@@ -1,0 +1,18 @@
+{
+  "name": "limitless",
+  "owner": {
+    "name": "Pyro"
+  },
+  "metadata": {
+    "description": "Collection of mindbending plugins for Claude Code making you and Claudelimitless",
+    "version": "0.1.0",
+    "homepage": "https://github.com/pyros-projects/limitless"
+  },
+  "plugins": [
+    {
+      "name": "article-pack",
+      "source": "./plugins/article-pack",
+      "description": "Generate complete content packages from research or drafts. And if you need it also does the research for you."
+    }
+  ]
+}

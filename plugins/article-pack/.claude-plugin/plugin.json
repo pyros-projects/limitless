@@ -1,0 +1,11 @@
+{
+  "name": "article-pack",
+  "version": "0.1.0",
+  "description": "Generate complete content packages from research or drafts. Creates articles for multiple platforms (Substack, LinkedIn) in multiple languages, slide decks, and social media kits with copy buttons. Trigger with 'article-pack' or when user wants to create publishable content from notes/research.",
+  "author": {
+    "name": "Pyro"
+  },
+  "homepage": "https://github.com/pyros-projects/limitless",
+  "repository": "https://github.com/pyros-projects/limitless",
+  "license": "MIT"
+}
