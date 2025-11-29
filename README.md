@@ -8,7 +8,7 @@
   <strong>Claude Code plugins that are better than NZT-48.</strong>
 </p>
 
-*Remember the movie? One pill and you're operating at 100% capacity — seeing patterns, making connections, executing at superhuman speed. These plugins are that pill for Claude Code.*
+*Remember the movie? One pill and you're operating at 100% capacity — seeing patterns, making connections, executing at superhuman speed. These plugins are that pill for Claude Code.* 💊
 
 ---
 
@@ -24,13 +24,13 @@ A curated collection of Claude Code skills designed to unlock capabilities you d
 
 | Plugin | What It Does |
 |--------|--------------|
-| **[article-pack](plugins/article-pack/)** | Research → Article → Social → Slides → Podcast. Generates complete content packages from a topic or notes. Multi-platform (Substack, LinkedIn), multi-language, with AI images and dice-rolled podcast hosts. |
+| 📝 **[article-pack](plugins/article-pack/)** | Research → Article → Social → Slides → Podcast. Generates complete content packages from a topic or notes. Multi-platform (Substack, LinkedIn), multi-language, with AI images and dice-rolled podcast hosts. |
 
 ---
 
 ## Installation
 
-### Add the Marketplace
+### 1. Add the Marketplace
 
 In Claude Code, run:
 
@@ -38,14 +38,14 @@ In Claude Code, run:
 /plugin marketplace add pyros-projects/limitless
 ```
 
-### Browse & Install Plugins
+### 2. Browse & Install
 
 ```
 /plugin                                    # Browse available plugins
 /plugin install article-pack@limitless    # Install a specific plugin
 ```
 
-### Manage Plugins
+### 3. Manage
 
 ```
 /plugin enable article-pack@limitless     # Enable
