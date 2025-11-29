@@ -270,6 +270,120 @@ Options:
 
 ### Image Generation
 
+#### Pre-flight: API Key Check
+
+**BEFORE attempting any image generation**, verify the OpenRouter API key exists. Run ALL of these checks to be certain:
+
+```bash
+# Check 1: Environment variable
+echo "ENV_CHECK: ${OPENROUTER_API_KEY:+SET}"
+
+# Check 2: Try to read from Claude settings (may have key but not loaded yet)
+cat ~/.claude/settings.json 2>/dev/null | grep -o '"OPENROUTER_API_KEY"' || echo "NOT_IN_SETTINGS"
+
+# Check 3: Verify it's not empty/whitespace
+[ -n "${OPENROUTER_API_KEY// }" ] && echo "KEY_VALID" || echo "KEY_EMPTY_OR_MISSING"
+```
+
+**Interpret results:**
+- If `ENV_CHECK: SET` AND `KEY_VALID` → Key is ready, proceed to image generation
+- If key is in settings but `KEY_EMPTY_OR_MISSING` → User needs to restart Claude Code
+- If all checks fail → Key is missing, run setup flow
+
+#### API Key Setup Flow
+
+**Only run this if the key is confirmed missing.** Tell the user:
+
+> "🔑 Image generation requires an OpenRouter API key.
+> 
+> OpenRouter gives you access to multiple image models (Gemini, FLUX) through one API.
+> 
+> **Get your free key:** https://openrouter.ai/keys
+> 
+> Paste your key below (starts with `sk-or-`):"
+
+After receiving the key, validate format:
+```bash
+# Key should start with sk-or- and be reasonably long
+[[ "$USER_KEY" =~ ^sk-or-.{20,}$ ]] && echo "FORMAT_OK" || echo "FORMAT_BAD"
+```
+
+If format looks wrong, ask user to double-check they copied the full key.
+
+**Then ask where to save:**
+
+```
+Question: "Where should I save this API key?"
+Options:
+- Claude Code settings (recommended - auto-loads every session)
+- Shell profile (~/.bashrc or ~/.zshrc)
+- This session only (won't persist)
+- Cancel - skip image generation
+```
+
+**For Claude Code settings (recommended):**
+
+```bash
+# Read existing settings or create empty object
+SETTINGS_FILE="$HOME/.claude/settings.json"
+mkdir -p ~/.claude
+
+if [ -f "$SETTINGS_FILE" ]; then
+    # File exists - check if it has env section
+    cat "$SETTINGS_FILE"
+else
+    # Create new settings file
+    echo '{}' > "$SETTINGS_FILE"
+fi
+```
+
+Then update the JSON to add/merge the env key. The resulting file should look like:
+```json
+{
+  "env": {
+    "OPENROUTER_API_KEY": "sk-or-v1-xxxxx"
+  }
+}
+```
+
+**Important:** After saving to Claude settings, tell the user:
+
+> "✅ API key saved to Claude Code settings.
+> 
+> **You need to restart Claude Code** for the key to load.
+> 
+> After restart, run `article-pack` again and image generation will work!"
+
+Then **stop the wizard** - don't continue without the key active.
+
+**For shell profile:**
+
+```bash
+# Detect shell
+SHELL_RC="$HOME/.bashrc"
+[ -n "$ZSH_VERSION" ] || [ "$SHELL" = "/bin/zsh" ] && SHELL_RC="$HOME/.zshrc"
+
+# Append export (avoid duplicates)
+grep -q "OPENROUTER_API_KEY" "$SHELL_RC" 2>/dev/null || \
+  echo 'export OPENROUTER_API_KEY="sk-or-v1-xxxxx"' >> "$SHELL_RC"
+
+# Source it for current session
+source "$SHELL_RC"
+
+# Verify
+echo $OPENROUTER_API_KEY
+```
+
+**For session only:**
+
+```bash
+export OPENROUTER_API_KEY="sk-or-v1-xxxxx"
+```
+
+Warn the user: "This key will be lost when you close Claude Code."
+
+#### Image Generation (after key verified)
+
 ```bash
 python ~/.claude/skills/article-pack/generate_images.py \
   --prompt "prompt from placeholder" \
@@ -284,6 +398,13 @@ python ~/.claude/skills/article-pack/generate_images.py \
 | `flex` | FLUX 2 Flex - photorealistic |
 
 After generation, replace placeholders with `<figure><img>` tags.
+
+#### Fallback if No Key
+
+If user chooses "Cancel - skip image generation":
+- Continue with article pack generation
+- Use placeholder comments instead of images: `<!-- IMAGE: [prompt description] -->`
+- Note in completion summary: "Images skipped (no API key)"
 
 ### Social Media Kit
 

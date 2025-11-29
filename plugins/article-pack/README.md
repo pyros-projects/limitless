@@ -137,7 +137,22 @@ See the full configuration summary and confirm before generation.
 
 ## AI Image Generation
 
-Uses OpenRouter to generate images via multiple models:
+Uses OpenRouter to generate images via multiple models.
+
+### API Key Setup
+
+When you select "AI-generated images" as an extra, the skill checks for your OpenRouter API key. If missing, it guides you through setup:
+
+1. **Get a free key** at https://openrouter.ai/keys
+2. **Paste the key** (starts with `sk-or-`)
+3. **Choose where to save:**
+   - **Claude Code settings** (recommended) — auto-loads every session
+   - **Shell profile** (~/.bashrc) — loads in all terminals
+   - **Session only** — temporary, lost on close
+
+If saved to Claude Code settings, you'll need to **restart Claude Code** for the key to activate.
+
+### Models
 
 ```bash
 python skills/generate_images.py \
@@ -152,7 +167,9 @@ python skills/generate_images.py \
 | `pro` | FLUX 2 Pro — stylized, illustrated |
 | `flex` | FLUX 2 Flex — photorealistic |
 
-Requires `OPENROUTER_API_KEY` environment variable.
+### No API Key?
+
+If you skip key setup, the skill continues without images — articles will have placeholder comments instead.
 
 ---
 
