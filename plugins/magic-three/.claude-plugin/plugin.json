@@ -1,0 +1,11 @@
+{
+  "name": "magic-three",
+  "version": "0.1.0",
+  "description": "Pyro's magical three: spec-driven development (OpenSpec), dependency-aware task management (Beads), and privacy-respecting web search (SearXNG). The essential agent skill trio for structured AI-assisted development.",
+  "author": {
+    "name": "Pyro"
+  },
+  "homepage": "https://github.com/pyros-projects/limitless",
+  "repository": "https://github.com/pyros-projects/limitless",
+  "license": "MIT"
+}

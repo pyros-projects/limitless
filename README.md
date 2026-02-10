@@ -8,7 +8,7 @@
   <strong>Claude Code plugins that are better than NZT-48.</strong>
 </p>
 
-*Remember the movie? One pill and you're operating at 100% capacity — seeing patterns, making connections, executing at superhuman speed. These plugins are that pill for Claude Code.* 💊
+*Remember the movie? One pill and you're operating at 100% capacity — seeing patterns, making connections, executing at superhuman speed. These plugins are that pill for Claude Code.*
 
 ---
 
@@ -24,7 +24,8 @@ A curated collection of Claude Code skills designed to unlock capabilities you d
 
 | Plugin | What It Does |
 |--------|--------------|
-| 📝 **[article-pack](plugins/article-pack/)** | Research → Article → Social → Slides → Podcast. Generates complete content packages from a topic or notes. Multi-platform (Substack, LinkedIn), multi-language, with AI images and dice-rolled podcast hosts. |
+| [**article-pack**](plugins/article-pack/) | Research → Article → Social → Slides → Podcast. Generates complete content packages from a topic or notes. Multi-platform (Substack, LinkedIn), multi-language, with AI images and dice-rolled podcast hosts. |
+| [**magic-three**](plugins/magic-three/) | Pyro's essential agent skill trio: spec-driven development (OpenSpec), dependency-aware task management (Beads), and privacy-respecting web search (SearXNG). The structured development toolkit. |
 
 ---
 
@@ -42,15 +43,16 @@ In Claude Code, run:
 
 ```
 /plugin                                    # Browse available plugins
-/plugin install article-pack@limitless    # Install a specific plugin
+/plugin install article-pack@limitless     # Content generation powerhouse
+/plugin install magic-three@limitless      # Structured development toolkit
 ```
 
 ### 3. Manage
 
 ```
-/plugin enable article-pack@limitless     # Enable
-/plugin disable article-pack@limitless    # Disable
-/plugin uninstall article-pack@limitless  # Uninstall
+/plugin enable article-pack@limitless      # Enable
+/plugin disable magic-three@limitless      # Disable
+/plugin uninstall article-pack@limitless   # Uninstall
 ```
 
 ---
@@ -73,11 +75,19 @@ These plugins embody:
 
 The roadmap includes plugins for:
 
-- 🔬 **Deep research** — Multi-source synthesis with citation tracking
-- 📊 **Data storytelling** — Charts, visualizations, and narratives from raw data  
-- 🎨 **Visual identity** — Brand kits, style guides, design systems
-- 🔄 **Workflow automation** — Complex multi-step task orchestration
-- 📚 **Knowledge extraction** — Turn codebases into documentation
+- **deep-research** — Multi-source synthesis with citation tracking
+- **codebase-oracle** — Instant deep understanding of any codebase
+- **pitch-deck** — Investor-ready presentations from a business concept
+- **data-story** — Charts, visualizations, and narratives from raw data
+- **brand-forge** — Brand kits, style guides, design systems
+
+See [docs/brainstorm/plugin-ideas.md](docs/brainstorm/plugin-ideas.md) for the full idea backlog.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 ---
 
