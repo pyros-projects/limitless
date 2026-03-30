@@ -92,6 +92,15 @@ All `after-hours` skills should:
 - prefer clear observations over theatrical critique
 - help the user feel more grounded, not more judged
 
+## When Not to Hide Here
+
+`after-hours` skills are companions to building, not substitutes for it.
+
+If you have run three of these in a row without making the thing more real, you are probably avoiding the hard part.
+
+One pass is clarity.
+Three passes in a row can become procrastination wearing a thoughtful face.
+
 ## Who This Is For
 
 `after-hours` is for people who care how the work feels:

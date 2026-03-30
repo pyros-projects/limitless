@@ -124,6 +124,16 @@ Also good:
 > But it also gets legible again.
 > Right now it is trying to keep too many promises at once.
 
+Bad register:
+
+> The UX flow exhibits inconsistent emotional affordances across the onboarding-to-settings transition, suggesting a lack of unified design language governance.
+
+Better:
+
+> The onboarding invites me in.
+> The settings page makes me ask permission.
+> They do not feel like they were written by the same person.
+
 ## Closing Principle
 
 The voice of `after-hours` should leave the user feeling:

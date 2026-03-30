@@ -145,3 +145,12 @@ They belong together because they all do one of four things:
 ## Shared Rule
 
 If a skill creates more noise than clarity, it is being used wrong.
+
+## Pack-Level Warning
+
+These skills should sharpen the work, not delay it.
+
+If you keep chaining them together without making the product, document, or decision more real, stop.
+
+Use one when it clarifies the next move.
+Do not use the whole pack as a beautiful way to postpone commitment.

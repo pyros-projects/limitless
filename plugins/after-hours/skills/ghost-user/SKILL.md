@@ -26,6 +26,8 @@ Use this when:
 
 Do not use this to invent edge cases for sport. Stay close to plausible first-use reality.
 
+If you have already read project docs, architecture notes, or implementation details in the current session, explicitly say that your ghost-user pass is partially contaminated and flag which observations may be insider-influenced.
+
 ## What to Produce
 
 Walk through the product or flow as the ghost user would:
@@ -41,7 +43,7 @@ Narrate it plainly. The power of this skill is not sophistication. It is honesty
 ## Working Loop
 
 1. Forget the author view.
-   Start from the surface alone, without importing context from docs, implementation knowledge, or prior intent.
+   Start from the surface alone. Do not read README files, docs, architecture notes, or source code before the pass if the raw product surface is available.
 
 2. Walk the first contact honestly.
    What do I see? What do I think this means? What do I try next?
@@ -73,6 +75,16 @@ Narrate it plainly. The power of this skill is not sophistication. It is honesty
 - Jumping to rare edge cases instead of plausible first contact
 - Importing insider knowledge halfway through the walk
 - Ending with too many fixes instead of the highest-leverage ones
+
+## Integrity Rule
+
+If the product surface is available, raw surface beats documentation.
+
+If you cannot avoid prior knowledge, say so plainly:
+
+- what you already knew
+- which observations may be contaminated
+- what a cleaner ghost-user pass would require
 
 ## Good Outcome
 

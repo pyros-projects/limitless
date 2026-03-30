@@ -44,7 +44,13 @@ When useful, separate:
    Look at a product, interface, writing sample, or codebase with enough surface area to reveal patterns.
 
 2. Ignore first-order imitation.
-   Do not start with colors, animations, or other obvious artifacts. Ask what repeated choices are creating the feeling underneath.
+   Do not start with colors, animations, or other obvious artifacts. Instead, inspect concrete dimensions such as:
+   - information density
+   - pacing between actions or beats
+   - what gets prominent placement versus what stays hidden
+   - how errors, empty states, and uncertainty are handled
+   - the ratio of explanation to assumption
+   - how often the system trusts the user versus over-guiding them
 
 3. Extract rules.
    What does it consistently do? What does it avoid? Where does it spend attention? Where does it stay restrained?
