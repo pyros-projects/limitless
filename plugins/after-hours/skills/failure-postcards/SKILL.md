@@ -59,6 +59,13 @@ Then explain:
 - `Broken assumption`
 - `What to change before this becomes real`
 
+## Tiny Example
+
+- `Postcard`: "I uploaded the file three times and nothing changed except the spinner. I still don't know if you have it or not."
+- `What this reveals`: The flow hides system state right when the user most needs reassurance.
+- `Broken assumption`: The team assumed a spinner counts as feedback.
+- `What to change before this becomes real`: Show upload progress, success confirmation, and a visible retry state.
+
 ## Working Style
 
 - Keep the artifacts human and believable

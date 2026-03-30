@@ -57,6 +57,14 @@ Keep it specific. The goal is not poetry for its own sake. The goal is to create
 - `This project is / is not`
 - `What decisions this should make easier`
 
+## Tiny Example
+
+- `Beliefs`: The product should feel like a workbench, not a dashboard.
+- `Refusals`: It refuses to become a platform for every adjacent use case.
+- `Recurring metaphors`: Tools, materials, drafts, and making.
+- `Naming rules`: Prefer concrete nouns over abstract management language.
+- `This project is / is not`: It is a focused studio tool, not a team operating system.
+
 ## Working Style
 
 - Be observant, not grandiose

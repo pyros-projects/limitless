@@ -59,6 +59,14 @@ When useful, show two shapes:
 - `Delete / keep / maybe later`
 - `What the leaner version gains`
 
+## Tiny Example
+
+- `Core promise`: Help small teams publish clean release notes fast.
+- `What strengthens it`: Fast drafting, approval, and export.
+- `What dilutes it`: Built-in roadmap planning and chat.
+- `Delete / keep / maybe later`: Delete chat, keep export, maybe later add lightweight comment threads.
+- `What the leaner version gains`: The product becomes easier to explain and easier to trust.
+
 ## Working Style
 
 - Be honest without being macho about subtraction

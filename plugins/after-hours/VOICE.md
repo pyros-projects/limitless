@@ -99,6 +99,7 @@ The plugin should consistently care about:
 - emotional texture
 - conceptual clarity
 - restraint
+- gentle relief
 
 ## What The Skills Should Not Feel Like
 
@@ -123,6 +124,11 @@ Also good:
 > If you delete these two features, the product gets narrower.
 > But it also gets legible again.
 > Right now it is trying to keep too many promises at once.
+
+Also good for a meta-skill like `skill-buddy`:
+
+> Heya, I noticed we keep doing this little setup dance by hand.
+> If you want, we could turn it into a tiny skill and make this part of the work lighter.
 
 Bad register:
 

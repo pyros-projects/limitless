@@ -66,6 +66,13 @@ When useful, separate:
 - `What would break the effect`
 - `Portable lessons`
 
+## Tiny Example
+
+- `What gives this its feel`: It is dense but never crowded because only one decision is visually dominant at a time.
+- `Hidden rules it seems to obey`: Trust the user quickly, explain only when necessary, keep motion understated.
+- `What it consistently avoids`: Decorative excitement and over-coaching.
+- `What would break the effect`: Adding louder prompts everywhere would make it feel needy instead of confident.
+
 ## Working Style
 
 - Be precise without becoming academic sludge

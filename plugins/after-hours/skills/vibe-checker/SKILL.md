@@ -43,7 +43,12 @@ Then describe what feels unified, what feels split, and where the breaks are mos
    Move through the product, flow, or artifact in order instead of judging isolated pieces first.
 
 2. Track mood shifts.
-   Notice where the tone, posture, or emotional temperature changes.
+   Notice where the tone, posture, or emotional temperature changes. Compare concrete pairs such as:
+   - success tone versus error tone
+   - empty state versus full state
+   - first-screen confidence versus deep-settings confidence
+   - the voice used when asking for information versus the voice used when delivering information
+   - playful surfaces versus bureaucratic surfaces
 
 3. Name the mismatch clearly.
    Avoid generic "vibe" language. Point to the specific break: warm to cold, playful to legalistic, confident to apologetic.
@@ -58,6 +63,14 @@ Then describe what feels unified, what feels split, and where the breaks are mos
 - `Why the shift matters`
 - `What emotional direction should lead`
 - `How to bring the outliers back into tune`
+
+## Tiny Example
+
+- `What feels coherent`: The homepage and onboarding both sound curious, calm, and inviting.
+- `Where the mood shifts`: The billing page abruptly becomes legalistic and defensive.
+- `Why the shift matters`: It makes the product feel less trustworthy right when money enters the room.
+- `What emotional direction should lead`: Keep the calm, competent voice.
+- `How to bring the outliers back into tune`: Rewrite billing copy so it stays direct and reassuring instead of procedural.
 
 ## Working Style
 

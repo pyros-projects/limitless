@@ -56,6 +56,14 @@ Then recommend a cleaner vocabulary and explain what changes in the user's under
 - `Recommended vocabulary`
 - `What becomes easier to understand after renaming`
 
+## Tiny Example
+
+- `Current concept map`: The UI says `Workspace`, the API says `Project`, and the docs say `Environment`.
+- `Conflicts and collisions`: Three names are pointing at the same thing.
+- `What mental model the current language creates`: The product feels like it has three overlapping containers.
+- `Recommended vocabulary`: Use `Workspace` everywhere.
+- `What becomes easier to understand after renaming`: Users can form one stable picture of where their work lives.
+
 ## Working Style
 
 - Be crisp and kind

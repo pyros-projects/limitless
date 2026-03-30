@@ -81,6 +81,27 @@ Not a chaos monkey.
 Not edge-case theatre.
 Just quiet first-contact truth.
 
+## Possible Next Arrival
+
+### `skill-buddy`
+A gentle meta-skill that notices recurring collaborative friction and, in calm moments, suggests small skills that could make the work more relaxed.
+
+This one is less about raw efficiency than about reducing repeated little burdens before they harden into ritual.
+
+## Why These Work
+
+Every skill in `after-hours` is trying to produce a small, concrete artifact:
+
+- a lorebook
+- a constitution of taste
+- a postcard from a failure
+- a coherence diagnosis
+- a deletion map
+- a naming model
+- a first-contact walkthrough
+
+That is deliberate. These skills should leave something behind that sharpens the next real decision.
+
 ## Shared Philosophy
 
 All `after-hours` skills should:

@@ -118,6 +118,23 @@ Each skill is meant to feel useful in a live session, not merely clever on a bra
 - hidden assumptions
 - friction notes
 
+## Possible Next Arrival: `skill-buddy`
+
+**Core move:** quietly notice recurring collaborative friction and propose small skills that would make the work easier and more relaxed.
+
+**Use when:**
+- the same manual ritual keeps appearing
+- the same process needs re-explaining
+- low-value busywork is quietly becoming part of the collaboration
+- the goal is not raw speed, but reducing repeated little burdens
+
+**Output shape:**
+- what keeps recurring
+- why it seems real rather than incidental
+- what small skill it could become
+- what it would make lighter
+- confidence
+
 ## Family Resemblance
 
 These are not seven random skills.
@@ -145,6 +162,12 @@ They belong together because they all do one of four things:
 ## Shared Rule
 
 If a skill creates more noise than clarity, it is being used wrong.
+
+The easiest way to tell whether a skill is working is simple:
+it should leave behind one compact artifact that makes the next decision easier.
+
+That applies to `skill-buddy`, too:
+its job is not to generate a backlog of future automation dreams, but to surface one or two skill opportunities that would actually make the collaboration calmer.
 
 ## Pack-Level Warning
 

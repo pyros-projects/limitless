@@ -62,6 +62,14 @@ Narrate it plainly. The power of this skill is not sophistication. It is honesty
 - `What required inside knowledge`
 - `The 3 highest-leverage fixes`
 
+## Tiny Example
+
+- `What I notice first`: I see a button called `Init`.
+- `What I assume`: Maybe it creates something, but I do not know what.
+- `Where I get confused`: Clicking it changes the page, but nothing tells me what happened.
+- `What required inside knowledge`: Knowing that `Init` means "create a new workspace."
+- `The 3 highest-leverage fixes`: Rename the button, add immediate confirmation, and show the created thing in context.
+
 ## Working Style
 
 - Stay literal and grounded
