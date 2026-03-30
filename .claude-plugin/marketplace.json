@@ -4,8 +4,8 @@
     "name": "Pyro"
   },
   "metadata": {
-    "description": "Curated Claude Code skills by Pyro for research, prototyping, publishing, and search.",
-    "version": "0.3.0",
+    "description": "Curated Claude Code plugins by Pyro for research, prototyping, publishing, search, and calm product clarity work.",
+    "version": "0.4.0",
     "homepage": "https://github.com/pyros-projects/limitless"
   },
   "plugins": [
@@ -13,6 +13,11 @@
       "name": "limitless",
       "source": "./plugins/limitless",
       "description": "Pyro's curated skill pack: article-pack, Codies Research, Surface-First Development, and SearXNG."
+    },
+    {
+      "name": "after-hours",
+      "source": "./plugins/after-hours",
+      "description": "A calm, high-taste skill pack for project identity, subtraction, naming, coherence, and first-contact honesty."
     }
   ]
 }

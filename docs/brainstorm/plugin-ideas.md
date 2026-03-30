@@ -258,6 +258,15 @@ Each plugin should answer: **"What would you do if you could do anything?"**
 ## Wild Cards
 
 ### 🎲 chaos-monkey
+
+---
+
+## After Hours
+
+### 🌙 after-hours
+**What it does:** A calm, high-taste plugin family for clarity, coherence, subtraction, naming, project identity, and first-contact honesty. Less about doing more work, more about helping the work feel more itself.
+
+**Why it fits:** Not every superpower should be speed. Some of the rarest forms of leverage are taste, restraint, emotional coherence, and the ability to see what should be removed.
 **What it does:** Generates edge cases, stress tests, and "what if" scenarios. Tries to break your assumptions. Makes your thinking antifragile.
 
 **Why it fits:** Stress-testing ideas before reality does is wisdom. This plugin is your devil's advocate.

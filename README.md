@@ -25,6 +25,7 @@ A curated Claude Code plugin built from a handful of high-leverage skills design
 | Plugin | What It Does |
 |--------|--------------|
 | [**limitless**](plugins/limitless/) | A curated Pyro skill pack: article generation, research, surface-first prototyping, and privacy-respecting web search. |
+| [**after-hours**](plugins/after-hours/) | A calm, high-taste plugin for project identity, subtraction, naming, coherence, and first-contact honesty. |
 
 ---
 
@@ -43,14 +44,18 @@ In Claude Code, run:
 ```
 /plugin                                    # Browse available plugins
 /plugin install limitless@limitless        # Curated Pyro skill pack
+/plugin install after-hours@limitless      # Calm, wholesome product-intelligence skills
 ```
 
 ### 3. Manage
 
 ```
 /plugin enable limitless@limitless         # Enable
+/plugin enable after-hours@limitless       # Enable
 /plugin disable limitless@limitless        # Disable
+/plugin disable after-hours@limitless      # Disable
 /plugin uninstall limitless@limitless      # Uninstall
+/plugin uninstall after-hours@limitless    # Uninstall
 ```
 
 ---
@@ -60,12 +65,13 @@ In Claude Code, run:
 > "I don't have delusions of grandeur, I have an accurate assessment of my own abilities."
 > — Eddie Morra, *Limitless*
 
-This plugin embodies:
+These plugins embody:
 
 - **Depth over breadth** — Keep the pack small, useful, and opinionated
 - **Research-first** — Don't just execute, understand first
 - **Concrete over ceremonial** — Skills should make the agent stronger in live work
-- **Delightful surprises** — Dice-rolled podcast hosts, whitepaper-backed SFD, unexpected depth
+- **Taste and restraint** — Some of the best help is subtraction, naming, coherence, and clarity
+- **Delightful surprises** — Dice-rolled podcast hosts, whitepaper-backed SFD, calm late-night product intelligence
 
 ---
 

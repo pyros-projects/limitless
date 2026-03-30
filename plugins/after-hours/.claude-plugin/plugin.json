@@ -1,0 +1,11 @@
+{
+  "name": "after-hours",
+  "version": "0.1.0",
+  "description": "A calm, high-taste Claude Code plugin for clarity, coherence, subtraction, naming, project identity, and first-contact honesty.",
+  "author": {
+    "name": "Pyro"
+  },
+  "homepage": "https://github.com/pyros-projects/limitless",
+  "repository": "https://github.com/pyros-projects/limitless",
+  "license": "MIT"
+}
