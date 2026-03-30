@@ -155,7 +155,7 @@ If saved to Claude Code settings, you'll need to **restart Claude Code** for the
 ### Models
 
 ```bash
-python skills/generate_images.py \
+python skills/article-pack/scripts/generate_images.py \
   --prompt "your image prompt" \
   --output path/to/image.png \
   --model gemini
@@ -179,13 +179,13 @@ For podcast transcripts, the skill generates random host personalities for natur
 
 ```bash
 # Quick archetype mode (default)
-python skills/dice_roll.py --hosts 2
+python skills/article-pack/scripts/dice_roll.py --hosts 2
 
 # Full 5-dimension personality mode
-python skills/dice_roll.py --hosts 2 --mode full
+python skills/article-pack/scripts/dice_roll.py --hosts 2 --mode full
 
 # JSON output
-python skills/dice_roll.py --hosts 2 --json
+python skills/article-pack/scripts/dice_roll.py --hosts 2 --json
 ```
 
 ### Personality Dimensions (d6 each)

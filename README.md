@@ -5,27 +5,26 @@
 <h1 align="center">Limitless</h1>
 
 <p align="center">
-  <strong>Claude Code plugins that are better than NZT-48.</strong>
+  <strong>A small, sharp marketplace of Claude Code skills that punch above their weight.</strong>
 </p>
 
-*Remember the movie? One pill and you're operating at 100% capacity — seeing patterns, making connections, executing at superhuman speed. These plugins are that pill for Claude Code.*
+*Instead of shipping a pile of half-maintained bundles, this repo now centers one curated plugin with a few high-leverage skills.*
 
 ---
 
 ## What Is This?
 
-A curated collection of Claude Code skills designed to unlock capabilities you didn't know you needed. Each plugin transforms Claude from an assistant into a specialist — researching, creating, and executing at a level that would normally take a team.
+A curated Claude Code plugin built from a handful of high-leverage skills designed to unlock capabilities you didn't know you needed. The goal is to turn Claude from a generic assistant into a sharper specialist for research, creation, and execution.
 
 **The goal:** Make you (and Claude) limitless.
 
 ---
 
-## Plugins
+## Plugin
 
 | Plugin | What It Does |
 |--------|--------------|
-| [**article-pack**](plugins/article-pack/) | Research → Article → Social → Slides → Podcast. Generates complete content packages from a topic or notes. Multi-platform (Substack, LinkedIn), multi-language, with AI images and dice-rolled podcast hosts. |
-| [**magic-three**](plugins/magic-three/) | Pyro's essential agent skill trio: spec-driven development (OpenSpec), dependency-aware task management (Beads), and privacy-respecting web search (SearXNG). The structured development toolkit. |
+| [**limitless**](plugins/limitless/) | A curated Pyro skill pack: article generation, research, surface-first prototyping, and privacy-respecting web search. |
 
 ---
 
@@ -43,16 +42,15 @@ In Claude Code, run:
 
 ```
 /plugin                                    # Browse available plugins
-/plugin install article-pack@limitless     # Content generation powerhouse
-/plugin install magic-three@limitless      # Structured development toolkit
+/plugin install limitless@limitless        # Curated Pyro skill pack
 ```
 
 ### 3. Manage
 
 ```
-/plugin enable article-pack@limitless      # Enable
-/plugin disable magic-three@limitless      # Disable
-/plugin uninstall article-pack@limitless   # Uninstall
+/plugin enable limitless@limitless         # Enable
+/plugin disable limitless@limitless        # Disable
+/plugin uninstall limitless@limitless      # Uninstall
 ```
 
 ---
@@ -62,18 +60,18 @@ In Claude Code, run:
 > "I don't have delusions of grandeur, I have an accurate assessment of my own abilities."
 > — Eddie Morra, *Limitless*
 
-These plugins embody:
+This plugin embodies:
 
-- **Depth over breadth** — Each plugin does one thing exceptionally well
+- **Depth over breadth** — Keep the pack small, useful, and opinionated
 - **Research-first** — Don't just execute, understand first
-- **Complete outputs** — No half-measures; if you're making an article, make the social kit too
-- **Delightful surprises** — Dice-rolled podcast hosts, creative prose versions, unexpected depth
+- **Concrete over ceremonial** — Skills should make the agent stronger in live work
+- **Delightful surprises** — Dice-rolled podcast hosts, whitepaper-backed SFD, unexpected depth
 
 ---
 
 ## Coming Soon
 
-The roadmap includes plugins for:
+The roadmap includes future skills or plugin branches for:
 
 - **deep-research** — Multi-source synthesis with citation tracking
 - **codebase-oracle** — Instant deep understanding of any codebase

@@ -1,19 +1,11 @@
 ---
 name: searxng
-description: Search the web using SearXNG, a self-hosted, privacy-respecting metasearch engine. Aggregates 70+ search engines with no tracking. Use as your primary search tool.
-homepage: https://docs.searxng.org/
-read_when:
-  - You need to search the web for information.
-  - You want privacy-respecting search without API keys.
-  - You need structured JSON search results for programmatic use.
-metadata:
-  openclaw:
-    emoji: "🔍"
+description: Use when the agent needs direct web search through a self-hosted, privacy-respecting SearXNG instance, especially when structured JSON results or API-key-free search are useful.
 ---
 
 # SearXNG — Privacy-Respecting Web Search
 
-SearXNG is a self-hosted metasearch engine that aggregates results from 70+ search engines (Google, Bing, DuckDuckGo, etc.) without tracking or profiling. It provides a JSON API perfect for AI agent use.
+SearXNG is a self-hosted metasearch engine that aggregates results from 70+ search engines (Google, Bing, DuckDuckGo, etc.) without tracking or profiling. It provides a JSON API that works well for agent research loops.
 
 ## Installation
 

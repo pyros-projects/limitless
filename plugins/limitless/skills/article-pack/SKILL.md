@@ -639,7 +639,7 @@ Options:
 If user selects AI-generated images and the key is ready:
 
 ```bash
-python ~/.claude/skills/article-pack/generate_images.py \
+python scripts/generate_images.py \
   --prompt "prompt from placeholder" \
   --output "{folder}/assets/01-name.png"
 ```
@@ -850,13 +850,13 @@ NotebookLM-style two-host conversational dialogue.
 
 ```bash
 # Quick archetype mode (default)
-python3 ~/.claude/skills/article-pack/dice_roll.py --hosts 2
+python3 scripts/dice_roll.py --hosts 2
 
 # Full 5-dimension personality mode
-python3 ~/.claude/skills/article-pack/dice_roll.py --hosts 2 --mode full
+python3 scripts/dice_roll.py --hosts 2 --mode full
 
 # JSON output for programmatic use
-python3 ~/.claude/skills/article-pack/dice_roll.py --hosts 2 --json
+python3 scripts/dice_roll.py --hosts 2 --json
 ```
 
 Alternatively, roll manually on each dimension for each host (or let user pick):
