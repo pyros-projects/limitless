@@ -5,6 +5,9 @@ description: "This skill should be used when the agent needs to evaluate or prom
 
 # Memory Promote
 
+> **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
+> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+
 ## When To Use
 
 - At session close (automatic evaluation)

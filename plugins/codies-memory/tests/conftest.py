@@ -24,6 +24,7 @@ def tmp_global_vault(tmp_path: Path) -> Path:
         "dreams",
         "boot",
         "projects",
+        "feedback",
     ]:
         (root / d).mkdir(parents=True)
     # Seed default profile

@@ -24,6 +24,7 @@ GLOBAL_DIRS: list[str] = [
     "dreams",
     "boot",
     "projects",
+    "feedback",
 ]
 
 PROJECT_DIRS: list[str] = [

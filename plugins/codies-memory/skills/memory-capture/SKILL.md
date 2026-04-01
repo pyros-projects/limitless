@@ -5,6 +5,9 @@ description: "This skill should be used when the agent needs to save something t
 
 # Memory Capture
 
+> **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
+> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+
 ## When To Use
 
 When you want to persist anything:

@@ -5,6 +5,9 @@ description: "This skill should be used at session start, when entering a new pr
 
 # Memory Boot
 
+> **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
+> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+
 ## When To Use
 
 Run at session start, when entering a new project, or via `/wake-up`.

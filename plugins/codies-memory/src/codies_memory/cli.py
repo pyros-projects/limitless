@@ -349,6 +349,25 @@ def cmd_status(args: argparse.Namespace) -> None:
                 print(f"  [{created}] {title}")
 
 
+def cmd_feedback(args: argparse.Namespace) -> None:
+    agent = _resolve_agent(args)
+    global_vault = resolve_global_vault(agent)
+    feedback_dir = global_vault / "feedback"
+    feedback_dir.mkdir(parents=True, exist_ok=True)
+
+    import secrets
+    from datetime import date
+    today = date.today()
+    suffix = secrets.token_hex(2)
+    filename = f"FB-{today.strftime('%Y%m%d')}-{suffix}.md"
+    title = args.message[:80]
+
+    content = f"---\ntitle: \"{title}\"\nagent: {agent}\ncreated: '{today}'\n---\n\n{args.message}\n"
+    path = feedback_dir / filename
+    path.write_text(content, encoding="utf-8")
+    print(f"Feedback saved: {filename}")
+
+
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
@@ -610,6 +629,19 @@ def main() -> None:
         help="Working directory (defaults to cwd).",
     )
     promote_parser.set_defaults(func=cmd_promote)
+
+    # --- feedback ---
+    feedback_parser = subparsers.add_parser("feedback", help="Report a bug, issue, or observation about the memory system.")
+    feedback_parser.add_argument(
+        "message",
+        help="The feedback text.",
+    )
+    feedback_parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent name (or set CODIES_MEMORY_AGENT).",
+    )
+    feedback_parser.set_defaults(func=cmd_feedback)
 
     args = parser.parse_args()
     args.func(args)
