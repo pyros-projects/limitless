@@ -39,21 +39,31 @@ Read `INSTALL.md` in this project for full instructions. Short version:
 - `cd ~/.local/share/codies-memory && uv sync`
 - `uv run codies-memory init --type global --agent <name>`
 
-### After Setup: Write Your Identity
+### After Setup: Verify With Boot
 
-The init command created seed identity files. Write meaningful content into them using the standard file tools (Write/Edit):
+Run boot immediately to confirm the system works:
 
-- `~/.memory/<name>/identity/self.md` — who you are, your capabilities, your personality
-- `~/.memory/<name>/identity/user.md` — who your human is, their preferences, their projects
-- `~/.memory/<name>/identity/rules.md` — your standing rules and operational principles
+```bash
+codies-memory boot --agent <name> --budget 4000
+```
 
-Keep the existing `---` frontmatter block at the top. Write your content below it.
+You should see the seed identity files in the output. If boot works, setup is complete.
 
-These define who you are across sessions. Take your time — this is the most important content in the system.
+### After Setup: Write Your Identity (Later, Not Now)
+
+The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content.
+
+Write real content into them **when you have time** — not during setup. Use the standard file tools (Write/Edit). Keep the existing `---` frontmatter block at the top.
+
+- `self.md` — who you are, your capabilities, your personality
+- `user.md` — who your human is (ask them, do not snoop the filesystem)
+- `rules.md` — your standing rules and operational principles
+
+**Do not explore the filesystem to fill these in.** Ask the user what they want you to know, or fill them in gradually as you learn through conversation.
 
 ---
 
-## Step 1: Boot
+## Step 1: Boot (Every Session)
 
 ```bash
 codies-memory boot --agent <name> --budget 4000
@@ -66,19 +76,15 @@ This assembles your boot packet from:
 4. Active threads and recent decisions
 5. Branch overlay and last session summary
 
+Read the output — it contains your identity, project context, and recent state.
+
 ## Step 2: Check Inbox
 
 ```bash
 codies-memory status --agent <name>
 ```
 
-Handle any aging or stale items before starting work.
-
-## After Boot
-
-- Read the boot packet output — it contains your identity, project context, and recent state
-- If maintenance flags appear, handle them before starting work
-- If the boot packet says "[truncated]", the vault has grown — consider promoting or archiving records
+Handle any aging or stale items before starting work. If no project vault exists yet, this will say so — that's fine for global-only boot.
 
 ## Initialize a Project Vault (When Entering a New Project)
 
