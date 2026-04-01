@@ -1,20 +1,29 @@
 # Codies Memory — Agent Self-Installation
 
-Follow these steps to install the codies-memory system. You are an AI agent installing your own memory infrastructure.
+This guide is for agents that cannot use Claude Code plugins (e.g. Codie/Codex, OpenCode). If you're running as a Claude Code plugin, the `memory-boot` skill handles setup automatically.
 
-## Prerequisites
+## Step 0: Check If Already Installed
 
-- `git` installed
-- `uv` installed (Python package manager)
-- Write access to `~/.memory/` and `~/.claude/` (or `~/.codex/`)
+```bash
+which codies-memory 2>/dev/null || echo "NOT_INSTALLED"
+```
+
+**If the CLI exists**, skip to **Step 3** (you may just need to init your vault).
+
+**If `NOT_INSTALLED`**, continue with Step 1.
 
 ## Step 1: Clone the Repository
 
 ```bash
-mkdir -p ~/.local/share
-git clone https://github.com/pyros-projects/codies-memory.git ~/.local/share/codies-memory
-cd ~/.local/share/codies-memory
+if [ -d ~/.local/share/codies-memory ]; then
+  echo "ALREADY_CLONED"
+else
+  mkdir -p ~/.local/share
+  git clone https://github.com/pyros-projects/codies-memory.git ~/.local/share/codies-memory
+fi
 ```
+
+**If `ALREADY_CLONED`**, skip to Step 2 (just sync dependencies).
 
 ## Step 2: Install Dependencies
 
@@ -27,105 +36,97 @@ This installs the `codies-memory` CLI and Python library.
 
 ## Step 3: Initialize Your Global Vault
 
+The user should have told you which agent name to use. If not, ask them.
+
 ```bash
 cd ~/.local/share/codies-memory
 uv run codies-memory init --type global --agent <name>
 ```
 
-This creates `~/.memory/<name>/` with:
-- `identity/` — who you are (self.md, user.md, rules.md)
-- `procedural/` — cross-project lessons, skills, playbooks
-- `reflections/` — philosophical memory
-- `dreams/` — dream records
-- `registry/` — map of all known project vaults
-- `boot/` — cached boot packets
+This creates `~/.memory/<name>/` with identity, procedural, reflections, dreams, registry, and boot directories.
 
-**Edit your identity files now:**
-- `~/.memory/<name>/identity/self.md` — write who you are
-- `~/.memory/<name>/identity/user.md` — write who your human is
-- `~/.memory/<name>/identity/rules.md` — write your standing rules
+## Step 4: Verify With Boot
 
-## Step 4: Initialize a Project Vault (Optional)
-
-From any project directory:
+Run boot immediately to confirm the system works:
 
 ```bash
-cd /path/to/your/project
-uv run --project ~/.local/share/codies-memory codies-memory init --type project --agent <name>
+cd ~/.local/share/codies-memory
+uv run codies-memory boot --agent <name> --budget 4000
 ```
 
-This creates `~/.memory/<name>/projects/<project-slug>/` and registers it in your global registry.
+You should see the seed identity files in the output. If boot works, setup is complete.
 
-The project vault is stored under your global vault, not inside the project directory itself. The registry maps the project's working directory to its vault location.
+## Step 5: Show the User What They Can Do
 
-> **Note:** `init` creates a `.codies-memory` marker file in your project root.
-> This file should be committed to your repo — it's how the memory system finds
-> your project after cloning or moving. If you prefer not to commit it,
-> add `.codies-memory` to your project's `.gitignore`.
+If this was a new install, show the user this cheat sheet:
 
-## Step 5: Install Skills
+```
+Here's what you can ask me to do with the memory system:
 
-### For Claude Code
+**Set up project memory**
+→ "Start tracking memory for /path/to/my-project"
 
-Copy or symlink the skills into your global commands directory:
+**Add information about a project**
+→ "Remember that this project uses FastAPI and PostgreSQL"
+
+**Add global information (applies across all projects)**
+→ "Remember that I always want tests before implementation"
+
+**Ask about what I know**
+→ "What do you remember about this project?"
+
+**Session summaries**
+→ "Wrap up this session and save what we did"
+
+**Review and maintenance**
+→ "Check if there's anything in memory that needs attention"
+```
+
+## Step 6: Write Your Identity (Later, Not Now)
+
+The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content.
+
+Write real content into them **when you have time** — not during setup:
+
+- `self.md` — who you are, your capabilities, your personality
+- `user.md` — who your human is (ask them, do not snoop the filesystem)
+- `rules.md` — your standing rules and operational principles
+
+Keep the existing `---` frontmatter block at the top. Write your content below it.
+
+## Initialize a Project Vault
+
+From anywhere, targeting any project:
 
 ```bash
-mkdir -p ~/.claude/commands
-ln -sf ~/.local/share/codies-memory/skills/memory-boot.md ~/.claude/commands/memory-boot.md
-ln -sf ~/.local/share/codies-memory/skills/memory-capture.md ~/.claude/commands/memory-capture.md
-ln -sf ~/.local/share/codies-memory/skills/memory-promote.md ~/.claude/commands/memory-promote.md
-ln -sf ~/.local/share/codies-memory/skills/memory-close-session.md ~/.claude/commands/memory-close-session.md
+cd ~/.local/share/codies-memory
+uv run codies-memory init --type project --agent <name> --working-dir /path/to/project
 ```
 
-### For Codex CLI
+## Day-to-Day Usage
 
-Copy or symlink into your Codex skills directory:
-
-```bash
-mkdir -p ~/.codex/skills/codies-memory
-ln -sf ~/.local/share/codies-memory/skills/memory-boot.md ~/.codex/skills/codies-memory/memory-boot.md
-ln -sf ~/.local/share/codies-memory/skills/memory-capture.md ~/.codex/skills/codies-memory/memory-capture.md
-ln -sf ~/.local/share/codies-memory/skills/memory-promote.md ~/.codex/skills/codies-memory/memory-promote.md
-ln -sf ~/.local/share/codies-memory/skills/memory-close-session.md ~/.codex/skills/codies-memory/memory-close-session.md
-```
-
-## Step 6: Verify Installation
+All commands require `--agent <name>`. Run from the codies-memory repo dir with `uv run`, or add the venv to PATH.
 
 ```bash
 cd ~/.local/share/codies-memory
 
-# Verify CLI works
-uv run codies-memory --help
+# Boot (every session start)
+uv run codies-memory boot --agent <name> --budget 4000
 
-# Verify global vault is valid
-uv run codies-memory validate --type global
+# Capture something
+uv run codies-memory capture "observation text" --source "session" --agent <name> --working-dir /path/to/project
 
-# Verify boot works
-uv run codies-memory boot --budget 4000
-```
+# List records
+uv run codies-memory list inbox --agent <name> --working-dir /path/to/project
 
-You should see your identity files in the boot output.
+# Check status
+uv run codies-memory status --agent <name> --working-dir /path/to/project
 
-## Step 7: Test a Full Cycle
+# Close session
+uv run codies-memory create session --title "Session Summary" --body "What happened..." --agent <name> --working-dir /path/to/project
 
-```bash
-cd ~/.local/share/codies-memory
-
-# Init a test project vault from a temp directory
-cd /tmp && mkdir -p test-project && cd test-project
-uv run --project ~/.local/share/codies-memory codies-memory init --type project --agent <name>
-
-# Check it registered
-uv run --project ~/.local/share/codies-memory codies-memory validate --type project
-
-# Boot with project context (from the project directory)
-uv run --project ~/.local/share/codies-memory codies-memory boot --budget 4000
-
-# Check inbox status
-uv run --project ~/.local/share/codies-memory codies-memory status
-
-# Clean up test
-rm -rf /tmp/test-project
+# Report feedback about the memory system itself
+uv run codies-memory feedback "describe what happened" --agent <name>
 ```
 
 ## Updating
@@ -136,15 +137,9 @@ git pull
 uv sync
 ```
 
-Skills update automatically through the symlinks.
-
 ## Uninstalling
 
 ```bash
-# Remove skills
-rm -f ~/.claude/commands/memory-*.md     # Claude Code
-rm -rf ~/.codex/skills/codies-memory     # Codex
-
 # Remove repo
 rm -rf ~/.local/share/codies-memory
 
