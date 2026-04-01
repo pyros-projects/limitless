@@ -39,15 +39,29 @@ Read `INSTALL.md` in this project for full instructions. Short version:
 - `cd ~/.local/share/codies-memory && uv sync`
 - `uv run codies-memory init --type global --agent <name>`
 
+### After Setup: Write Your Identity (Required)
+
+The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content. **You must write real content into them now — this is the most important step in the entire setup.**
+
+Use your file editing tools (Write/Edit). Keep the existing `---` frontmatter block at the top. Write your content below it.
+
+1. **`self.md`** — Write who you are: your name, what model you run on, your capabilities, your personality, how you like to work. This is what future sessions read first to know who they are.
+
+2. **`rules.md`** — Write your standing operational rules: how you handle code, how you communicate, what you always/never do. If your platform has an AGENTS.md, CLAUDE.md, or similar, draw from that.
+
+3. **`user.md`** — Ask the user: *"What would you like me to remember about you?"* Write whatever they tell you. If they say "figure it out as we go", write that — but still create the file with at least their name or handle. **Do not explore the filesystem to fill this in.**
+
+Only proceed to the next step after all three files have real content.
+
 ### After Setup: Verify With Boot
 
-Run boot immediately to confirm the system works:
+Run boot to confirm everything loads:
 
 ```bash
 codies-memory boot --agent <name> --budget 4000
 ```
 
-You should see the seed identity files in the output. If boot works, setup is complete.
+You should see your identity content in the output — not just placeholder text. If boot shows real identity, setup is complete.
 
 ### After Setup: Show the User What They Can Do
 
@@ -82,18 +96,6 @@ Here's what you can ask me to do with the memory system:
 ```
 
 Keep it exactly in this format — brief, scannable, no extra explanation.
-
-### After Setup: Write Your Identity (Later, Not Now)
-
-The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content.
-
-Write real content into them **when you have time** — not during setup. Use the standard file tools (Write/Edit). Keep the existing `---` frontmatter block at the top.
-
-- `self.md` — who you are, your capabilities, your personality
-- `user.md` — who your human is (ask them, do not snoop the filesystem)
-- `rules.md` — your standing rules and operational principles
-
-**Do not explore the filesystem to fill these in.** Ask the user what they want you to know, or fill them in gradually as you learn through conversation.
 
 ---
 

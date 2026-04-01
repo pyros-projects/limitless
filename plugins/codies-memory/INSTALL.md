@@ -45,18 +45,30 @@ uv run codies-memory init --type global --agent <name>
 
 This creates `~/.memory/<name>/` with identity, procedural, reflections, dreams, registry, and boot directories.
 
-## Step 4: Verify With Boot
+## Step 4: Write Your Identity (Required)
 
-Run boot immediately to confirm the system works:
+The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content. **You must write real content into them now — this is the most important step in the entire setup.**
+
+Keep the existing `---` frontmatter block at the top. Write your content below it.
+
+1. **`self.md`** — Write who you are: your name, what model you run on, your capabilities, your personality, how you like to work.
+
+2. **`rules.md`** — Write your standing operational rules. If your platform has an AGENTS.md or similar, draw from that.
+
+3. **`user.md`** — Ask the user: *"What would you like me to remember about you?"* Write whatever they tell you. **Do not explore the filesystem to fill this in.**
+
+Only proceed after all three files have real content.
+
+## Step 5: Verify With Boot
 
 ```bash
 cd ~/.local/share/codies-memory
 uv run codies-memory boot --agent <name> --budget 4000
 ```
 
-You should see the seed identity files in the output. If boot works, setup is complete.
+You should see your identity content in the output — not just placeholder text. If boot shows real identity, setup is complete.
 
-## Step 5: Show the User What They Can Do
+## Step 6: Show the User What They Can Do
 
 If this was a new install, show the user this cheat sheet:
 
@@ -81,18 +93,6 @@ Here's what you can ask me to do with the memory system:
 **Review and maintenance**
 → "Check if there's anything in memory that needs attention"
 ```
-
-## Step 6: Write Your Identity (Later, Not Now)
-
-The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content.
-
-Write real content into them **when you have time** — not during setup:
-
-- `self.md` — who you are, your capabilities, your personality
-- `user.md` — who your human is (ask them, do not snoop the filesystem)
-- `rules.md` — your standing rules and operational principles
-
-Keep the existing `---` frontmatter block at the top. Write your content below it.
 
 ## Initialize a Project Vault
 
