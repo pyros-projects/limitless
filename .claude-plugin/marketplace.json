@@ -4,8 +4,8 @@
     "name": "Pyro"
   },
   "metadata": {
-    "description": "Curated Claude Code plugins by Pyro for research, prototyping, publishing, search, and calm product clarity work.",
-    "version": "0.4.0",
+    "description": "Curated Claude Code plugins by Pyro — research, prototyping, publishing, creative lifecycle, and persistent agent memory.",
+    "version": "1.0.0",
     "homepage": "https://github.com/pyros-projects/limitless"
   },
   "plugins": [
@@ -18,6 +18,16 @@
       "name": "after-hours",
       "source": "./plugins/after-hours",
       "description": "A calm, high-taste skill pack for project identity, subtraction, naming, coherence, and first-contact honesty."
+    },
+    {
+      "name": "pyro-kit",
+      "source": "./plugins/pyro-kit",
+      "description": "17-skill creative lifecycle toolkit: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting."
+    },
+    {
+      "name": "codies-memory",
+      "source": "./plugins/codies-memory",
+      "description": "Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, and CLI write commands. Requires uv sync setup."
     }
   ]
 }
