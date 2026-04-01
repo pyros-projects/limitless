@@ -1,0 +1,20 @@
+{
+  "name": "codies-memory",
+  "version": "1.0.0",
+  "description": "File-based two-tier memory system for AI agents. Agent-namespaced vaults with promotion pipelines, trust levels, and CLI write commands. Gives any agent persistent memory across sessions.",
+  "author": {
+    "name": "Pyro"
+  },
+  "homepage": "https://github.com/pyros-projects/limitless",
+  "repository": "https://github.com/pyros-projects/limitless",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "persistence",
+    "identity",
+    "agent-memory",
+    "vault",
+    "promotion",
+    "trust"
+  ]
+}

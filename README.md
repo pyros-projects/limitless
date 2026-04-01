@@ -14,7 +14,7 @@
 
 ## What Is This?
 
-A curated Claude Code plugin marketplace with high-leverage skills designed to unlock capabilities you didn't know you needed. Three plugins covering research, content creation, product intelligence, and the full creative project lifecycle.
+A curated Claude Code plugin marketplace with high-leverage skills designed to unlock capabilities you didn't know you needed. Four plugins covering research, content creation, product intelligence, creative lifecycle management, and persistent agent memory.
 
 **The goal:** Make you (and Claude) limitless.
 
@@ -27,6 +27,7 @@ A curated Claude Code plugin marketplace with high-leverage skills designed to u
 | [**limitless**](plugins/limitless/) | 4 | Article generation, research, surface-first prototyping, and privacy-respecting web search. |
 | [**after-hours**](plugins/after-hours/) | 7 | Calm, high-taste product intelligence: identity, subtraction, naming, coherence, and first-contact honesty. |
 | [**pyro-kit**](plugins/pyro-kit/) | 17 | Complete 7-phase creative lifecycle: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting. |
+| [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, and CLI write commands. Requires `uv sync` setup — see INSTALL.md. |
 
 ---
 
@@ -47,6 +48,7 @@ In Claude Code, run:
 /plugin install limitless@limitless        # Curated Pyro skill pack
 /plugin install after-hours@limitless      # Calm, wholesome product-intelligence skills
 /plugin install pyro-kit@limitless         # Full creative lifecycle toolkit
+/plugin install codies-memory@limitless    # Persistent agent memory (requires uv sync)
 ```
 
 ### 3. Manage
@@ -55,12 +57,15 @@ In Claude Code, run:
 /plugin enable limitless@limitless         # Enable
 /plugin enable after-hours@limitless       # Enable
 /plugin enable pyro-kit@limitless          # Enable
+/plugin enable codies-memory@limitless     # Enable
 /plugin disable limitless@limitless        # Disable
 /plugin disable after-hours@limitless      # Disable
 /plugin disable pyro-kit@limitless         # Disable
+/plugin disable codies-memory@limitless    # Disable
 /plugin uninstall limitless@limitless      # Uninstall
 /plugin uninstall after-hours@limitless    # Uninstall
 /plugin uninstall pyro-kit@limitless       # Uninstall
+/plugin uninstall codies-memory@limitless  # Uninstall
 ```
 
 ---
