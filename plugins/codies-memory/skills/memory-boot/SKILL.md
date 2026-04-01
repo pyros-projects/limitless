@@ -51,20 +51,37 @@ You should see the seed identity files in the output. If boot works, setup is co
 
 ### After Setup: Show the User What They Can Do
 
-If this was a new install, tell the user how to interact with the memory system. Show them these example prompts they can use:
+If this was a new install, show the user what they can ask you to do. Use this format — categories with example prompts. No internal jargon (no "threads", "lessons", "inbox", "promote"). Just plain language.
 
 ```
-"Initialize memory for /path/to/my-project"
-"Remember that this project uses FastAPI and PostgreSQL"
-"What do you remember about this project?"
-"Capture a lesson: always check YAML tabs vs spaces"
-"Show me what's in your inbox"
-"Promote that thread to a lesson"
-"Write a session summary before we stop"
-"What patterns do you see across my projects?"
+Here's what you can ask me to do with the memory system:
+
+**Set up project memory**
+→ "Start tracking memory for /path/to/my-project"
+→ "Initialize memory for this project"
+
+**Add information about a project**
+→ "Remember that this project uses FastAPI and PostgreSQL"
+→ "Note that the deploy target is AWS ECS"
+
+**Add global information (applies across all projects)**
+→ "Remember that I always want tests before implementation"
+→ "Add a global rule: never commit to main directly"
+
+**Ask about what I know**
+→ "What do you remember about this project?"
+→ "What have you learned across all my projects?"
+
+**Session summaries**
+→ "Wrap up this session and save what we did"
+→ "Write a summary before we stop"
+
+**Review and maintenance**
+→ "Check if there's anything in memory that needs attention"
+→ "What's been sitting in memory unreviewed?"
 ```
 
-Keep it brief — just the examples, no wall of explanation.
+Keep it exactly in this format — brief, scannable, no extra explanation.
 
 ### After Setup: Write Your Identity (Later, Not Now)
 
