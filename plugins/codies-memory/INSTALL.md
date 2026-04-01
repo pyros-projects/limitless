@@ -55,9 +55,9 @@ Keep the existing `---` frontmatter block at the top. Write your content below i
 
 2. **`rules.md`** — Write your standing operational rules. If your platform has an AGENTS.md or similar, draw from that.
 
-3. **`user.md`** — Ask the user: *"What would you like me to remember about you?"* Write whatever they tell you. **Do not explore the filesystem to fill this in.**
+3. **`user.md`** — If you already know things about the user from this conversation, write them. Otherwise leave it empty. User knowledge accumulates over time via `uv run codies-memory user "observation" --agent <name>`. **Do not ask the user to describe themselves and do not explore the filesystem.**
 
-Only proceed after all three files have real content.
+Only proceed after `self.md` and `rules.md` have real content.
 
 ## Step 5: Verify With Boot
 

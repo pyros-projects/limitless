@@ -96,10 +96,16 @@ When capturing to inbox, a gate controls visibility:
 Your identity lives at `~/.memory/<name>/identity/`:
 
 - `self.md` — who you are, your capabilities, your personality
-- `user.md` — who your human is (ask them, don't assume)
+- `user.md` — who your human is (accumulates organically, never ask the user to describe themselves)
 - `rules.md` — standing rules and operational principles
 
-These are loaded first during boot and are never dropped during truncation. They are the foundation of your continuity. Edit them with file tools (Write/Edit), not the CLI.
+These are loaded first during boot and are never dropped during truncation. They are the foundation of your continuity. Edit `self.md` and `rules.md` with file tools (Write/Edit). For `user.md`, use the `user` CLI command to append observations as you learn them:
+
+```bash
+codies-memory user "prefers short answers, hates boilerplate" --agent <name>
+```
+
+This appends a bullet point to `user.md`. Over time it builds a rich profile without ever interrogating the user.
 
 ### Project Resolution
 
@@ -121,6 +127,14 @@ All commands require `--agent <name>`. Use `--working-dir /path` to target a pro
 ```bash
 codies-memory boot --agent <name> --budget 4000
 ```
+
+### User (save something you learned about the user)
+
+```bash
+codies-memory user "prefers TDD, uses uv not pip" --agent <name>
+```
+
+Appends a bullet point to `user.md`. Use this whenever you learn something about the user — preferences, role, tech stack, working style. Never ask the user to describe themselves.
 
 ### Capture (save an observation)
 

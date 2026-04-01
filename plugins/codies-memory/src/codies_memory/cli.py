@@ -348,6 +348,30 @@ def cmd_status(args: argparse.Namespace) -> None:
                 print(f"  [{created}] {title}")
 
 
+def cmd_user(args: argparse.Namespace) -> None:
+    agent = _resolve_agent(args)
+    global_vault = resolve_global_vault(agent)
+    user_file = global_vault / "identity" / "user.md"
+
+    if not user_file.exists():
+        print(f"Error: identity files not initialized. Run 'codies-memory init --type global --agent {agent}' first.", file=sys.stderr)
+        sys.exit(1)
+
+    # Read existing content
+    existing = user_file.read_text(encoding="utf-8")
+
+    # Append bullet point
+    bullet = f"- {args.observation}\n"
+    if existing.rstrip().endswith("---") or existing.rstrip().endswith("---\n"):
+        # Only frontmatter, no content yet — add a blank line first
+        updated = existing.rstrip() + f"\n\n{bullet}"
+    else:
+        updated = existing.rstrip() + f"\n{bullet}"
+
+    user_file.write_text(updated, encoding="utf-8")
+    print(f"Noted: {args.observation[:60]}")
+
+
 def cmd_feedback(args: argparse.Namespace) -> None:
     agent = _resolve_agent(args)
     global_vault = resolve_global_vault(agent)
@@ -628,6 +652,19 @@ def main() -> None:
         help="Working directory (defaults to cwd).",
     )
     promote_parser.set_defaults(func=cmd_promote)
+
+    # --- user ---
+    user_parser = subparsers.add_parser("user", help="Save an observation about the user to identity/user.md.")
+    user_parser.add_argument(
+        "observation",
+        help="What you learned about the user.",
+    )
+    user_parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent name (required).",
+    )
+    user_parser.set_defaults(func=cmd_user)
 
     # --- feedback ---
     feedback_parser = subparsers.add_parser("feedback", help="Report a bug, issue, or observation about the memory system.")
