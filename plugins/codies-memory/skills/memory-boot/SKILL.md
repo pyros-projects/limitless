@@ -112,7 +112,11 @@ This assembles your boot packet from:
 
 Read the output — it contains your identity, project context, and recent state.
 
-## Step 2: Check Inbox
+## Step 2: Learn How Memory Works
+
+After booting, invoke the `memory-help` skill to understand the memory system's concepts, commands, and vocabulary. This is essential — terms like "threads", "promotions", "trust levels", and "inbox" have specific meanings in this system that you need to know before using it.
+
+## Step 3: Check Inbox
 
 ```bash
 codies-memory status --agent <name>
