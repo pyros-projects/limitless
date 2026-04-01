@@ -120,12 +120,31 @@ codies-memory status --agent <name>
 
 Handle any aging or stale items before starting work. If no project vault exists yet, this will say so — that's fine for global-only boot.
 
-## Initialize a Project Vault (When Entering a New Project)
+## Available Commands
 
-From the project's working directory:
+All commands require `--agent <name>`. Use `--working-dir` to target a project without being in its directory.
 
 ```bash
-codies-memory init --type project --agent <name>
-```
+# Initialize a project vault (from anywhere)
+codies-memory init --type project --agent <name> --working-dir /path/to/project
 
-This registers the project in your vault and creates a `.codies-memory` marker file.
+# Capture an observation to a project's inbox
+codies-memory capture "what you noticed" --source "session" --agent <name>
+
+# Create a record (lesson, session, thread, decision, reflection, dream)
+codies-memory create lesson --title "Title" --body "Content" --agent <name>
+
+# List records
+codies-memory list inbox --agent <name>
+codies-memory list lessons --scope global --agent <name>
+
+# Check inbox status (active, aging, stale counts)
+codies-memory status --agent <name>
+
+# Promote a record (e.g. inbox item to thread, or lesson to global)
+codies-memory promote /path/to/record.md --to thread --agent <name>
+codies-memory promote /path/to/record.md --to-global --agent <name>
+
+# Report bugs or feedback about the memory system itself
+codies-memory feedback "what happened" --agent <name>
+```
