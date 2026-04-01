@@ -49,6 +49,23 @@ codies-memory boot --agent <name> --budget 4000
 
 You should see the seed identity files in the output. If boot works, setup is complete.
 
+### After Setup: Show the User What They Can Do
+
+If this was a new install, tell the user how to interact with the memory system. Show them these example prompts they can use:
+
+```
+"Initialize memory for /path/to/my-project"
+"Remember that this project uses FastAPI and PostgreSQL"
+"What do you remember about this project?"
+"Capture a lesson: always check YAML tabs vs spaces"
+"Show me what's in your inbox"
+"Promote that thread to a lesson"
+"Write a session summary before we stop"
+"What patterns do you see across my projects?"
+```
+
+Keep it brief — just the examples, no wall of explanation.
+
 ### After Setup: Write Your Identity (Later, Not Now)
 
 The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content.
