@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -27,10 +26,10 @@ from codies_memory.profile import load_profile, get_write_gate_bias
 # ---------------------------------------------------------------------------
 
 def _resolve_agent(args: argparse.Namespace) -> str:
-    """Resolve agent name from --agent flag or CODIES_MEMORY_AGENT env var."""
-    agent = getattr(args, "agent", None) or os.environ.get("CODIES_MEMORY_AGENT")
+    """Resolve agent name from --agent flag."""
+    agent = getattr(args, "agent", None)
     if not agent:
-        print("Error: --agent flag or CODIES_MEMORY_AGENT env var required.", file=sys.stderr)
+        print("Error: --agent flag is required.", file=sys.stderr)
         sys.exit(1)
     return agent
 
@@ -410,7 +409,7 @@ def main() -> None:
     validate_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     validate_parser.add_argument(
         "--type",
@@ -431,7 +430,7 @@ def main() -> None:
     boot_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     boot_parser.add_argument(
         "--branch",
@@ -457,7 +456,7 @@ def main() -> None:
     status_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     status_parser.add_argument(
         "--all",
@@ -492,7 +491,7 @@ def main() -> None:
     capture_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     capture_parser.add_argument(
         "--working-dir",
@@ -547,7 +546,7 @@ def main() -> None:
     create_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     create_parser.add_argument(
         "--working-dir",
@@ -588,7 +587,7 @@ def main() -> None:
     list_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     list_parser.add_argument(
         "--working-dir",
@@ -620,7 +619,7 @@ def main() -> None:
     promote_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     promote_parser.add_argument(
         "--working-dir",
@@ -639,7 +638,7 @@ def main() -> None:
     feedback_parser.add_argument(
         "--agent",
         default=None,
-        help="Agent name (or set CODIES_MEMORY_AGENT).",
+        help="Agent name (required).",
     )
     feedback_parser.set_defaults(func=cmd_feedback)
 

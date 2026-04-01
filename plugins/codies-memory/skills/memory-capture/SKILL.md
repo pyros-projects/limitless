@@ -33,7 +33,7 @@ If you don't specify a type, the system infers from content:
 
 ## Scope Routing
 
-- **Global types** (reflection, dream, skill, playbook) -> global vault (resolved via `CODIES_MEMORY_AGENT` env var)
+- **Global types** (reflection, dream, skill, playbook) -> global vault (resolved via `--agent` flag)
 - **Project types** (thread, decision, lesson, session, inbox) -> project vault (auto-resolved from cwd)
 
 ## Trust Assignment

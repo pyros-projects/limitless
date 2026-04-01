@@ -27,18 +27,7 @@ class TestResolveAgent:
         ns = argparse.Namespace(agent="claude")
         assert _resolve_agent(ns) == "claude"
 
-    def test_from_env(self, monkeypatch):
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "opus")
-        ns = argparse.Namespace(agent=None)
-        assert _resolve_agent(ns) == "opus"
-
-    def test_flag_overrides_env(self, monkeypatch):
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "opus")
-        ns = argparse.Namespace(agent="claude")
-        assert _resolve_agent(ns) == "claude"
-
-    def test_missing_exits(self, monkeypatch):
-        monkeypatch.delenv("CODIES_MEMORY_AGENT", raising=False)
+    def test_missing_exits(self):
         ns = argparse.Namespace(agent=None)
         with pytest.raises(SystemExit):
             _resolve_agent(ns)
@@ -132,7 +121,7 @@ class TestCmdBoot:
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "claude")
+
 
         # Init global vault
         ns_global = argparse.Namespace(agent="claude", type="global")
@@ -143,7 +132,7 @@ class TestCmdBoot:
         working_dir.mkdir()
         monkeypatch.chdir(working_dir)
 
-        ns_boot = argparse.Namespace(agent=None, branch="main", budget=4000)
+        ns_boot = argparse.Namespace(agent="claude", branch="main", budget=4000)
         cmd_boot(ns_boot)
 
         captured = capsys.readouterr()
@@ -155,7 +144,7 @@ class TestCmdBoot:
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "claude")
+
 
         working_dir = tmp_path / "myapp"
         working_dir.mkdir()
@@ -169,7 +158,7 @@ class TestCmdBoot:
 
         monkeypatch.chdir(working_dir)
 
-        ns_boot = argparse.Namespace(agent=None, branch="main", budget=4000)
+        ns_boot = argparse.Namespace(agent="claude", branch="main", budget=4000)
         cmd_boot(ns_boot)
 
         captured = capsys.readouterr()
@@ -190,7 +179,7 @@ class TestCmdStatus:
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "claude")
+
 
         working_dir = tmp_path / "myapp"
         working_dir.mkdir()
@@ -209,7 +198,7 @@ class TestCmdStatus:
     def test_clean_inbox(self, tmp_path, monkeypatch, capsys):
         self._setup_vault_with_inbox(tmp_path, monkeypatch)
 
-        ns = argparse.Namespace(agent=None, all=False)
+        ns = argparse.Namespace(agent="claude", all=False)
         cmd_status(ns)
 
         out = capsys.readouterr().out
@@ -229,7 +218,7 @@ class TestCmdStatus:
             f"created: \"{today}\"\nupdated: \"{today}\"\n---\n\nSome note.\n"
         )
 
-        ns = argparse.Namespace(agent=None, all=False)
+        ns = argparse.Namespace(agent="claude", all=False)
         cmd_status(ns)
 
         out = capsys.readouterr().out
@@ -247,7 +236,7 @@ class TestCmdStatus:
             f"created: \"{today}\"\nupdated: \"{today}\"\n---\n\nContent.\n"
         )
 
-        ns = argparse.Namespace(agent=None, all=True)
+        ns = argparse.Namespace(agent="claude", all=True)
         cmd_status(ns)
 
         out = capsys.readouterr().out
@@ -258,7 +247,7 @@ class TestCmdStatus:
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "claude")
+
 
         cmd_init(argparse.Namespace(agent="claude", type="global"))
 
@@ -266,7 +255,7 @@ class TestCmdStatus:
         unrelated.mkdir()
         monkeypatch.chdir(unrelated)
 
-        ns = argparse.Namespace(agent=None, all=False)
+        ns = argparse.Namespace(agent="claude", all=False)
         with pytest.raises(SystemExit):
             cmd_status(ns)
 
@@ -306,7 +295,7 @@ class TestCmdCapture:
         capsys.readouterr()  # discard init output
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             content="The API returns 404",
             source="testing",
             gate="allow",
@@ -329,7 +318,7 @@ class TestCmdCapture:
         capsys.readouterr()  # discard init output
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             content="Something to remember",
             source="chat",
             gate=None,
@@ -359,7 +348,7 @@ class TestCmdCreate:
         capsys.readouterr()
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             type="lesson",
             title="Check YAML tabs",
             body="YAML rejects tabs; always use spaces.",
@@ -389,7 +378,7 @@ class TestCmdCreate:
         body_file.write_text("Body from file.")
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             type="thread",
             title="File-sourced thread",
             body=None,
@@ -414,7 +403,7 @@ class TestCmdCreate:
         capsys.readouterr()
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             type="decision",
             title="Use pytest",
             body="We decided to use pytest.",
@@ -435,7 +424,7 @@ class TestCmdCreate:
         capsys.readouterr()
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             type="reflection",
             title="On persistence",
             body="Memory is what makes us continuous.",
@@ -470,7 +459,7 @@ class TestCmdValidate:
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-        monkeypatch.setenv("CODIES_MEMORY_AGENT", "claude")
+
 
         working_dir = tmp_path / "myapp"
         working_dir.mkdir()
@@ -488,7 +477,7 @@ class TestCmdValidate:
         monkeypatch.chdir(elsewhere)
 
         ns = argparse.Namespace(
-            agent=None,
+            agent="claude",
             type="project",
             working_dir=str(working_dir),
         )
@@ -511,14 +500,14 @@ class TestCmdList:
         # Capture two items
         for text in ["First item", "Second item"]:
             cmd_capture(argparse.Namespace(
-                agent=None, content=text, source="test",
+                agent="claude", content=text, source="test",
                 gate="allow", working_dir=None,
             ))
         capsys.readouterr()
 
         # List inbox
         cmd_list(argparse.Namespace(
-            agent=None, type="inbox", scope="project",
+            agent="claude", type="inbox", scope="project",
             status=None, trust=None, format="table",
             working_dir=None,
         ))
@@ -535,13 +524,13 @@ class TestCmdList:
         capsys.readouterr()
 
         cmd_capture(argparse.Namespace(
-            agent=None, content="JSON test item", source="test",
+            agent="claude", content="JSON test item", source="test",
             gate="allow", working_dir=None,
         ))
         capsys.readouterr()
 
         cmd_list(argparse.Namespace(
-            agent=None, type="inbox", scope="project",
+            agent="claude", type="inbox", scope="project",
             status=None, trust=None, format="json",
             working_dir=None,
         ))
@@ -557,13 +546,13 @@ class TestCmdList:
         capsys.readouterr()
 
         cmd_capture(argparse.Namespace(
-            agent=None, content="Paths test", source="test",
+            agent="claude", content="Paths test", source="test",
             gate="allow", working_dir=None,
         ))
         capsys.readouterr()
 
         cmd_list(argparse.Namespace(
-            agent=None, type="inbox", scope="project",
+            agent="claude", type="inbox", scope="project",
             status=None, trust=None, format="paths",
             working_dir=None,
         ))
@@ -576,14 +565,14 @@ class TestCmdList:
         capsys.readouterr()
 
         cmd_capture(argparse.Namespace(
-            agent=None, content="Active item", source="test",
+            agent="claude", content="Active item", source="test",
             gate="allow", working_dir=None,
         ))
         capsys.readouterr()
 
         # Filter for status=archived should return nothing
         cmd_list(argparse.Namespace(
-            agent=None, type="inbox", scope="project",
+            agent="claude", type="inbox", scope="project",
             status="archived", trust=None, format="table",
             working_dir=None,
         ))
@@ -596,7 +585,7 @@ class TestCmdList:
         capsys.readouterr()
 
         cmd_list(argparse.Namespace(
-            agent=None, type="inbox", scope="project",
+            agent="claude", type="inbox", scope="project",
             status=None, trust=None, format="table",
             working_dir=None,
         ))
@@ -617,7 +606,7 @@ class TestCmdPromote:
 
         # Capture an inbox item first
         cmd_capture(argparse.Namespace(
-            agent=None, content="Investigate the 404 bug",
+            agent="claude", content="Investigate the 404 bug",
             source="testing", gate="allow", working_dir=None,
         ))
         capsys.readouterr()
@@ -630,7 +619,7 @@ class TestCmdPromote:
 
         # Promote to thread
         cmd_promote(argparse.Namespace(
-            agent=None, source=str(source_path), to="thread",
+            agent="claude", source=str(source_path), to="thread",
             to_global=False, working_dir=None,
         ))
 
@@ -654,7 +643,7 @@ class TestCmdPromote:
 
         # Create a lesson first (promote_to_global requires type=lesson)
         cmd_create(argparse.Namespace(
-            agent=None, type="lesson", title="Global lesson",
+            agent="claude", type="lesson", title="Global lesson",
             body="A lesson worth sharing globally.",
             body_file=None, scope="project", trust="working",
             field=None, working_dir=None,
@@ -669,7 +658,7 @@ class TestCmdPromote:
 
         # Promote to global
         cmd_promote(argparse.Namespace(
-            agent=None, source=str(source_path),
+            agent="claude", source=str(source_path),
             to=None, to_global=True, working_dir=None,
         ))
 
@@ -682,7 +671,7 @@ class TestCmdPromote:
         _setup_project(tmp_path, monkeypatch)
 
         ns = argparse.Namespace(
-            agent=None, source="/nonexistent/path.md",
+            agent="claude", source="/nonexistent/path.md",
             to="thread", to_global=False, working_dir=None,
         )
         with pytest.raises(SystemExit):

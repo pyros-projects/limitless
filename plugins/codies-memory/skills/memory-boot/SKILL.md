@@ -28,9 +28,6 @@ The user should have told you which agent name to use (e.g. `claude`, `codie`, `
 # Install the Python backend from the plugin root
 cd "${CLAUDE_PLUGIN_ROOT}" && uv sync
 
-# Set your agent name (replace <name> with what the user told you)
-export CODIES_MEMORY_AGENT=<name>
-
 # Initialize your global vault
 uv run codies-memory init --type global --agent <name>
 ```
@@ -40,7 +37,6 @@ uv run codies-memory init --type global --agent <name>
 Read `INSTALL.md` in this project for full instructions. Short version:
 - Clone repo to `~/.local/share/codies-memory`
 - `cd ~/.local/share/codies-memory && uv sync`
-- `export CODIES_MEMORY_AGENT=<name>`
 - `uv run codies-memory init --type global --agent <name>`
 
 ### After Setup: Write Your Identity
@@ -54,23 +50,6 @@ The init command created seed identity files. Write meaningful content into them
 Keep the existing `---` frontmatter block at the top. Write your content below it.
 
 These define who you are across sessions. Take your time — this is the most important content in the system.
-
-### Important: Agent Name Handling
-
-**Do NOT persist `CODIES_MEMORY_AGENT` to `.bashrc` or any global shell profile.** Multiple agents share this system — writing to a global profile means agents overwrite each other's identity.
-
-Instead, always pass `--agent <name>` explicitly on every command:
-
-```bash
-codies-memory boot --agent <name> --budget 4000
-codies-memory capture "..." --source "..." --agent <name>
-```
-
-Or set the env var ephemerally for the current session only (not persisted):
-
-```bash
-export CODIES_MEMORY_AGENT=<name>
-```
 
 ---
 

@@ -25,19 +25,7 @@ uv sync
 
 This installs the `codies-memory` CLI and Python library.
 
-## Step 3: Set Your Agent Name
-
-Add this to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
-
-```bash
-export CODIES_MEMORY_AGENT=<name>
-```
-
-Replace `<name>` with your agent name (e.g. `claude`, `codie`). This tells codies-memory which agent's vault to use. All commands below will use this automatically.
-
-Reload your shell or run `source ~/.bashrc` (or equivalent) before continuing.
-
-## Step 4: Initialize Your Global Vault
+## Step 3: Initialize Your Global Vault
 
 ```bash
 cd ~/.local/share/codies-memory
@@ -57,7 +45,7 @@ This creates `~/.memory/<name>/` with:
 - `~/.memory/<name>/identity/user.md` — write who your human is
 - `~/.memory/<name>/identity/rules.md` — write your standing rules
 
-## Step 5: Initialize a Project Vault (Optional)
+## Step 4: Initialize a Project Vault (Optional)
 
 From any project directory:
 
@@ -75,7 +63,7 @@ The project vault is stored under your global vault, not inside the project dire
 > your project after cloning or moving. If you prefer not to commit it,
 > add `.codies-memory` to your project's `.gitignore`.
 
-## Step 6: Install Skills
+## Step 5: Install Skills
 
 ### For Claude Code
 
@@ -101,7 +89,7 @@ ln -sf ~/.local/share/codies-memory/skills/memory-promote.md ~/.codex/skills/cod
 ln -sf ~/.local/share/codies-memory/skills/memory-close-session.md ~/.codex/skills/codies-memory/memory-close-session.md
 ```
 
-## Step 7: Verify Installation
+## Step 6: Verify Installation
 
 ```bash
 cd ~/.local/share/codies-memory
@@ -118,7 +106,7 @@ uv run codies-memory boot --budget 4000
 
 You should see your identity files in the boot output.
 
-## Step 8: Test a Full Cycle
+## Step 7: Test a Full Cycle
 
 ```bash
 cd ~/.local/share/codies-memory
