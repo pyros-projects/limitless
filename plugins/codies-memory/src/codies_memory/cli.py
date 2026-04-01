@@ -309,15 +309,19 @@ def cmd_status(args: argparse.Namespace) -> None:
     project_vault = resolve_project_vault(global_vault, working_dir)
 
     if project_vault is None:
-        print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
-        sys.exit(1)
+        print(f"Global vault: {global_vault}")
+        print(f"Project vault: none (no project initialized for {working_dir})")
+        print("\nRun 'codies-memory init --type project' to initialize a project vault here.")
+        return
 
     result = pending_review(project_vault)
     active = result.get("active", [])
     aging = result.get("aging", [])
     stale = result.get("stale", [])
 
-    print(f"Active: {len(active)}  Aging: {len(aging)}  Stale: {len(stale)}")
+    print(f"Global vault: {global_vault}")
+    print(f"Project vault: {project_vault}")
+    print(f"\nActive: {len(active)}  Aging: {len(aging)}  Stale: {len(stale)}")
 
     if not active and not aging and not stale:
         print("Inbox is clean.")

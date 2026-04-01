@@ -243,11 +243,10 @@ class TestCmdStatus:
         assert "Active: 1" in out
         assert "My task" in out
 
-    def test_no_project_vault_exits(self, tmp_path, monkeypatch):
+    def test_no_project_vault_shows_info(self, tmp_path, monkeypatch, capsys):
         fake_home = tmp_path / "home"
         fake_home.mkdir()
         monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
-
 
         cmd_init(argparse.Namespace(agent="claude", type="global"))
 
@@ -256,8 +255,12 @@ class TestCmdStatus:
         monkeypatch.chdir(unrelated)
 
         ns = argparse.Namespace(agent="claude", all=False)
-        with pytest.raises(SystemExit):
-            cmd_status(ns)
+        cmd_status(ns)
+
+        out = capsys.readouterr().out
+        assert "Global vault:" in out
+        assert "Project vault: none" in out
+        assert "init --type project" in out
 
 
 # ---------------------------------------------------------------------------
