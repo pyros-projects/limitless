@@ -45,24 +45,39 @@ Read `INSTALL.md` in this project for full instructions. Short version:
 
 ### After Setup: Write Your Identity
 
-Edit these files — they define who you are across sessions:
+The init command created seed identity files. Write meaningful content into them using the standard file tools (Write/Edit):
 
-- `~/.memory/<name>/identity/self.md` — who you are
-- `~/.memory/<name>/identity/user.md` — who your human is
-- `~/.memory/<name>/identity/rules.md` — your standing rules
+- `~/.memory/<name>/identity/self.md` — who you are, your capabilities, your personality
+- `~/.memory/<name>/identity/user.md` — who your human is, their preferences, their projects
+- `~/.memory/<name>/identity/rules.md` — your standing rules and operational principles
 
-These are the most important files in the system. Take your time.
+Keep the existing `---` frontmatter block at the top. Write your content below it.
 
-### After Setup: Persist the Agent Name
+These define who you are across sessions. Take your time — this is the most important content in the system.
 
-Add `export CODIES_MEMORY_AGENT=<name>` to your shell profile so it survives restarts. Or ask the user to configure it in their agent's settings.
+### Important: Agent Name Handling
+
+**Do NOT persist `CODIES_MEMORY_AGENT` to `.bashrc` or any global shell profile.** Multiple agents share this system — writing to a global profile means agents overwrite each other's identity.
+
+Instead, always pass `--agent <name>` explicitly on every command:
+
+```bash
+codies-memory boot --agent <name> --budget 4000
+codies-memory capture "..." --source "..." --agent <name>
+```
+
+Or set the env var ephemerally for the current session only (not persisted):
+
+```bash
+export CODIES_MEMORY_AGENT=<name>
+```
 
 ---
 
 ## Step 1: Boot
 
 ```bash
-codies-memory boot --budget 4000
+codies-memory boot --agent <name> --budget 4000
 ```
 
 This assembles your boot packet from:
@@ -75,7 +90,7 @@ This assembles your boot packet from:
 ## Step 2: Check Inbox
 
 ```bash
-codies-memory status
+codies-memory status --agent <name>
 ```
 
 Handle any aging or stale items before starting work.
