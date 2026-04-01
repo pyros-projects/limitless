@@ -1,6 +1,6 @@
 ---
 name: taste-distiller
-description: Use when someone likes a product, interface, writing style, or codebase but cannot yet explain the hidden rules behind why it feels right.
+description: This skill should be used when the user wants to understand why a product, interface, writing style, or codebase feels unusually good, or to extract the hidden governing rules behind a reference. Responds to "I like this but I can't explain why", "what makes this work", "extract the design principles", "distill the taste", "what rules is this obeying", or any request to learn from a reference without copying it.
 ---
 
 # Taste Distiller
@@ -79,6 +79,7 @@ When useful, separate:
 - Prefer "it seems to obey these rules" over false certainty
 - Focus on the rules that actually matter, not decorative trivia
 - Leave the user with something reusable
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

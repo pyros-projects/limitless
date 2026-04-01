@@ -1,6 +1,6 @@
 ---
 name: ghost-user
-description: Use when something seems obvious to the builders and you want a cold first-contact pass from a first-time user with zero context or author knowledge.
+description: This skill should be used when the user wants a first-time user simulation — a cold-start walkthrough from the perspective of someone with zero context, zero author knowledge, and zero sympathy for what the builders intended. Responds to "pretend you're a new user", "do a first-contact pass", "test the onboarding", "is this obvious to a newcomer", "what would a stranger see here", "ghost user this", or any request to check whether the product relies on inside knowledge.
 ---
 
 # Ghost User
@@ -76,6 +76,7 @@ Narrate it plainly. The power of this skill is not sophistication. It is honesty
 - Do not smuggle in insider understanding
 - Prefer "I see a button called init and I do not know what that means" over design jargon
 - End with the few changes that would most improve first contact
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

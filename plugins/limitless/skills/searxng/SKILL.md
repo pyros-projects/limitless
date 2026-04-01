@@ -1,11 +1,23 @@
 ---
 name: searxng
-description: Use when the agent needs direct web search through a self-hosted, privacy-respecting SearXNG instance, especially when structured JSON results or API-key-free search are useful.
+description: This skill should be used when the agent needs to perform web searches, look up current information online, or gather search results from the internet. Provides privacy-respecting web search through a self-hosted SearXNG instance with structured JSON output. Responds to "search the web for", "look this up online", "find recent articles about", "what does Google say about", "web search", or any task requiring live internet search results. No API keys or external accounts needed.
 ---
 
 # SearXNG — Privacy-Respecting Web Search
 
 SearXNG is a self-hosted metasearch engine that aggregates results from 70+ search engines (Google, Bing, DuckDuckGo, etc.) without tracking or profiling. It provides a JSON API that works well for agent research loops.
+
+## Usage Posture
+
+When using SearXNG for research:
+
+- **Start with a focused query.** Narrow beats broad. `"rust async runtime comparison 2026"` beats `"rust async"`.
+- **Fetch 5–10 results per query.** More than 10 rarely adds signal. Use `jq '.results[:5]'` or `[:10]`.
+- **Use categories to cut noise.** `categories=it` for tech, `categories=news` for recency, `categories=science` for academic sources.
+- **Use `time_range` for freshness.** `time_range=week` or `time_range=month` when recency matters. Omit it for evergreen topics.
+- **Paginate only when the first page is promising but incomplete.** Add `pageno=2` if you see relevant results but need more.
+- **Handle zero or poor results by reformulating.** Try synonyms, drop qualifiers, or switch categories before concluding nothing exists.
+- **Combine multiple targeted searches over one broad search.** Two precise queries (`"SearXNG docker setup"` + `"SearXNG JSON API"`) beat one vague query (`"SearXNG"`).
 
 ## Installation
 

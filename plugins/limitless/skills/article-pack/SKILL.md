@@ -1,6 +1,6 @@
 ---
 name: article-pack
-description: Research topics and generate complete content packages. Creates articles for multiple platforms (Substack, LinkedIn) in multiple languages, slide decks, and social media kits with copy buttons. Can start from just a topic idea—will research via web search until enough material exists. Trigger with "article-pack" or when user wants to create publishable content.
+description: This skill should be used when the user wants to create publishable content such as articles, blog posts, social media kits, slide decks, newsletters, or podcast transcripts. Covers multi-platform content generation (Substack, LinkedIn, Medium) in multiple languages, voice calibration, and AI image generation. Responds to "article-pack", "content pack", "write me an article", "Substack post", "LinkedIn article", "turn my notes into a blog post", "create a newsletter", or any request to research a topic and produce publishable material from it.
 ---
 
 # Article Pack Generator

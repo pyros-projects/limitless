@@ -1,6 +1,6 @@
 ---
 name: local-mythology
-description: Use when a project has good instincts but weak self-definition, especially when naming, tone, scope, or product identity are starting to drift.
+description: This skill should be used when the user wants to define a project's identity, build a lorebook, articulate what a product believes and refuses to become, or capture the implicit rules a project lives by. Responds to "what is this project trying to be", "the product is drifting", "write down the project values", "give this project a spine", "build a lorebook", or any moment when naming, tone, scope, or product identity feel undefined or are starting to drift.
 ---
 
 # Local Mythology
@@ -71,6 +71,7 @@ Keep it specific. The goal is not poetry for its own sake. The goal is to create
 - Prefer clear phrases over dramatic manifestos
 - If you infer something, say that it is an inference
 - Protect the project from becoming generic sludge
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

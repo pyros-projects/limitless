@@ -1,6 +1,6 @@
 ---
 name: naming-as-design
-description: Use when a product, workflow, or system uses muddy, overlapping, or conflicting names and the language layer is distorting the mental model.
+description: This skill should be used when the user wants to audit, clean up, or redesign the naming in a product, workflow, or system — treating names as structural design decisions, not editorial polish. Responds to "the naming is a mess", "we call the same thing three different names", "clean up the terminology", "what should we call this", "the API and UI use different words", or any situation where muddy, overlapping, or conflicting names are distorting the user's mental model.
 ---
 
 # Naming as Design
@@ -70,6 +70,7 @@ Then recommend a cleaner vocabulary and explain what changes in the user's under
 - Care about meaning more than cleverness
 - Prefer one clean mental model over three locally convenient labels
 - Explain naming in terms of the world it creates for the user
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

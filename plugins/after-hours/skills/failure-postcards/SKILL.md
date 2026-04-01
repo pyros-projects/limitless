@@ -1,6 +1,6 @@
 ---
 name: failure-postcards
-description: Use when a feature, flow, or product idea sounds fine in the abstract but needs emotionally concrete pressure-testing before or during design.
+description: This skill should be used when the user wants to pressure-test a feature, flow, or product idea by generating emotionally concrete future failure artifacts such as support tickets, angry emails, user complaints, one-star reviews, or postmortem fragments. Responds to "what could go wrong", "stress test this", "write a pre-mortem", "show me how this fails", "what would the support tickets look like", "pressure test this flow", or any request to make abstract risk viscerally real before or during design.
 ---
 
 # Failure Postcards
@@ -72,6 +72,7 @@ Then explain:
 - Make the frustration concrete, not cartoonish
 - Tie every postcard back to a real design implication
 - Prefer the few postcards that reveal the most
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

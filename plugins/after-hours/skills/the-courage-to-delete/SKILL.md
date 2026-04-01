@@ -1,6 +1,6 @@
 ---
 name: the-courage-to-delete
-description: Use when a product, feature set, or roadmap feels crowded, diluted, or overcommitted and the real question may be what should be removed.
+description: This skill should be used when the user wants help subtracting — identifying what to cut, delete, or deprioritize so the core product can breathe again. Responds to "what should I cut", "this is too bloated", "what can I delete", "simplify this", "what's diluting the core", "what would this look like with less", or any moment when a product, feature set, or roadmap is crowded, overcommitted, or accumulating obligations faster than conviction.
 ---
 
 # The Courage to Delete
@@ -73,6 +73,7 @@ When useful, show two shapes:
 - Explain why removal helps
 - Distinguish "not core" from "bad"
 - Protect the project from keeping too many promises at once
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

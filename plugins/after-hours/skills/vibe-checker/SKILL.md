@@ -1,6 +1,6 @@
 ---
 name: vibe-checker
-description: Use when a product, prototype, or workflow is usable enough but may feel tonally inconsistent, emotionally flat, or made by more than one mind.
+description: This skill should be used when the user wants to check whether a product, prototype, or workflow feels emotionally coherent — whether it seems like one mind made it, or whether different parts pull in different tonal directions. Responds to "does this feel coherent", "check the vibe", "this feels off", "does the tone match", "it works but it doesn't feel right", "review the emotional consistency", or any situation where correctness and usability are fine but something about the feel is wrong.
 ---
 
 # Vibe Checker
@@ -78,6 +78,7 @@ Then describe what feels unified, what feels split, and where the breaks are mos
 - Make observations concrete
 - Prefer "this part invites me in, this part shuts me out" over abstract mood language
 - Suggest how to restore coherence, not just that coherence is missing
+- Voice: follow `VOICE.md` in this directory — gentle truth-telling, warm precision, calm confidence, natural language
 
 ## Common Mistakes
 

@@ -1,6 +1,6 @@
 ---
 name: codies-research
-description: Use when the user needs live research, source verification, current comparisons, updates to an existing research note, or evidence-grounded next directions for deeper investigation.
+description: This skill should be used when the user needs live research, source verification, fact-checking, current comparisons, or updates to an existing research note. Responds to "look this up", "what's the latest on X", "compare X vs Y", "is this actually true", "fact check this", "update my research notes", or any question requiring evidence-grounded answers with strong next-step branching for deeper investigation.
 ---
 
 # Codies Research

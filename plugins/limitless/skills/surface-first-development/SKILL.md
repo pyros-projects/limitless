@@ -1,6 +1,6 @@
 ---
 name: surface-first-development
-description: Use when the user wants to start or reshape an app, tool, CLI, API, automation, or feature from the interaction surface first, by converging on a prototype before deriving contracts and building inward.
+description: This skill should be used when the user wants to build, prototype, or reshape an app, tool, CLI, API, automation, or feature by starting from the interaction surface first. Responds to "let's build", "prototype this", "I have an idea for an app/tool", "show me what it would look like", "surface first", "SFD", "click dummy", "what would the UX be", "what would the workflow look like", or any request where the user describes what something should do without specifying architecture. Converges on a working prototype before deriving contracts and building inward.
 ---
 
 # Surface-First Development
