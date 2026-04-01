@@ -1,0 +1,11 @@
+{
+  "name": "pyro-kit",
+  "description": "Pyro Kit — 17-skill creative lifecycle toolkit for solo developers",
+  "plugins": [
+    {
+      "name": "pyro-kit",
+      "version": "1.0.0",
+      "description": "Complete 7-phase lifecycle: ignition, exploration, prototyping, contracts, building, momentum, and composting"
+    }
+  ]
+}

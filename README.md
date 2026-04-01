@@ -8,24 +8,25 @@
   <strong>A small, sharp marketplace of Claude Code skills that punch above their weight.</strong>
 </p>
 
-*Instead of shipping a pile of half-maintained bundles, this repo now centers one curated plugin with a few high-leverage skills.*
+*A curated collection of Claude Code plugins — from research and content generation to full creative lifecycle management.*
 
 ---
 
 ## What Is This?
 
-A curated Claude Code plugin built from a handful of high-leverage skills designed to unlock capabilities you didn't know you needed. The goal is to turn Claude from a generic assistant into a sharper specialist for research, creation, and execution.
+A curated Claude Code plugin marketplace with high-leverage skills designed to unlock capabilities you didn't know you needed. Three plugins covering research, content creation, product intelligence, and the full creative project lifecycle.
 
 **The goal:** Make you (and Claude) limitless.
 
 ---
 
-## Plugin
+## Plugins
 
-| Plugin | What It Does |
-|--------|--------------|
-| [**limitless**](plugins/limitless/) | A curated Pyro skill pack: article generation, research, surface-first prototyping, and privacy-respecting web search. |
-| [**after-hours**](plugins/after-hours/) | A calm, high-taste plugin for project identity, subtraction, naming, coherence, and first-contact honesty. |
+| Plugin | Skills | What It Does |
+|--------|--------|--------------|
+| [**limitless**](plugins/limitless/) | 4 | Article generation, research, surface-first prototyping, and privacy-respecting web search. |
+| [**after-hours**](plugins/after-hours/) | 7 | Calm, high-taste product intelligence: identity, subtraction, naming, coherence, and first-contact honesty. |
+| [**pyro-kit**](plugins/pyro-kit/) | 17 | Complete 7-phase creative lifecycle: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting. |
 
 ---
 
@@ -45,6 +46,7 @@ In Claude Code, run:
 /plugin                                    # Browse available plugins
 /plugin install limitless@limitless        # Curated Pyro skill pack
 /plugin install after-hours@limitless      # Calm, wholesome product-intelligence skills
+/plugin install pyro-kit@limitless         # Full creative lifecycle toolkit
 ```
 
 ### 3. Manage
@@ -52,10 +54,13 @@ In Claude Code, run:
 ```
 /plugin enable limitless@limitless         # Enable
 /plugin enable after-hours@limitless       # Enable
+/plugin enable pyro-kit@limitless          # Enable
 /plugin disable limitless@limitless        # Disable
 /plugin disable after-hours@limitless      # Disable
+/plugin disable pyro-kit@limitless         # Disable
 /plugin uninstall limitless@limitless      # Uninstall
 /plugin uninstall after-hours@limitless    # Uninstall
+/plugin uninstall pyro-kit@limitless       # Uninstall
 ```
 
 ---

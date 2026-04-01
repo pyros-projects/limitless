@@ -1,0 +1,17 @@
+{
+  "name": "pyro-kit",
+  "version": "1.0.0",
+  "description": "Pyro Kit — 17-skill creative lifecycle toolkit for solo developers. Idea excavation, design exploration, prototyping, contract derivation, vertical-slice building, momentum tracking, scope management, and anti-abandonment composting across a complete 7-phase project lifecycle.",
+  "author": {
+    "name": "Pyro"
+  },
+  "license": "MIT",
+  "keywords": [
+    "lifecycle",
+    "ideation",
+    "momentum",
+    "anti-abandonment",
+    "surface-first-development",
+    "propose-react-iterate"
+  ]
+}

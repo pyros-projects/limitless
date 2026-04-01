@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/session-init.sh\"",
+            "timeout": 2
+          }
+        ],
+        "description": "Injects Pyro Kit project context and detects dormancy at session start"
+      }
+    ]
+  }
+}
