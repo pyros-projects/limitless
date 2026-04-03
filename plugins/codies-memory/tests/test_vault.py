@@ -28,13 +28,40 @@ from codies_memory.vault import (
 # ---------------------------------------------------------------------------
 
 class TestResolveGlobalVault:
-    def test_claude_agent(self) -> None:
-        result = resolve_global_vault("claude")
-        assert result == Path.home() / ".memory" / "claude"
+    def test_exact_match(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
+        memory = tmp_path / ".memory"
+        (memory / "Claude").mkdir(parents=True)
+        result = resolve_global_vault("Claude")
+        assert result == memory / "Claude"
 
-    def test_codie_agent(self) -> None:
-        result = resolve_global_vault("codie")
-        assert result == Path.home() / ".memory" / "codie"
+    def test_case_insensitive_match(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
+        memory = tmp_path / ".memory"
+        (memory / "Claude").mkdir(parents=True)
+        result = resolve_global_vault("claude")
+        assert result == memory / "Claude"
+
+    def test_case_insensitive_upper(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
+        memory = tmp_path / ".memory"
+        (memory / "Claude").mkdir(parents=True)
+        result = resolve_global_vault("CLAUDE")
+        assert result == memory / "Claude"
+
+    def test_no_match_returns_exact_path(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """When no directory exists, return the exact (as-typed) path for init."""
+        monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
+        memory = tmp_path / ".memory"
+        memory.mkdir(parents=True)
+        result = resolve_global_vault("newagent")
+        assert result == memory / "newagent"
+
+    def test_no_memory_dir_returns_exact_path(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """When ~/.memory doesn't exist yet, return the exact path."""
+        monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
+        result = resolve_global_vault("claude")
+        assert result == tmp_path / ".memory" / "claude"
 
 
 # ---------------------------------------------------------------------------

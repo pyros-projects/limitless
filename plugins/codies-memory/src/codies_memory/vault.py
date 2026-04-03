@@ -119,8 +119,24 @@ def _update_registry_working_dir(global_vault: Path, slug: str, working_dir: str
 # ---------------------------------------------------------------------------
 
 def resolve_global_vault(agent: str) -> Path:
-    """Return the global vault path for *agent*: ``~/.memory/<agent>``."""
-    return Path.home() / ".memory" / agent
+    """Return the global vault path for *agent*: ``~/.memory/<agent>``.
+
+    If the exact directory does not exist, performs a case-insensitive scan
+    of ``~/.memory/`` and returns the first matching directory.  This allows
+    ``--agent claude`` to find a vault stored as ``Claude/``.
+    """
+    memory_root = Path.home() / ".memory"
+    exact = memory_root / agent
+    if exact.is_dir():
+        return exact
+    # Case-insensitive fallback
+    if memory_root.is_dir():
+        agent_lower = agent.lower()
+        for entry in memory_root.iterdir():
+            if entry.is_dir() and entry.name.lower() == agent_lower:
+                return entry
+    # Nothing found — return the exact path (will be created on init)
+    return exact
 
 
 def resolve_project_vault(global_vault: Path, working_dir: Path) -> Path | None:
