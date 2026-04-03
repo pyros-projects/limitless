@@ -8,7 +8,22 @@ This guide is for agents that cannot use Claude Code plugins (e.g. Codie/Codex, 
 which codies-memory 2>/dev/null || echo "NOT_INSTALLED"
 ```
 
-**If the CLI exists**, skip to **Step 3** (you may just need to init your vault).
+**If the CLI exists**, do not assume it is current. First verify which copy you are using:
+
+```bash
+which codies-memory
+codies-memory -h
+```
+
+If `which codies-memory` points at `~/.local/share/codies-memory/.venv/bin/codies-memory`, update that clone before continuing:
+
+```bash
+cd ~/.local/share/codies-memory
+git pull
+uv sync
+```
+
+Then continue with **Step 3**.
 
 **If `NOT_INSTALLED`**, continue with Step 1.
 
@@ -23,7 +38,13 @@ else
 fi
 ```
 
-**If `ALREADY_CLONED`**, skip to Step 2 (just sync dependencies).
+**If `ALREADY_CLONED`**, update it before continuing:
+
+```bash
+cd ~/.local/share/codies-memory
+git pull
+uv sync
+```
 
 ## Step 2: Install Dependencies
 
@@ -122,12 +143,26 @@ uv run codies-memory list inbox --agent <name> --working-dir /path/to/project
 # Check status
 uv run codies-memory status --agent <name> --working-dir /path/to/project
 
+# Save something you learned about the user
+uv run codies-memory user "prefers short, high-signal answers" --agent <name>
+
 # Close session
 uv run codies-memory create session --title "Session Summary" --body "What happened..." --agent <name> --working-dir /path/to/project
 
 # Report feedback about the memory system itself
 uv run codies-memory feedback "describe what happened" --agent <name>
 ```
+
+## Quick Sanity Check
+
+When something feels off, verify that you are using the expected copy of the CLI:
+
+```bash
+which codies-memory
+codies-memory -h
+```
+
+The help output should include newer commands like `user` and `feedback`. If it does not, you are probably running a stale install and should update the repo you are resolving from.
 
 ## Updating
 

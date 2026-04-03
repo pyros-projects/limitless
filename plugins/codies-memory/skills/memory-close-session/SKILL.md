@@ -24,24 +24,38 @@ At the end of every work session.
 
 ```bash
 # 1. Write session summary
+AGENT="your-agent-name"
+TODAY="$(python - <<'PY'
+from datetime import date
+print(date.today().isoformat())
+PY
+)"
+
 codies-memory create session \
-  --title "Session Summary - $(date +%Y-%m-%d)" \
+  --agent "$AGENT" \
+  --title "Session Summary - $TODAY" \
   --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Next Step\n- [what the next session should pick up]" \
   --field mode=implement \
   --field next_step="[what to do next]"
 
 # 2. Check inbox aging and status
-codies-memory status
+codies-memory status --agent "$AGENT"
 
 # 3. Run promotion evaluation
 uv run python -c "
-from pathlib import Path
 from codies_memory.records import list_records
 from codies_memory.promotion import evaluate_for_promotion
+from codies_memory.vault import resolve_global_vault, resolve_project_vault
+from pathlib import Path
 
-vault = Path('.memory')
+agent = 'your-agent-name'
+global_vault = resolve_global_vault(agent)
+project_vault = resolve_project_vault(global_vault, Path.cwd())
+if project_vault is None:
+    raise SystemExit(f'No project vault found for {Path.cwd()}')
+
 for rtype in ['inbox', 'thread']:
-    items = list_records(vault, rtype, scope='project', status='active')
+    items = list_records(project_vault, rtype, scope='project', status='active')
     for item in items:
         result = evaluate_for_promotion(item, context={'session_count': 1})
         if result['eligible']:
