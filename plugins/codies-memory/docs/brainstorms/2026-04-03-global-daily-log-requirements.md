@@ -15,10 +15,10 @@ Additionally, there is no cross-project view of what happened on a given day. Bo
 
 **Default Project**
 
-- R1. `init --type global` creates a `_general` project vault alongside the global vault structure, registered in `projects.yaml` with slug `_general`, no `working_dir`, and no `git_remote`. `init_project_vault` gains parameters `write_marker: bool = True` and `working_dir: Path | None = None` (made optional). When `working_dir` is None: marker file is skipped, git remote detection is skipped, and `register_project_vault` receives `working_dir=""` (empty string). The slug `_general` is reserved -- `init_project_vault` rejects it when called by users directly.
-- R2. When `resolve_project_vault` returns None, the CLI commands `create` and `capture` auto-fallback to `_general` (resolved as `global_vault / "projects" / "_general"`). The `_resolve_project_vault` helper in cli.py is updated to return `_general` instead of calling `sys.exit(1)`. Other commands (`status`, `boot`, `validate`, `list`) do not fallback -- they report which vault resolved (or None) and behave accordingly.
+- R1. `init --type global` creates a `_general` project vault alongside the global vault structure, registered in `projects.yaml` with slug `_general`, no `working_dir` (omitted from registry, not empty string), and no `git_remote`. `init_project_vault` gains parameters `write_marker: bool = True` and `working_dir: Path | None = None` (made optional). When `working_dir` is None: marker file is skipped, git remote detection is skipped, and `register_project_vault` omits `working_dir` from the entry (or stores `None`). The slug `_general` is reserved -- `init_project_vault` rejects it when called by users directly.
+- R2. When `resolve_project_vault` returns None, the CLI commands `create` and `capture` auto-fallback to `_general` (resolved as `global_vault / "projects" / "_general"`), but only for project-scoped record types. Global-scoped types (reflection, dream, skill, playbook, identity) still route to the global vault as before — they never touch `_general`. The `_resolve_project_vault` helper in cli.py is updated to return `_general` instead of calling `sys.exit(1)`. Other commands (`status`, `boot`, `validate`, `list`) do not fallback — they report which vault resolved (or None) and behave accordingly.
 - R3. `_general` behaves like any other project vault -- same directory structure, same record types, same promotion paths. The only difference is: no marker file, no working_dir in registry.
-- R4. `status` and `boot` show which vault was resolved (including when it fell back to `_general`), so the agent knows where records are landing.
+- R4. `status` and `boot` show which vault was resolved. Note: these commands do not fall back to `_general` — they display the resolved project vault (which may be None). If a prior `create`/`capture` wrote to `_general`, boot will load `_general` as the project context only if it resolves via the normal three-tier lookup (which it won't, since `_general` has no marker or working_dir). Boot's cross-project awareness comes from the global daily log (R9), not from loading `_general`.
 
 **Global Daily Log**
 
@@ -26,12 +26,12 @@ Additionally, there is no cross-project view of what happened on a given day. Bo
 - R6. A daily log file is created (or appended to) at `~/.memory/<agent>/sessions/YYYY-MM-DD.md` whenever a CLI command creates a user-initiated record (`create`, `capture`). The daily log is not written by `promote`, `supersede_record`, or other internal record-creation paths.
 - R7. Each entry in the daily log is a single line: `- [[RECORD-ID]] <short> (<project-slug-or-global>)`. The project slug is derived from the vault path (`vault.name` for project vaults under `global_vault/projects/<slug>/`, or `"global"` for global-scoped records where the vault IS the global vault).
 - R8. The daily log file uses type `daily-log` (not `session`) to avoid collisions with project session records. Frontmatter is write-once on creation: `id` (format: `DL-YYYYMMDD`), `title` (the date), `type: daily-log`, `status: active`, `trust: canonical`, `scope: global`, `created`, `updated` (both set once to the same date, `updated` never bumped -- present only to satisfy `REQUIRED_FIELDS` validation). Body is pure append, frontmatter is never rewritten. The `DL-YYYYMMDD` ID format is generated directly by `append_daily_log`, not via `generate_id()`, since daily log files are one-per-day and not created through `create_record`.
-- R9. Boot reads the most recent global daily log file(s) from the global vault's `sessions/` directory. Budget: share layer 5's existing 12.5% allocation -- read one daily log file (today's or most recent) alongside the project session, truncating within the shared budget.
+- R9. Boot reads the **tail** of the most recent global daily log file from the global vault's `sessions/` directory (not the whole file — read the last N lines to avoid loading a full busy-day log). Budget: share layer 5's existing 12.5% allocation alongside the project session, truncating within the shared budget.
 - R10. `("daily-log", "global")` is added to `_PATH_MAP` pointing to `sessions/`. `daily-log` is added to `_ID_PREFIXES` as `DL` and to `TYPE_EXTRA_FIELDS` (empty set). `daily-log` and `daily-logs` are added to the `type_aliases` dict in `cmd_list` so that `codies-memory list daily-log --scope global` works.
 
 **--short Flag**
 
-- R11. `create` gets an optional `--short` argument: a one-line summary (max ~120 chars) used in the daily log entry.
+- R11. `create` gets an optional `--short` argument: a one-line summary used in the daily log entry. Sanitization: single-line only, strip leading/trailing whitespace, collapse internal newlines to spaces, hard-cap at 120 characters before writing to the daily log. Truncation uses the sanitized value.
 - R12. `capture` gets an optional `--short` argument with the same purpose.
 - R13. The CLI passes `--short` (or the title as fallback when `--short` is omitted) directly to `append_daily_log` -- no read-back from record frontmatter. For `capture`, the fallback is the auto-generated title (`content[:80]`), which may be noisy; agents should prefer providing `--short` for captures.
 - R14. The `short` value is stored in the record's frontmatter so it is available for search and display. `short` is added to the universal known-fields set in `validate_frontmatter` (alongside `probation_until`, `promoted_from`, etc.) rather than per-type in `TYPE_EXTRA_FIELDS`. This avoids unknown-field warnings for all record types including `daily-log`.
@@ -77,7 +77,7 @@ Additionally, there is no cross-project view of what happened on a given day. Bo
 - **CLI-layer integration point**: Daily log appending lives in the CLI command handlers, not in `create_record()`. This keeps `create_record` pure (no global vault dependency) and naturally excludes promote/supersede from daily logging. The integration point is `append_daily_log()` called by `cmd_create` and `cmd_capture`.
 - **`daily-log` as distinct type**: Daily log files use `type: daily-log`, not `type: session`. This avoids collision with project session records and makes the type system honest about the structural difference.
 - **`short` as frontmatter field**: Stored on the record for searchability. Primarily used by the daily log, but available for QMD and other contexts.
-- **Write-once frontmatter**: Daily log frontmatter is set once on creation (no `updated` field). Body-only appending means no read-modify-write, no race conditions on frontmatter.
+- **Write-once frontmatter**: Daily log frontmatter is set once on creation (`updated` included but set to same value as `created`, never bumped). Body-only appending means no read-modify-write, no race conditions on frontmatter.
 - **Lazy `sessions/` directory**: Created on first daily log write, not during `init_global_vault`. Avoids breaking `validate_vault` on existing vaults.
 
 ## Dependencies / Assumptions
@@ -86,7 +86,7 @@ Additionally, there is no cross-project view of what happened on a given day. Bo
 - `sessions/` directory is created lazily, so existing global vaults need no migration.
 - `_general` slug is reserved. `init_project_vault` should reject user attempts to create a project with this slug.
 - QMD collection for `claudes-codies-memory` will automatically pick up the new `sessions/` directory on next reindex.
-- Thread safety: daily log entries are single lines (~100-200 bytes). On Linux, writes under `PIPE_BUF` (4096 bytes) to a file opened with `O_APPEND` are atomic. Acceptable risk for a file-based system.
+- Thread safety: daily log entries are single lines (~100-200 bytes). Implementation must use `open(path, 'a')` (append mode) to get `O_APPEND` semantics. On Linux, writes under `PIPE_BUF` (4096 bytes) to a file opened with `O_APPEND` are atomic at the syscall level. Use a single `file.write()` call per entry to keep the write in one syscall. Acceptable risk for a file-based system.
 
 ## Outstanding Questions
 
