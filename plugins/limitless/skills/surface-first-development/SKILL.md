@@ -34,14 +34,28 @@ Do NOT start with database schemas, backend architecture, API design, or infrast
 - Treat the user as the evaluator and steering function; your job is to generate proposals they can react to.
 - Keep internals provisional until the surface is accepted.
 
+## The Propose-Choose-Proceed Rule
+
+This is the governing interaction pattern for the entire SFD process. Every decision point — from research directions to surface proposals to contract shapes to slice ordering — follows this loop:
+
+1. **Propose** 2-3 concrete directional options. Not vague buckets — each option should be specific enough that the user can picture what choosing it means.
+2. **User chooses** one (or more), or discards all with feedback. If discarded, generate a new batch informed by the feedback. Repeat until the user approves a direction.
+3. **Proceed** only after explicit user approval.
+
+This prevents the failure mode where you barrel ahead on assumptions and the user has to interrupt to course-correct. It also prevents the opposite failure mode where you ask open-ended questions and the user has to do the design work. The sweet spot: you do the thinking, the user does the steering.
+
+The pattern applies everywhere — Phase 2 research directions, Phase 3 prototype concepts, Phase 4 iteration proposals, Phase 5 contract alternatives, Phase 6 slice ordering, Phase 7 hardening priorities. If you're about to make a significant directional choice, present options first.
+
 ## First Move
 
 When this skill is triggered:
 
 1. Identify the primary interaction surface.
-2. Build the smallest believable prototype that covers the critical path.
-3. Put it in front of the user quickly.
-4. Ask for critique of behavior and flow, not implementation.
+2. Explore the problem space (research or generate concept directions).
+3. Get user approval on a direction before building anything.
+4. Build the smallest believable prototype that covers the critical path.
+5. Put it in front of the user quickly.
+6. Ask for critique of behavior and flow, not implementation.
 
 Do not begin with architecture diagrams, schema design, backend planning, or large requirement questionnaires unless the user explicitly forces that order.
 
@@ -77,7 +91,67 @@ Determine what type of interaction surface the project has. Ask the user ONLY if
 | A data pipeline | Operator workflow | Simulated deploy/monitor/debug session |
 | An automation/agent | Trigger-to-outcome flow | Scenario walkthrough |
 
-### Phase 2: Generate Surface Proposal
+### Phase 2: Explore the Problem Space
+
+Before building anything, understand the landscape. The goal is to arrive at an informed concept direction that both you and the user believe in — not to produce a research paper, but to avoid building a prototype grounded in ignorance.
+
+**The "Already Exists" Check — do this throughout Phase 2, not as a separate step:**
+
+Your job during discovery is to map what exists so the user can make informed decisions about where to spend their building energy. Two things to watch for:
+
+- **If the user's idea already exists** (or something very close), say so immediately. Don't wait for the user to ask "isn't this already a thing?" — surfacing that is YOUR job. Name the existing tool, explain what it does, and then focus on the interesting part: what does the user's vision do that the existing tool doesn't? Those differences are where the real project lives. The user may know the tool exists and want to build anyway (for control, philosophy, learning, or because the existing tool is bad) — that's their call. Your job is to make sure they have the information, not to talk them out of building.
+- **If parts of the idea are solved by existing libraries, frameworks, or protocols**, surface them as building blocks. The user's building energy should go toward the unique value, not toward re-solving solved problems. "We should use X for rendering and build the feedback layer on top" is almost always a better direction than "let's build a renderer from scratch." Frame concept directions around what to USE (commodity) and what to BUILD (the differentiator).
+
+This isn't a one-time gate — it applies at every decision point throughout the process. If mid-conversation you realize a library handles something you were about to propose building, say so. The user should never have to be the one pointing out "doesn't X already do this?"
+
+**Step 1: Propose research directions**
+
+Present 2-3 research directions as concrete options. Each direction should focus on a different angle of the problem space — e.g., existing tools and their gaps, technical approaches, target user segments, or prior art in adjacent domains. Format as a numbered list the user can pick from:
+
+> Here are a few angles I can research before we prototype:
+> 1. **[Direction A]** — [what you'd look into and why it matters]
+> 2. **[Direction B]** — [what you'd look into and why it matters]
+> 3. **[Direction C]** — [what you'd look into and why it matters]
+>
+> Pick one or more, or tell me to skip research / try different directions.
+
+If the user discards all directions, ask what's off and generate a new batch. If the user says "skip research" or the topic clearly doesn't need it (they already know the space, or it's a personal tool with no competitive landscape), move to Step 3 directly.
+
+**Step 2: Research and present findings**
+
+Use available research skills (web search, documentation lookup, etc.) to investigate the chosen direction(s). Keep research focused — you're building context for a prototype, not writing a thesis.
+
+Present findings as a concise summary, structured as:
+1. **What already exists** — name specific tools, libraries, and projects. If something IS the user's idea (or 80%+ of it), flag it prominently: "This already exists — it's called X. Here's what it does and where it differs from your vision."
+2. **What's commodity** — libraries, frameworks, and protocols that solve parts of the problem. Recommend using them: "We should use X for this part rather than building our own."
+3. **What's the actual gap** — the part that doesn't exist yet. This is where the user's project has value.
+
+This structure prevents the failure mode where you present a landscape survey and then propose building something the survey just showed already exists. The gap analysis IS the research output — everything else is context.
+
+**Step 3: Propose concept directions**
+
+Based on research (or your own knowledge if research was skipped), propose 2-3 concept directions for the prototype. Each should be a distinct take on how to solve the user's problem — different enough that choosing one meaningfully shapes what the prototype looks like.
+
+Each direction should clearly state what you'd **use** (existing tools/libraries) vs what you'd **build** (the unique value). If a direction is mostly "use existing tool X," that's a valid direction — and often the best one.
+
+> Based on what I found, here are three directions we could take:
+> 1. **[Concept A]** — [what the tool would feel like, key differentiator]. Uses: [existing tools]. Builds: [new parts].
+> 2. **[Concept B]** — [what the tool would feel like, key differentiator]. Uses: [existing tools]. Builds: [new parts].
+> 3. **[Concept C]** — [what the tool would feel like, key differentiator]. Uses: [existing tools]. Builds: [new parts].
+>
+> Which resonates? Or should I think in a different direction?
+
+If the user discards all concepts, ask what's missing and generate a new batch. If the user wants more research first, loop back to Step 1.
+
+**Step 4: Lock direction**
+
+Once the user picks a concept direction, confirm it explicitly:
+
+> "Locked in: [chosen direction]. Building the first prototype around this."
+
+Only now proceed to Phase 3.
+
+### Phase 3: Generate Surface Proposal
 
 Build a working prototype of the surface immediately. Rules:
 
@@ -92,7 +166,7 @@ After generating, tell the user:
 
 **Good enough for round one:** believable, navigable, and critiqueable. Not production-ready, not deeply wired, not exhaustive.
 
-### Phase 3: Iterate to Convergence
+### Phase 4: Iterate to Convergence
 
 The user will critique the prototype. Your job:
 
@@ -109,7 +183,7 @@ When the user says something like "this feels right," "let's build it," "I'm hap
 
 > "Surface converged. Moving to contract derivation."
 
-### Phase 4: Derive Contracts
+### Phase 5: Derive Contracts
 
 Before writing any backend/internal code, extract what the converged surface demands:
 
@@ -122,7 +196,7 @@ Present these to the user for confirmation:
 
 > "Based on the converged surface, here are the contracts the backend needs to fulfill: [list]. Does this capture everything? Anything I'm missing?"
 
-### Phase 5: Build Inward (Vertical Slices)
+### Phase 6: Build Inward (Vertical Slices)
 
 Now build the internals. Rules:
 
@@ -133,7 +207,7 @@ Now build the internals. Rules:
 
 When in doubt about slice order, implement the slice that makes the most important user-visible flow real first.
 
-### Phase 6: Progressive Hardening
+### Phase 7: Progressive Hardening
 
 Replace simulated components with real implementations in this general order:
 
@@ -224,7 +298,7 @@ Use these gates to track progress. Don't skip gates.
 3. **Don't build backend before the surface is converged.** You will build the wrong backend.
 4. **Don't throw away the prototype.** Harden it. If a full rewrite is truly needed, the converged surface is still the behavioral reference.
 5. **Don't gold-plate the prototype.** Fast and opinionated beats slow and polished. The user will fix what's wrong.
-6. **Don't ask too many questions before starting.** Make assumptions, build, show. The user corrects faster than they specify.
+6. **Don't ask open-ended questions.** Present options, don't ask the user to design. "Which of these three directions?" is good. "What do you want it to look like?" is bad. The user steers; you generate.
 
 ---
 
@@ -253,7 +327,7 @@ After Gate 2 (contracts frozen), create Beads tasks for each vertical slice and 
 
 ### Workflow
 ```
-SFD Phase 1-3 (discover + converge)
+SFD Phase 1-4 (discover + research + prototype + converge)
     |
     v
 Gate 1 --> OpenSpec: capture converged surface + contracts
@@ -262,7 +336,7 @@ Gate 1 --> OpenSpec: capture converged surface + contracts
 Gate 2 --> Beads: create tasks for slices + hardening
     |
     v
-SFD Phase 5-6 (build + harden, tracked in Beads)
+SFD Phase 6-7 (build + harden, tracked in Beads)
     |
     v
 Gates 3-5 (review, verify, release)
@@ -284,10 +358,12 @@ When resuming work on an SFD project:
 Use this mental loop throughout the session:
 
 1. What is the surface?
-2. What is the smallest artifact that makes it real enough to critique?
-3. What did the user react to?
-4. What contract does that reaction imply?
-5. What is the next thin slice inward?
+2. Do I understand the problem space well enough to prototype? (If not → Phase 2)
+3. Am I about to make a directional choice? (If yes → Propose-Choose-Proceed)
+4. What is the smallest artifact that makes it real enough to critique?
+5. What did the user react to?
+6. What contract does that reaction imply?
+7. What is the next thin slice inward?
 
 ## End of Session Protocol
 

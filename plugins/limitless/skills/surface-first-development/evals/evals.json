@@ -1,0 +1,44 @@
+{
+  "skill_name": "surface-first-development",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "We talked once about how there's no offline local alternative to google stitch and similar tools and joked we can easily do it. well let's see how it pans out :D",
+      "expected_output": "Should identify GUI surface, then explore the problem space (propose research directions OR concept directions), present 2-3 options, and wait for user approval before building any prototype.",
+      "files": [],
+      "assertions": [
+        {"id": "presented-options", "text": "Response presents 2-3 numbered directional options for the user to choose from"},
+        {"id": "asked-for-approval", "text": "Response explicitly asks the user to choose or approve a direction before proceeding"},
+        {"id": "no-immediate-prototype", "text": "Response does NOT contain actual prototype code — stops at options stage"},
+        {"id": "surface-identified", "text": "Response correctly identifies GUI/web app surface"},
+        {"id": "problem-space-explored", "text": "Response mentions existing tools or proposes research into the landscape"}
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "I want a CLI tool that converts markdown files into beautiful slide decks, like a local alternative to slides.com but from the terminal. prototype this for me",
+      "expected_output": "Should identify CLI surface, then explore the problem space, present 2-3 options, and wait for user approval before building.",
+      "files": [],
+      "assertions": [
+        {"id": "presented-options", "text": "Response presents 2-3 numbered directional options for the user to choose from"},
+        {"id": "asked-for-approval", "text": "Response explicitly asks the user to choose or approve a direction before proceeding"},
+        {"id": "no-immediate-prototype", "text": "Response does NOT contain actual prototype code — stops at options stage"},
+        {"id": "surface-identified", "text": "Response correctly identifies CLI/terminal surface"},
+        {"id": "problem-space-explored", "text": "Response mentions existing tools (Marp, Slidev, reveal.js) or proposes research"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have an idea for a personal finance API — something I can self-host that aggregates my bank data and gives me spending insights. let's build it",
+      "expected_output": "Should identify API surface, then explore the problem space, present 2-3 options, and wait for user approval before building.",
+      "files": [],
+      "assertions": [
+        {"id": "presented-options", "text": "Response presents 2-3 numbered directional options for the user to choose from"},
+        {"id": "asked-for-approval", "text": "Response explicitly asks the user to choose or approve a direction before proceeding"},
+        {"id": "no-immediate-prototype", "text": "Response does NOT contain actual prototype code — stops at options stage"},
+        {"id": "surface-identified", "text": "Response correctly identifies API/developer-experience surface"},
+        {"id": "problem-space-explored", "text": "Response mentions existing tools (Firefly III, Plaid, etc.) or proposes research"}
+      ]
+    }
+  ]
+}

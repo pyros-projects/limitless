@@ -1,6 +1,6 @@
 {
   "name": "limitless",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Pyro's curated Claude Code skill pack: article-pack, Codies Research, Surface-First Development, and SearXNG. A small set of high-leverage skills for research, prototyping, publishing, and web search.",
   "author": {
     "name": "Pyro"
