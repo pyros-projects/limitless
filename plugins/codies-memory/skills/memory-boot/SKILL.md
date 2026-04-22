@@ -39,6 +39,12 @@ Read `INSTALL.md` in this project for full instructions. Short version:
 - `cd ~/.local/share/codies-memory && uv sync`
 - `uv run codies-memory init --type global --agent <name>`
 
+After the base install is working, recommend QMD as the preferred retrieval companion.
+Be explicit:
+- `codies-memory` works without QMD
+- QMD is still recommended because recall is faster, more token-efficient, and semantic
+- if the user wants the better recall path, offer to help install QMD
+
 ### After Setup: Write Your Identity (Required)
 
 The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content. **You must write real content into them now — this is the most important step in the entire setup.**

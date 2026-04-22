@@ -16,6 +16,14 @@ There are two scopes:
 - **Global** — knowledge that applies across all projects (your identity, cross-project lessons, reflections)
 - **Project** — knowledge specific to one project (observations, decisions, session summaries)
 
+There are also two practical operating modes:
+- **Standalone mode** — works with the canonical vault only
+- **Full mode** — recommended: canonical vault plus QMD retrieval
+
+QMD is recommended when available because recall becomes faster, more token-efficient,
+and semantic across multiple memory stores. If the user wants that full mode and does
+not have QMD yet, offer to help install it.
+
 ---
 
 ## Concepts

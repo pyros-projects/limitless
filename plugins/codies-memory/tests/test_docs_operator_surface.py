@@ -15,6 +15,9 @@ def test_install_mentions_update_path_for_existing_clone() -> None:
     assert "qmd" in install.lower()
     assert "qmd status" in install.lower()
     assert "timestamps" in install.lower() or "last updated" in install.lower()
+    assert "recommended" in install.lower()
+    assert "token-efficient" in install.lower() or "token efficient" in install.lower()
+    assert "offer to help install qmd" in install.lower() or "help install qmd" in install.lower()
 
 
 def test_close_session_skill_uses_v2_resolution_examples() -> None:
@@ -36,3 +39,5 @@ def test_boot_and_help_skills_explain_qmd_recall_workflow() -> None:
     assert "not found in the current index" in help_skill.lower()
     assert "hyphenated" in help_skill.lower()
     assert "ace step" in help_skill.lower() or "codies memory" in help_skill.lower()
+    assert "works without qmd" in boot_skill.lower()
+    assert "offer to help install qmd" in boot_skill.lower() or "help install qmd" in help_skill.lower()

@@ -12,6 +12,16 @@ This guide is for agents that cannot use Claude Code plugins (e.g. Codie/Codex, 
 The plugin owns structured writes, promotion, trust, and boot behavior. QMD is the
 recommended read path when available, but it is not packaged inside this plugin.
 
+Standalone mode is fully usable. Full mode is recommended because QMD makes recall:
+
+- faster
+- more token-efficient
+- semantic as well as keyword-based
+- better across multiple memory stores
+
+If the user wants the better recall path, recommend installing QMD and offer to
+help install QMD instead of making them discover it later.
+
 ## Step 0: Check If Already Installed
 
 ```bash
