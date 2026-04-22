@@ -25,6 +25,7 @@ class TestBuildGlobalSummary:
         summary = build_global_summary(tmp_global_vault)
 
         assert "# Global Summary" in summary
+        assert "Generated:" in summary
         assert "Codie remembers durable patterns." in summary
         assert "Check retrieval freshness" in summary
 
@@ -41,14 +42,16 @@ class TestBuildProjectSummary:
         summary = build_project_summary(tmp_project_vault)
 
         assert "# Project Summary" in summary
+        assert "Generated:" in summary
         assert "This project owns warm summaries." in summary
         assert "Use markdown summaries" in summary
+        assert "[2026-04-22]" in summary
         assert "Global Summary" not in summary
 
 
 class TestBuildRecentEpisodes:
-    def test_is_bounded_to_latest_three_sessions(self, tmp_project_vault: Path) -> None:
-        for idx in range(5):
+    def test_is_bounded_to_latest_five_sessions(self, tmp_project_vault: Path) -> None:
+        for idx in range(7):
             session = tmp_project_vault / "sessions" / f"SS-2026042{idx}-session-{idx}.md"
             session.write_text(
                 f"---\nid: SS-2026042{idx}\ntitle: Session {idx}\ntype: session\nstatus: active\ntrust: working\nscope: project\ncreated: '2026-04-2{idx}'\nupdated: '2026-04-2{idx}'\nnext_step: Next {idx}\n---\n\nEpisode {idx} body.\n"
@@ -56,11 +59,28 @@ class TestBuildRecentEpisodes:
 
         summary = build_recent_episodes(tmp_project_vault)
 
+        assert "Generated:" in summary
+        assert "max 400 chars" in summary
+        assert "Session 6" in summary
+        assert "Session 5" in summary
         assert "Session 4" in summary
         assert "Session 3" in summary
         assert "Session 2" in summary
-        assert "Session 1" not in summary
         assert "Session 0" not in summary
+        assert "Session 1" not in summary
+
+    def test_recent_episode_excerpt_is_truncated(self, tmp_project_vault: Path) -> None:
+        session = tmp_project_vault / "sessions" / "SS-20260424-long.md"
+        session.write_text(
+            "---\nid: SS-20260424\ntitle: Long Session\ntype: session\nstatus: active\ntrust: working\nscope: project\ncreated: '2026-04-24'\nupdated: '2026-04-24'\nnext_step: Keep going\n---\n\n"
+            + ("word " * 200)
+            + "\n"
+        )
+
+        summary = build_recent_episodes(tmp_project_vault)
+
+        assert "Long Session" in summary
+        assert "..." in summary
 
 
 class TestWriteWarmArtifacts:

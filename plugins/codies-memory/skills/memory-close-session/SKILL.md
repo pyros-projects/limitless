@@ -19,6 +19,7 @@ At the end of every work session.
 3. Enforce 14-day inbox aging rule (promote, compact, or discard stale items)
 4. Update project active context
 5. Evaluate pending promotions
+6. Rebuild warm summaries so the next boot sees updated project summaries and recent episodes
 
 ## How To Run
 
@@ -61,6 +62,9 @@ for rtype in ['inbox', 'thread']:
         if result['eligible']:
             print(f'  Promote {rtype}: {item[\"frontmatter\"][\"title\"][:60]}')
 "
+
+# 4. Refresh warm summaries
+codies-memory refresh --agent "$AGENT"
 ```
 
 ## Session Summary Fields
@@ -70,3 +74,15 @@ Every session record should include:
 - `next_step` — what the next session should pick up
 - `artifacts` — files created or modified
 - `write_gate_summary` — what was allowed, held, discarded
+
+## Recent Episode Constraint
+
+The warm `recent-episodes.md` artifact is intentionally brief.
+
+- it only keeps the latest 5 sessions
+- each entry stores the session date, title, a short excerpt, and the `next_step`
+- the excerpt is capped at a short single-paragraph summary (currently max 400 chars)
+
+So the session summary should still be rich and useful on disk, but do not expect the
+warm recent-episode view to preserve a long narrative. It is a routing aid for boot,
+not a second full session log.

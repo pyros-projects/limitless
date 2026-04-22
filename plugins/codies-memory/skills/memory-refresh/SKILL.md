@@ -33,6 +33,12 @@ codies-memory refresh --agent <name> --scope project
 - `projects/<slug>/boot/project-summary.md`
 - `projects/<slug>/boot/recent-episodes.md`
 
+Format notes:
+- summaries include generation dates
+- project summary lines include record dates where available
+- recent episodes include the session date, title, a short excerpt, and `next_step`
+- recent episode excerpts are intentionally capped at 400 chars and only the latest 5 sessions are kept
+
 ## Usage Notes
 
 - Prefer `--scope both` or the default after meaningful project work.

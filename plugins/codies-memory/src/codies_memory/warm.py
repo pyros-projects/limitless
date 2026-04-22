@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from codies_memory.records import list_records, parse_record
+
+MAX_RECENT_EPISODE_CHARS = 400
+MAX_RECENT_EPISODES = 5
 
 
 def _first_content_line(text: str) -> str:
@@ -40,7 +44,9 @@ def _summarize_identity_file(path: Path) -> str | None:
 def _summarize_record_line(record: dict, extra_key: str | None = None) -> str:
     fm = record["frontmatter"]
     title = fm.get("title", "(no title)")
-    line = f"- `{fm.get('id', '')}` {title}"
+    created = fm.get("created") or fm.get("updated")
+    prefix = f"[{created}] " if created else ""
+    line = f"- {prefix}`{fm.get('id', '')}` {title}"
     if extra_key and fm.get(extra_key):
         line += f" — {fm[extra_key]}"
     return line
@@ -48,7 +54,8 @@ def _summarize_record_line(record: dict, extra_key: str | None = None) -> str:
 
 def build_global_summary(global_vault: Path) -> str:
     """Build a concise global summary from canonical files."""
-    lines: list[str] = ["# Global Summary", ""]
+    today = date.today().isoformat()
+    lines: list[str] = ["# Global Summary", f"Generated: {today}", ""]
 
     identity_lines = [
         _summarize_identity_file(global_vault / "identity" / "self.md"),
@@ -79,7 +86,8 @@ def build_global_summary(global_vault: Path) -> str:
 
 def build_project_summary(project_vault: Path) -> str:
     """Build a concise project summary from canonical project files."""
-    lines: list[str] = ["# Project Summary", ""]
+    today = date.today().isoformat()
+    lines: list[str] = ["# Project Summary", f"Generated: {today}", ""]
 
     project_dir = project_vault / "project"
     overview_files = sorted(project_dir.glob("*.md")) if project_dir.is_dir() else []
@@ -89,7 +97,14 @@ def build_project_summary(project_vault: Path) -> str:
             continue
         excerpt = _truncate_line(_first_content_line(overview_file.read_text(encoding="utf-8")))
         if excerpt:
-            overview_lines.append(f"- `{overview_file.stem}`: {excerpt}")
+            try:
+                record = parse_record(overview_file)
+                fm = record["frontmatter"]
+                stamp = fm.get("updated") or fm.get("created")
+            except Exception:
+                stamp = None
+            prefix = f"[{stamp}] " if stamp else ""
+            overview_lines.append(f"- {prefix}`{overview_file.stem}`: {excerpt}")
     if overview_lines:
         lines.extend(["## Project Context", *overview_lines, ""])
 
@@ -119,10 +134,16 @@ def build_project_summary(project_vault: Path) -> str:
 
 def build_recent_episodes(project_vault: Path) -> str:
     """Build a bounded recent-episodes summary from latest sessions."""
-    lines: list[str] = ["# Recent Episodes", ""]
+    today = date.today().isoformat()
+    lines: list[str] = [
+        "# Recent Episodes",
+        f"Generated: {today}",
+        f"Entry format: date + title + short excerpt (max {MAX_RECENT_EPISODE_CHARS} chars) + next step.",
+        "",
+    ]
 
     sessions_dir = project_vault / "sessions"
-    session_files = sorted(sessions_dir.rglob("*.md"))[-3:] if sessions_dir.is_dir() else []
+    session_files = sorted(sessions_dir.rglob("*.md"))[-MAX_RECENT_EPISODES:] if sessions_dir.is_dir() else []
     if not session_files:
         return "\n".join(lines).rstrip() + "\n"
 
@@ -130,9 +151,10 @@ def build_recent_episodes(project_vault: Path) -> str:
         record = parse_record(session_file)
         fm = record["frontmatter"]
         title = fm.get("title", session_file.stem)
+        created = fm.get("created") or fm.get("updated") or "unknown-date"
         next_step = fm.get("next_step")
-        excerpt = _truncate_line(_first_content_line(record["body"]))
-        lines.append(f"## {title}")
+        excerpt = _truncate_line(_first_content_line(record["body"]), limit=MAX_RECENT_EPISODE_CHARS)
+        lines.append(f"## {created} — {title}")
         if excerpt:
             lines.append(excerpt)
         if next_step:
