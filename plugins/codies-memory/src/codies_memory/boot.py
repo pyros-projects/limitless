@@ -86,6 +86,13 @@ def _read_layer_files(vault: Path, subdirs: list[str]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+def _read_if_exists(path: Path) -> str:
+    """Read a file if it exists, else return an empty string."""
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8").strip()
+
+
 # ---------------------------------------------------------------------------
 # Assemble boot packet
 # ---------------------------------------------------------------------------
@@ -111,8 +118,10 @@ def assemble_boot(
     layer1_raw = _read_layer_files(global_vault, ["identity"])
     layer1 = truncate_to_budget(layer1_raw, budgets["global_identity"])
 
-    # Layer 2: global procedural (lessons + skills)
-    layer2_raw = _read_layer_files(global_vault, ["procedural/lessons", "procedural/skills"])
+    # Layer 2: global warm summary when available, otherwise procedural raws
+    layer2_raw = _read_if_exists(global_vault / "boot" / "global-summary.md")
+    if not layer2_raw:
+        layer2_raw = _read_layer_files(global_vault, ["procedural/lessons", "procedural/skills"])
     layer2 = truncate_to_budget(layer2_raw, budgets["global_procedural"])
 
     separator = "\n\n---\n\n"
@@ -125,32 +134,36 @@ def assemble_boot(
             "project_packet": "",
         }
 
-    # Layer 3: project context (project/ files)
-    layer3_raw = _read_layer_files(project_vault, ["project"])
+    # Layer 3: project summary when available, otherwise raw project files
+    layer3_raw = _read_if_exists(project_vault / "boot" / "project-summary.md")
+    if not layer3_raw:
+        layer3_raw = _read_layer_files(project_vault, ["project"])
     layer3 = truncate_to_budget(layer3_raw, budgets["project_context"])
 
     # Layer 4: project working memory (threads + decisions)
     layer4_raw = _read_layer_files(project_vault, ["threads", "decisions"])
     layer4 = truncate_to_budget(layer4_raw, budgets["project_working"])
 
-    # Layer 5: branch overlay + most recent session
-    branch_overlay_dir = project_vault / "project" / "branch-overlays"
-    overlay_parts: list[str] = []
-    if branch_overlay_dir.is_dir():
-        for md_file in sorted(branch_overlay_dir.glob(f"{branch}*.md")):
-            text = md_file.read_text(encoding="utf-8").strip()
-            if text:
-                overlay_parts.append(text)
+    # Layer 5: recent episodes summary when available, otherwise branch overlay + latest session
+    layer5_raw = _read_if_exists(project_vault / "boot" / "recent-episodes.md")
+    if not layer5_raw:
+        branch_overlay_dir = project_vault / "project" / "branch-overlays"
+        overlay_parts: list[str] = []
+        if branch_overlay_dir.is_dir():
+            for md_file in sorted(branch_overlay_dir.glob(f"{branch}*.md")):
+                text = md_file.read_text(encoding="utf-8").strip()
+                if text:
+                    overlay_parts.append(text)
 
-    sessions_dir = project_vault / "sessions"
-    if sessions_dir.is_dir():
-        session_files = sorted(sessions_dir.rglob("*.md"))
-        if session_files:
-            latest_session = session_files[-1].read_text(encoding="utf-8").strip()
-            if latest_session:
-                overlay_parts.append(latest_session)
+        sessions_dir = project_vault / "sessions"
+        if sessions_dir.is_dir():
+            session_files = sorted(sessions_dir.rglob("*.md"))
+            if session_files:
+                latest_session = session_files[-1].read_text(encoding="utf-8").strip()
+                if latest_session:
+                    overlay_parts.append(latest_session)
 
-    layer5_raw = "\n\n---\n\n".join(overlay_parts)
+        layer5_raw = "\n\n---\n\n".join(overlay_parts)
     layer5 = truncate_to_budget(layer5_raw, budgets["branch_session"])
 
     project_layers = [l for l in [layer3, layer4, layer5] if l]

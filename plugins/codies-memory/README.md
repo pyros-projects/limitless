@@ -31,6 +31,28 @@ The design assumes:
 - most captured information should remain provisional until promoted
 - boot context should be assembled intentionally, not by dumping recent logs
 
+## Operating Modes
+
+`codies-memory` supports two honest operating modes:
+
+- **Standalone mode** — canonical markdown vault only
+- **Full mode** — canonical markdown vault plus QMD retrieval across memory layers
+
+The plugin owns structured memory writes, promotion, trust, and boot assembly.
+QMD owns the broader retrieval plane when it is available.
+
+## How Recall Works
+
+Use the layers intentionally:
+
+1. `codies-memory boot` for scoped startup context
+2. `qmd query` for cross-store recall
+3. canonical vault files for deep truth and exact inspection
+
+When QMD is available, check `qmd status` before trusting a miss. A result can be
+missing from the current index even when the file exists on disk, especially if the
+collection timestamps or last updated times lag behind recent writes.
+
 ## Design Goals
 
 1. Preserve continuity across sessions without bloating context.

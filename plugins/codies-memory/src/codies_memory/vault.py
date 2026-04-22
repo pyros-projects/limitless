@@ -345,6 +345,21 @@ def resolve_path(vault_root: Path, record_type: str, scope: str) -> Path:
     return vault_root / _PATH_MAP[key]
 
 
+def global_summary_path(global_vault: Path) -> Path:
+    """Return the canonical path for the derived global summary."""
+    return global_vault / "boot" / "global-summary.md"
+
+
+def project_summary_path(project_vault: Path) -> Path:
+    """Return the canonical path for the derived project summary."""
+    return project_vault / "boot" / "project-summary.md"
+
+
+def recent_episodes_path(project_vault: Path) -> Path:
+    """Return the canonical path for the derived recent-episodes summary."""
+    return project_vault / "boot" / "recent-episodes.md"
+
+
 def find_vaults(global_vault: Path, include_archived: bool = False) -> list[dict]:
     """Return project entries from the global registry.
 

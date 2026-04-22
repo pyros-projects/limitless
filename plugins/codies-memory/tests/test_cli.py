@@ -12,7 +12,7 @@ import json
 
 from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
-    cmd_promote, cmd_validate, _resolve_agent,
+    cmd_promote, cmd_refresh, cmd_validate, _resolve_agent,
 )
 from codies_memory.vault import GLOBAL_DIRS, PROJECT_DIRS
 
@@ -401,6 +401,33 @@ class TestCmdCreate:
         assert len(files) == 1
         assert "Body from file." in files[0].read_text()
 
+    def test_cmd_create_normalizes_literal_newlines_in_body(self, tmp_path, monkeypatch, capsys):
+        project_vault = _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+
+        ns = argparse.Namespace(
+            agent="claude",
+            type="session",
+            title="Multiline summary",
+            body="Line one\\nLine two",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            working_dir=None,
+        )
+        cmd_create(ns)
+
+        out = capsys.readouterr().out.strip()
+        assert out.startswith("SS-")
+
+        sessions_dir = project_vault / "sessions"
+        files = list(sessions_dir.glob("*.md"))
+        assert len(files) == 1
+        content = files[0].read_text()
+        assert "Line one\nLine two" in content
+        assert "Line one\\nLine two" not in content
+
     def test_cmd_create_with_extra_fields(self, tmp_path, monkeypatch, capsys):
         _setup_project(tmp_path, monkeypatch)
         capsys.readouterr()
@@ -449,6 +476,49 @@ class TestCmdCreate:
         assert len(files) == 1
         content = files[0].read_text()
         assert "On persistence" in content
+
+
+# ---------------------------------------------------------------------------
+# cmd_refresh
+# ---------------------------------------------------------------------------
+
+class TestCmdRefresh:
+
+    def test_refresh_writes_global_and_project_summaries(self, tmp_path, monkeypatch, capsys):
+        project_vault = _setup_project(tmp_path, monkeypatch)
+        global_vault = tmp_path / "home" / ".memory" / "claude"
+        capsys.readouterr()
+
+        (global_vault / "identity" / "self.md").write_text(
+            "---\ntitle: self\ntype: identity\n---\nCodie keeps durable operational memory."
+        )
+        (project_vault / "project" / "overview.md").write_text(
+            "---\ntitle: overview\ntype: project\nstatus: active\ntrust: working\nscope: project\ncreated: '2026-04-22'\nupdated: '2026-04-22'\n---\nThis repo is testing warm summaries."
+        )
+
+        ns = argparse.Namespace(agent="claude", scope="both", working_dir=None)
+        cmd_refresh(ns)
+
+        out = capsys.readouterr().out
+        assert "global_summary:" in out
+        assert "project_summary:" in out
+        assert "recent_episodes:" in out
+        assert (global_vault / "boot" / "global-summary.md").is_file()
+        assert (project_vault / "boot" / "project-summary.md").is_file()
+        assert (project_vault / "boot" / "recent-episodes.md").is_file()
+
+    def test_refresh_global_scope_only_writes_global_summary(self, tmp_path, monkeypatch, capsys):
+        _setup_project(tmp_path, monkeypatch)
+        global_vault = tmp_path / "home" / ".memory" / "claude"
+        capsys.readouterr()
+
+        ns = argparse.Namespace(agent="claude", scope="global", working_dir=None)
+        cmd_refresh(ns)
+
+        out = capsys.readouterr().out
+        assert "global_summary:" in out
+        assert "project_summary:" not in out
+        assert (global_vault / "boot" / "global-summary.md").is_file()
 
 
 # ---------------------------------------------------------------------------

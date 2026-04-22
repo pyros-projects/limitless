@@ -120,6 +120,20 @@ class TestAssembleBoot:
         )
         assert total_tokens <= 600
 
+    def test_prefers_warm_summaries_when_present(
+        self, tmp_global_vault: Path, tmp_project_vault: Path
+    ) -> None:
+        (tmp_global_vault / "identity" / "self.md").write_text("I am Codie.")
+        (tmp_global_vault / "boot" / "global-summary.md").write_text("# Global Summary\nWarm global map.")
+        (tmp_project_vault / "boot" / "project-summary.md").write_text("# Project Summary\nWarm project map.")
+        (tmp_project_vault / "boot" / "recent-episodes.md").write_text("# Recent Episodes\nWarm recent map.")
+
+        result = assemble_boot(tmp_global_vault, tmp_project_vault)
+
+        assert "Warm global map." in result["global_packet"]
+        assert "Warm project map." in result["project_packet"]
+        assert "Warm recent map." in result["project_packet"]
+
 
 # ---------------------------------------------------------------------------
 # TestBootCache

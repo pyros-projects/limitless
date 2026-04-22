@@ -118,7 +118,26 @@ Read the output — it contains your identity, project context, and recent state
 
 After booting, invoke the `memory-help` skill to understand the memory system's concepts, commands, and vocabulary. This is essential — terms like "threads", "promotions", "trust levels", and "inbox" have specific meanings in this system that you need to know before using it.
 
-## Step 3: Check Inbox
+## Step 3: Recall Workflow
+
+When you need to search beyond the boot packet, use QMD first when it is available:
+
+```bash
+qmd status
+qmd query
+qmd get
+```
+
+Preferred order:
+1. boot for scoped startup context
+2. QMD for cross-store recall
+3. direct file inspection for exact on-disk truth
+
+Important caveat: a miss from QMD is not always proof that the memory does not exist.
+Check `qmd status` and the collection timestamps / last updated values before treating
+`not found in the current index` as `does not exist on disk`.
+
+## Step 4: Check Inbox
 
 ```bash
 codies-memory status --agent <name>

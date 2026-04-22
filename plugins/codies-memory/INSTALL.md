@@ -2,6 +2,16 @@
 
 This guide is for agents that cannot use Claude Code plugins (e.g. Codie/Codex, OpenCode). If you're running as a Claude Code plugin, the `memory-boot` skill handles setup automatically.
 
+## Supported Modes
+
+`codies-memory` works in two supported modes:
+
+- **Standalone mode** — local canonical vault only
+- **Full mode** — local canonical vault plus QMD retrieval across memory layers
+
+The plugin owns structured writes, promotion, trust, and boot behavior. QMD is the
+recommended read path when available, but it is not packaged inside this plugin.
+
 ## Step 0: Check If Already Installed
 
 ```bash
@@ -143,6 +153,9 @@ uv run codies-memory list inbox --agent <name> --working-dir /path/to/project
 # Check status
 uv run codies-memory status --agent <name> --working-dir /path/to/project
 
+# Rebuild warm summaries
+uv run codies-memory refresh --agent <name> --working-dir /path/to/project
+
 # Save something you learned about the user
 uv run codies-memory user "prefers short, high-signal answers" --agent <name>
 
@@ -152,6 +165,37 @@ uv run codies-memory create session --title "Session Summary" --body "What happe
 # Report feedback about the memory system itself
 uv run codies-memory feedback "describe what happened" --agent <name>
 ```
+
+For rich multiline record bodies, prefer `--body-file` over shell-quoted `--body`.
+Inline `--body` now normalizes literal `\n` sequences to real newlines, but
+`--body-file` remains the safer operator path for longer structured content.
+
+## How Recall Works
+
+Use the system in this order:
+
+1. `codies-memory boot` for scoped startup context
+2. `qmd query` for broader recall across memory stores
+3. direct file reads when you need exact on-disk truth
+
+Useful QMD commands when it is available:
+
+```bash
+qmd status
+qmd query
+qmd get
+```
+
+Do not treat a QMD miss as proof of absence until you check `qmd status`. The
+current index can lag behind on-disk writes, so collection timestamps or "last
+updated" values matter.
+
+One more practical gotcha: QMD structured searches are finicky about hyphenated
+names in `vec` / `hyde` queries. A term like `ACE-Step` or `codies-memory` can
+be interpreted like search syntax and trigger errors such as `Negation (-term)
+is not supported in vec/hyde queries`. When that happens, retry with a plain
+language variant like `ACE Step` or `codies memory`, and keep explicit `-term`
+negation only in `lex` queries.
 
 ## Quick Sanity Check
 

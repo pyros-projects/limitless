@@ -116,6 +116,31 @@ When you run a command with `--working-dir`, the system finds the project vault 
 
 If none match, there's no project vault for that directory.
 
+### Recall Workflow
+
+When you need to search across memory layers, prefer QMD first when it is available:
+
+```bash
+qmd status
+qmd query
+qmd get
+```
+
+Use the layers intentionally:
+- boot packet for fast scoped orientation
+- `qmd query` for cross-store recall
+- `qmd get` or direct file reads for exact source inspection
+
+Important: `not found in the current index` is not the same as `does not exist on disk`.
+Before trusting a miss, check `qmd status` and inspect the collection timestamps or
+last updated values. The QMD index can lag behind recent writes.
+
+Also note that structured QMD searches are finicky about hyphenated names in
+`vec` / `hyde` queries. Terms like `ACE-Step` or `codies-memory` can be parsed
+like search syntax and trigger errors about negation. If recall looks wrong,
+retry with plain-language variants such as `ACE Step` or `codies memory`, and
+keep explicit `-term` negation in `lex` queries only.
+
 ---
 
 ## Commands
@@ -150,6 +175,15 @@ codies-memory create <type> --title "Title" --body "Content" --agent <name>
 
 Types: `lesson`, `session`, `thread`, `decision`, `reflection`, `dream`. Global-only types auto-route.
 
+For longer or structured multiline content, prefer:
+
+```bash
+codies-memory create <type> --title "Title" --body-file /path/to/body.md --agent <name>
+```
+
+Inline `--body` normalizes literal `\n` sequences to real newlines, but `--body-file`
+is still the safer operator path when shell quoting would be fragile.
+
 ### List
 
 ```bash
@@ -162,6 +196,18 @@ codies-memory list lessons --scope global --agent <name> --format json
 ```bash
 codies-memory status --agent <name>
 ```
+
+### Refresh (rebuild warm summaries)
+
+```bash
+codies-memory refresh --agent <name>
+```
+
+Use this when you want to rebuild the derived warm-memory artifacts that boot can
+skim quickly:
+- global summary
+- project summary
+- recent episodes
 
 ### Promote
 

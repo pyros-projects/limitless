@@ -19,6 +19,7 @@ from codies_memory.inbox import capture, pending_review
 from codies_memory.records import create_record, read_record, list_records
 from codies_memory.promotion import promote_within_project, promote_to_global
 from codies_memory.profile import load_profile, get_write_gate_bias
+from codies_memory.warm import write_warm_artifacts
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +49,15 @@ def _resolve_project_vault(args: argparse.Namespace) -> tuple[Path, Path]:
         print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
         sys.exit(1)
     return global_vault, project_vault
+
+
+def _normalize_inline_body(body: str) -> str:
+    """Normalize inline body text from CLI flags.
+
+    Shell quoting often leaves literal ``\\n`` sequences in ``--body`` values.
+    Treat those as real newlines so inline record creation remains usable.
+    """
+    return body.replace("\\r\\n", "\n").replace("\\n", "\n")
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +168,8 @@ def cmd_create(args: argparse.Namespace) -> None:
     body_file = getattr(args, "body_file", None)
     if body_file:
         body = Path(body_file).read_text(encoding="utf-8")
+    elif body is not None:
+        body = _normalize_inline_body(body)
     if not body:
         print("Error: --body or --body-file is required.", file=sys.stderr)
         sys.exit(1)
@@ -395,6 +407,33 @@ def cmd_feedback(args: argparse.Namespace) -> None:
     print(f"Feedback saved: {filename}")
 
 
+def cmd_refresh(args: argparse.Namespace) -> None:
+    """Rebuild derived warm-memory artifacts."""
+    agent = _resolve_agent(args)
+    global_vault = resolve_global_vault(agent)
+
+    scope = getattr(args, "scope", "both")
+    project_vault = None
+    if scope in {"project", "both"}:
+        working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
+        project_vault = resolve_project_vault(global_vault, working_dir)
+        if project_vault is None and scope == "project":
+            print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
+            sys.exit(1)
+
+    if scope == "global":
+        written = write_warm_artifacts(global_vault)
+    elif scope == "project":
+        written = write_warm_artifacts(global_vault, project_vault=project_vault)
+    else:
+        written = write_warm_artifacts(global_vault, project_vault=project_vault)
+
+    for key, path in written.items():
+        if scope == "global" and key != "global_summary":
+            continue
+        print(f"{key}: {path}")
+
+
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
@@ -545,13 +584,13 @@ def main() -> None:
     body_group.add_argument(
         "--body",
         default=None,
-        help="Record body text.",
+        help="Record body text. Literal \\n sequences are normalized to newlines.",
     )
     body_group.add_argument(
         "--body-file",
         dest="body_file",
         default=None,
-        help="Path to file containing record body.",
+        help="Path to file containing record body. Preferred for rich multiline content.",
     )
     create_parser.add_argument(
         "--scope",
@@ -682,6 +721,27 @@ def main() -> None:
         help="Agent name (required).",
     )
     feedback_parser.set_defaults(func=cmd_feedback)
+
+    # --- refresh ---
+    refresh_parser = subparsers.add_parser("refresh", help="Rebuild derived warm-memory summaries.")
+    refresh_parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent name (required).",
+    )
+    refresh_parser.add_argument(
+        "--scope",
+        choices=["global", "project", "both"],
+        default="both",
+        help="Which summaries to rebuild (default: both).",
+    )
+    refresh_parser.add_argument(
+        "--working-dir",
+        dest="working_dir",
+        default=None,
+        help="Project working directory (defaults to cwd).",
+    )
+    refresh_parser.set_defaults(func=cmd_refresh)
 
     args = parser.parse_args()
     args.func(args)
