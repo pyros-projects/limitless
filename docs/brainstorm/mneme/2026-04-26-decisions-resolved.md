@@ -2,9 +2,9 @@
 
 *Decisions log - 2026-04-26 - Claude + Pyro*
 
-This doc records resolutions to the open product questions surfaced in `2026-04-23-mneme-product-spec.md` (Codie's canonical spec, originally written under the working name `nous`) and supersedes the "Open Product Questions" section there. The canonical spec remains the source of truth for everything except those questions.
+This doc records resolutions to the product questions surfaced in `2026-04-23-mneme-product-spec.md` (Codie's canonical spec, originally written under the working name `nous`). The canonical spec remains the source of truth for the product model; this doc remains the source of truth for the decisions made after the first spec draft.
 
-The folder, ADR, and all spec documents have been renamed from `nous` to `mneme` as of 2026-04-26. Internal text inside the older docs (vision, transformation, addendum, canonical spec) still reads `nous` historically — those are preserved as-written for archaeology. Future docs use `mneme`.
+The folder, ADR, and canonical spec documents have been renamed from `nous` to `mneme` as of 2026-04-26. Internal text inside the older 2026-04-22 archaeology docs may still read `nous` historically — those are preserved as-written for provenance. Future docs and the canonical spec use `mneme`.
 
 ---
 
@@ -18,7 +18,7 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 
 **Package name:** `mneme` (Python) / `mneme-cli` if collision (TBD).
 
-**Migration:** all future docs use `mneme`; existing brainstorm folder name (`nous/`) is left as-is to avoid breaking historical references.
+**Migration:** all future docs use `mneme`; older document bodies may keep historical `nous` wording only when explicitly treated as archaeology.
 
 ---
 
@@ -36,13 +36,17 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 
 ---
 
-## Retrieval Packaging: sidecar (managed QMD subprocess)
+## Retrieval Packaging: managed QMD sidecar
 
-**Decision:** ship QMD as a managed subprocess that `mneme` starts, monitors, and stops.
+**Decision:** ship QMD as a managed retrieval sidecar owned by `mneme`.
 
 **See:** `2026-04-26-adr-001-retrieval-packaging.md` for the full ADR and considered options.
 
-**Summary:** `mneme init` installs QMD into `~/.mneme/bin/qmd`, downloads the embedding model into `~/.mneme/models/`, and writes config. `mneme bind <host>` configures the host's MCP to point at the managed QMD socket. `mneme doctor` introspects QMD health. The sidecar pattern reuses the proven claude-knowledge ↔ QMD integration shape with cleaner lifecycle ownership.
+**Summary:** `mneme init` installs QMD into `~/.mneme/bin/qmd`, downloads or verifies the configured retrieval models in `~/.mneme/models/`, and writes config. `mneme bind <host>` configures the host's MCP to launch the managed `qmd mcp` command with Mneme's index/config. `mneme doctor` introspects QMD health. The sidecar pattern reuses the proven claude-knowledge ↔ QMD integration shape with cleaner lifecycle ownership.
+
+**Transport correction:** the current proven integration uses `qmd mcp` over stdio for host MCP bindings. Phase 1 should implement stdio MCP binding first. HTTP/socket daemon mode is allowed only after the QMD daemon surface is verified or added.
+
+**Ranking correction:** QMD collection filters are not the product ranking contract. `mneme ask` owns explicit layer-priority merging so `compiled/` can outrank `insights/`, `memory/`, and `captures/` predictably.
 
 ---
 
@@ -54,7 +58,7 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 
 **Implementation consequence:** `mneme bind codex` lands first with a complete working integration. `mneme bind claude` lands second using the documented adapter contract Codex exercises. Neither requires the other.
 
-**Adapter contract:** every host binding writes MCP server entries that point at the same QMD socket and exposes the same tool surface. Host-specific differences (config file location, MCP transport) are handled inside `mneme bind <host>`'s host-specific code path.
+**Adapter contract:** every host binding writes MCP server entries that launch the same managed QMD command/config and exposes the same tool surface. Host-specific differences (config file location, MCP transport details) are handled inside `mneme bind <host>`'s host-specific code path.
 
 ---
 
@@ -75,20 +79,23 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 **Rationale:** symlinks during migration would create a window of ambiguous source-of-truth. The trust pipeline that mneme's vault implements requires unambiguous file ownership. A one-shot migration is more disruptive briefly but eliminates a class of subtle bugs.
 
 **Migration shape:**
-1. `mneme migrate --from claude-knowledge --vault ~/.mneme/vault`
-2. The migration tool reads claude-knowledge's structure, transforms it to mneme's vault layout, writes the new vault.
-3. The original claude-knowledge directory is preserved (read-only) until the user explicitly removes it.
-4. No symlinks are created; pointing at the old location is an error.
+1. `mneme migrate --from codies-memory --agent <name> --vault ~/.mneme/vault`
+2. `mneme migrate --from claude-knowledge --vault ~/.mneme/vault`
+3. Optional historical import: `mneme migrate --from basic-memory --vault ~/.mneme/vault`
+4. The migration tool reads each source structure, transforms it to Mneme's vault layout, writes the new vault, and records provenance for every imported record.
+5. The original source directories are preserved until the user explicitly removes or archives them.
+6. No symlinks are created; pointing at the old location is an error.
+7. `mneme doctor` reports stale hooks, MCP configs, or project markers that still point at old systems.
 
 ---
 
 ## Adoption of Codie's Canonical Spec
 
-**Decision:** Codie's `2026-04-23-nous-product-spec.md` is adopted as canonical.
+**Decision:** Codie's `2026-04-23-mneme-product-spec.md` is adopted as canonical.
 
 **Rationale:** the product-boundary framing is correct; the build phases are sound; the four-layer model (operational memory + compiled + insights + captures) is structurally right. Pyro's earlier v1 vision doc and Codie's transformation doc are subordinate.
 
-**Override scope:** this decisions-log doc supersedes the "Open Product Questions" section of the canonical spec. Everything else in the canonical spec stands.
+**Override scope:** this decisions-log doc supersedes the former open-questions section from the first spec draft. Everything else in the canonical spec stands.
 
 ---
 
@@ -98,7 +105,8 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 |---|---|
 | Adopt Codie's canonical spec | Yes |
 | Compiled layer mechanism | On-demand-with-cache |
-| Retrieval packaging | Sidecar (managed QMD subprocess) |
+| Retrieval packaging | Managed QMD sidecar |
+| Retrieval transport | stdio MCP first; HTTP/socket daemon optional later |
 | Host scope | Codex first, Claude second |
 | Name | `mneme` |
 | Compiled directory name | `compiled/` |
@@ -113,7 +121,7 @@ The folder, ADR, and all spec documents have been renamed from `nous` to `mneme`
 
 - Reranker model choice (`bge-reranker-v2-m3` vs lighter alternatives) — pick during phase 1 with empirical comparison on the existing claude-knowledge corpus.
 - Whether `mneme compile` writes dossiers as a separate QMD collection (`compiled`) or reuses the insights collection with a marker. Recommended: separate collection.
-- Default port range for the QMD sidecar (current ADR proposes 7842 with fallback to 7847).
+- Whether QMD HTTP/socket daemon mode is ever needed after the stdio MCP v1 works.
 - Whether `mneme init --offline` is a v1 feature or v0.2.
 - Exact error messages and degradation behavior when QMD is unavailable (`mneme ask` should fall back to filesystem grep but exact UX is TBD).
 

@@ -2,7 +2,8 @@
 
 *Architecture Decision Record - 2026-04-26 - Claude*
 
-Status: **proposed** — awaits Pyro sign-off before phase 1 implementation
+Status: **accepted for phase 1 planning** — implementation must still verify the
+exact QMD machine-readable CLI/MCP surfaces before coding against them
 
 ---
 
@@ -20,7 +21,7 @@ The retrieval requirement, distilled from the spec:
 - survive offline (gracefully degrade when models or indices are unavailable)
 - accept new content with low-latency reindexing on capture/edit
 
-The reference implementation already exists. **claude-knowledge integrates QMD as the retrieval backend** for a 1,584-document multi-collection corpus (`insights`, `claudes-codies-memory`, `codies-codies-memory`, `basic-memory`). The integration ships via QMD's MCP server, exposing `mcp__qmd__query`, `mcp__qmd__get`, `mcp__qmd__multi_get`, and `mcp__qmd__status`. This is empirically the closest existing instance of what mneme needs.
+The reference implementation already exists. **claude-knowledge integrates QMD as the retrieval backend** for a 1,584-document multi-collection corpus (`insights`, `claudes-codies-memory`, `codies-codies-memory`, `basic-memory`). The integration currently ships through QMD's MCP server over stdio (`qmd mcp`), exposing `mcp__qmd__query`, `mcp__qmd__get`, `mcp__qmd__multi_get`, and `mcp__qmd__status`. QMD also has CLI commands for `status`, `query`, `update`, `embed`, and collection management. This is empirically the closest existing instance of what mneme needs.
 
 This ADR decides how mneme packages retrieval given that QMD already exists and is the obvious candidate.
 
@@ -30,11 +31,11 @@ This ADR decides how mneme packages retrieval given that QMD already exists and 
 
 1. **One-install UX.** The user installs mneme, not mneme-and-also-QMD-and-also-models.
 2. **Avoid reinventing the wheel.** QMD's lex/vec/hyde combination, RRF blending, multi-collection scoping, and intent-disambiguation are non-trivial and already work.
-3. **Lifecycle clarity.** Retrieval should start when needed, stop when mneme stops, and not require user-managed processes.
+3. **Lifecycle clarity.** Retrieval should be invoked and configured by Mneme, and should not require the user to manage QMD binaries, models, indices, or host MCP entries directly.
 4. **Source-of-truth invariant.** The vault is the truth; the index is derivable. If the index is lost, retrieval degrades but the vault still works.
 5. **MCP-binding compatibility.** When `mneme bind <host>` runs, the host (Claude Code, Codex, future) gets MCP tools that work without separate MCP configuration.
 6. **Future flexibility.** The packaging choice should allow swapping retrieval implementations later without breaking the user-facing surface.
-7. **Defensible install footprint.** Retrieval requires embedding models (~90MB+ for `all-MiniLM-L6-v2`, more for rerankers). The packaging must handle these without making installation hostile.
+7. **Defensible install footprint.** Retrieval requires embedding and optional reranking models. The packaging must handle these without making installation hostile.
 
 ---
 
@@ -77,23 +78,23 @@ Mneme bundles QMD as a vendored dependency, calls QMD's library API directly in-
 
 ### Option 3: Sidecar (Managed Subprocess)
 
-Mneme installs QMD as a managed subprocess that mneme starts and stops. The QMD MCP server runs on a known socket/port; mneme configures host bindings to point at it.
+Mneme installs and manages QMD as the retrieval engine. In v1, the binding target is the proven stdio MCP surface (`qmd mcp`) for host integrations, plus QMD CLI commands for Mneme's own `ask`, `status`, and `doctor` flows. HTTP/socket daemon mode is an optional later transport, not a phase-1 assumption.
 
 **Pros:**
 - One-install UX from the user's perspective: `mneme init` runs the QMD setup transparently.
-- Clean lifecycle: mneme owns process start/stop, restart-on-crash, graceful shutdown.
+- Clean lifecycle: mneme owns the QMD binary, index location, model paths, collection config, and host MCP binding commands.
 - Full QMD capability without reimplementation.
-- MCP-binding is natural: the QMD MCP server is the MCP endpoint that hosts get bound to.
-- `mneme doctor` can diagnose by introspecting the subprocess (PID, port, last-query latency, model availability).
+- MCP-binding is natural: hosts spawn `qmd mcp` through their normal MCP process model.
+- `mneme doctor` can diagnose by running QMD status/query/update checks and inspecting host MCP config.
 - Future-flexible: the sidecar can be swapped for embedded QMD or a smaller core without changing the user-facing surface or the host bindings.
 - Maps cleanly to claude-knowledge's existing integration: QMD already runs as an MCP server with multi-collection scoping; mneme adopts the same shape with managed lifecycle.
 
 **Cons:**
-- Process management complexity (PID files, port allocation, crash detection, restart loops).
-- First-run cost: QMD model download (`all-MiniLM-L6-v2` ~90MB, optional reranker model larger). Must be scripted into `mneme init` with progress feedback.
+- Host transport complexity (stdio process config, per-host MCP config shape, subprocess error reporting).
+- First-run cost: QMD model downloads can be non-trivial. Must be scripted into `mneme init` with progress feedback and an offline/degraded path.
 - Two binaries on disk (mneme + qmd) even if user perception is one install.
 
-**Verdict:** matches all seven decision drivers. The complexity cost is concentrated in `mneme init` / `mneme doctor` / process supervision code, which is the right place for it.
+**Verdict:** matches all seven decision drivers. The complexity cost is concentrated in `mneme init` / `mneme bind` / `mneme doctor`, which is the right place for it.
 
 ### Option 4: Smaller Retrieval Core (Reimplement Subset)
 
@@ -117,18 +118,19 @@ Mneme reimplements a smaller version of QMD: BM25 + a single embedding model + s
 
 ## Decision
 
-**Adopt Option 3 (Sidecar) for v1**, with a documented path to Option 1 (Wrapper) once QMD stabilizes as a standalone install Pyro is willing to require.
+**Adopt Option 3 (Managed QMD sidecar) for v1**, with stdio MCP as the phase-1 transport and a documented path to HTTP/socket daemon mode if QMD's daemon surface becomes necessary.
 
 The sidecar approach:
 
 - `mneme init` installs the QMD binary into `~/.mneme/bin/qmd` (or wherever appropriate), downloads required models into `~/.mneme/models/`, writes the QMD config into `~/.mneme/config/qmd.yaml`.
-- `mneme bind <host>` writes host-specific MCP configuration that points at the managed QMD socket. Examples:
-  - For Codex: writes the QMD MCP server entry into Codex's config so the agent can call `mcp__qmd__query` etc.
-  - For Claude Code: writes equivalent into `~/.claude/.mcp.json` or the project-scoped MCP config.
-- `mneme status` shows QMD subprocess health: PID, uptime, last-query latency, index size per collection, model availability.
-- `mneme doctor` runs end-to-end retrieval diagnostics: can it reach the socket, can it run a test query, are models loaded, are indices fresh, is the vault path resolved correctly.
-- `mneme capture` (and other write paths) trigger incremental reindex via QMD's index API; the index lives in `~/.mneme/index/` separate from the vault.
-- On `mneme` shutdown (SIGTERM, normal exit), the sidecar receives a graceful stop signal and persists any in-flight index state.
+- `mneme bind <host>` writes host-specific MCP configuration that launches `qmd mcp` with Mneme's index/config. Examples:
+  - For Codex: writes a `[mcp_servers.qmd]` entry whose command resolves to the managed QMD binary and whose args start the stdio MCP server.
+  - For Claude Code: writes equivalent MCP config for Claude's host-specific config surface.
+- `mneme ask <query>` calls QMD through a stable local interface (CLI JSON or MCP client), then applies Mneme's own layer-priority merge before rendering results.
+- `mneme status` shows QMD install state, model availability, index size per collection, collection freshness, and bound-host config state.
+- `mneme doctor` runs end-to-end retrieval diagnostics: can it invoke QMD, can it run a test query, are models available, are indices fresh, is the vault path resolved correctly, and do bound hosts point at the managed QMD command?
+- `mneme capture` (and other write paths) trigger reindex through QMD's supported update/index command. The index lives in `~/.mneme/index/` separate from the vault.
+- No v1 feature should depend on a long-lived port daemon. If HTTP/socket mode is later adopted, it must be a transport upgrade behind the same Mneme CLI contract.
 
 QMD collections map to mneme's vault layers:
 
@@ -140,7 +142,7 @@ QMD collections map to mneme's vault layers:
 | `captures` | `vault/captures/*.md` |
 | `ops` | `vault/ops/**/*.md` |
 
-The default search scope (compiled → insights → memory → captures, per spec) is encoded as default `collections` parameter ordering on `mneme ask`.
+The default search scope (compiled → insights → memory → captures, per spec) is encoded in Mneme's result-merging layer. QMD collection filters produce candidates; they do not by themselves guarantee product-level priority. `mneme ask` must apply explicit layer weights and provenance-aware rendering after QMD returns results.
 
 ---
 
@@ -149,7 +151,7 @@ The default search scope (compiled → insights → memory → captures, per spe
 ### Positive
 
 - **One install** from the user's perspective. `mneme init` produces a working retrieval system.
-- **Lifecycle is owned by mneme.** The user never has to start, stop, restart, or update QMD directly.
+- **Lifecycle is owned by mneme.** The user never has to install, configure, update, or bind QMD directly.
 - **Diagnosable.** `mneme doctor` and `mneme status` give the user actionable signal about retrieval health.
 - **MCP-native.** `mneme bind` configures host MCP without the user touching MCP config files. This is critical for the bind-codex-first phase since the codex CLI's MCP integration must be turnkey.
 - **Reuses claude-knowledge's working integration shape.** The existing claude-knowledge ↔ QMD pattern is already battle-tested with 1,584 docs across 4 collections. Mneme v1 inherits the proven pattern instead of inventing a new one.
@@ -159,8 +161,8 @@ The default search scope (compiled → insights → memory → captures, per spe
 
 - **First-run install is heavier than a pure-markdown product would be.** Model download takes minutes on a slow connection. Mitigation: `mneme init --offline` mode that defers model installation; `mneme doctor` reports which retrieval features are degraded until models are available.
 - **Two binaries to maintain in distribution.** Mneme's release process must coordinate QMD version pinning. Mitigation: pin to a known QMD version per mneme release; document upgrade path.
-- **Process management adds failure modes.** Crashed QMD process, port collisions, stale PID files. Mitigation: `mneme doctor` repair commands; defensive restart logic; configurable port range with auto-fallback.
-- **The sidecar is part of mneme's blast radius.** Misbehavior in QMD impacts mneme's retrieval. Mitigation: timeouts on all retrieval calls; `mneme ask` returns degraded results (e.g., file-system grep) when QMD is unavailable rather than failing hard.
+- **Host MCP config adds failure modes.** Wrong command path, stale config, missing env, or host-specific config drift can break retrieval. Mitigation: `mneme doctor` repair commands and per-host smoke tests after binding.
+- **The sidecar is part of mneme's blast radius.** Misbehavior in QMD impacts mneme's retrieval. Mitigation: timeouts on all retrieval calls; `mneme ask` returns degraded results (e.g., filesystem search) when QMD is unavailable rather than failing hard.
 
 ### Neutral
 
@@ -175,46 +177,50 @@ The default search scope (compiled → insights → memory → captures, per spe
 
 1. `mneme init` subcommand:
    - install QMD binary
-   - download `all-MiniLM-L6-v2` (BM25 doesn't need a model; vec does)
-   - allocate a port (default 7842 with collision-fallback up to 7847)
+   - download or verify the configured embedding/reranking models
    - write `~/.mneme/config/qmd.yaml` with vault path, collection map, model paths
-   - smoke-test: launch QMD, run a no-op query, shut down
-2. `mneme` daemon supervisor:
-   - launch QMD on `mneme` startup (if any subcommand needs it)
-   - monitor PID, restart on crash with exponential backoff
-   - graceful shutdown on `mneme stop` or signal
+   - initialize/update QMD collections for `compiled`, `insights`, `memory`, `captures`, and `ops`
+   - smoke-test: run `qmd status`, run a no-op or tiny query, verify JSON/result shape
+2. QMD invocation layer:
+   - resolve managed QMD command path
+   - call QMD CLI or MCP client with timeouts
+   - normalize result objects into Mneme's layer/provenance/trust shape
    - log retrieval events to `~/.mneme/log/qmd.log`
 3. `mneme bind <host>`:
-   - for Codex: write MCP server entry
-   - for Claude Code: write MCP server entry
+   - for Codex: write MCP server entry that launches `qmd mcp`
+   - for Claude Code: write MCP server entry that launches `qmd mcp`
    - smoke-test: invoke a one-shot query through the host's MCP runtime, confirm result shape
 4. `mneme ask <query>`:
    - construct the right `searches` array (lex+vec by default; +hyde when `--deep`)
-   - apply default collection ordering (compiled → insights → memory → captures)
+   - query the configured QMD collections
+   - apply Mneme's explicit layer-priority merge (compiled → insights → memory → captures)
    - render results with source layer, trust, recency annotations
 5. `mneme doctor`:
-   - reachability: socket open?
+   - reachability: QMD command resolves and can run?
    - functional: test query returns?
    - models: loaded?
    - indices: fresh? compare last-indexed time vs newest vault file
-   - bindings: each bound host's MCP config still points at the right socket?
+   - bindings: each bound host's MCP config still points at the managed QMD command?
 
 ### What the QMD team is asked to provide
 
-For this ADR to succeed cleanly, QMD should expose (if it doesn't already):
+For this ADR to succeed cleanly, QMD should expose or keep stable:
 
-- a `--config <path>` flag for collection mapping
-- an HTTP/socket health endpoint mneme can poll
+- a `--config <path>` or equivalent index selection mechanism for collection mapping
 - a stable MCP tool surface (the current `mcp__qmd__query` etc.) that mneme can pin to a version
-- an indexer API (`qmd index --collection <name> --path <vault-subpath>`) callable from mneme on capture events
-- a graceful-shutdown contract (responds to SIGTERM, persists index state)
+- stable CLI JSON for `status`, `query`, collection management, and update/index operations
+- an index/update API callable from mneme on capture events
+- clear exit codes and machine-readable errors for missing models, stale indices, and malformed queries
 
-If QMD is missing any of these, mneme either patches them upstream or wraps them with a shim before sidecar adoption is clean.
+HTTP/socket health endpoints, daemon lifecycle, and graceful shutdown contracts are optional transport upgrades. They are not blockers for the stdio/CLI-based v1.
+
+If QMD is missing any required stable surface, mneme either patches QMD upstream or wraps the current QMD CLI with a narrow compatibility shim before depending on it.
 
 ### Open questions deferred to implementation
 
 - Exact reranker model choice (`bge-reranker-v2-m3` vs lighter alternatives) — pick during phase 1 with empirical comparison on the existing claude-knowledge corpus.
 - Whether `mneme compile` (phase 2) writes its dossiers as a separate QMD collection (`compiled`) or reuses the insights collection with a marker. Recommend separate collection for clean ranking semantics.
+- Exact machine-readable QMD invocation format for `mneme ask` (CLI JSON vs internal MCP client). Recommend CLI JSON first if result shape is stable.
 - How `mneme status --remote` behaves once remote sync ships in v0.3+ — the sidecar architecture is local-only by design; remote sync is orthogonal.
 
 ---
