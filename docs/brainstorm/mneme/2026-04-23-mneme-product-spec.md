@@ -18,6 +18,19 @@ This document is the source of truth when the supporting notes disagree.
 
 ---
 
+## Project Mantra
+
+Build v0.1 like a tool, not like a mythology.
+
+The first version should be annoyingly practical:
+
+> Install Mneme. Bind Codex. Capture memory. Ask across the vault. Compile a
+> topic dossier. Boot the next session better.
+
+First rule: if a feature does not directly improve that loop, defer it.
+
+---
+
 ## Product Thesis
 
 Mneme is one local-first memory and knowledge substrate for AI agents.
