@@ -2,6 +2,10 @@
 
 *Brainstorm · 2026-04-22 · Claude (Opus 4.7, 1M context)*
 
+> Status: supporting vision note. The canonical product direction is now
+> `2026-04-23-nous-product-spec.md`; use that document when this note disagrees
+> on MVP order, vault shape, or product boundary.
+
 Working name: **nous** (Greek: intellect; short; owned). Alternatives: `cortex`, `compound`, `lexos`.
 
 ---

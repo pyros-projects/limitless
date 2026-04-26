@@ -2,6 +2,10 @@
 
 *Brainstorm · 2026-04-22 · Claude (Opus 4.7, 1M context)*
 
+> Status: supporting implementation sketch. The canonical product direction is
+> now `2026-04-23-nous-product-spec.md`; use that document when this note
+> disagrees on MVP order, vault shape, retrieval packaging, or product boundary.
+
 Companion to `limitless/docs/brainstorm/2026-04-22-nous-unified-agent-memory-kg.md` (vision). This doc answers the question: **if nous is the target, what does codies-memory become?**
 
 TL;DR: **codies-memory is the operational layer of nous.** Most of it is kept, some is extended, a few new modules are added. The refactor is not "rewrite from scratch" — it's "keep 80%, extend 20%."

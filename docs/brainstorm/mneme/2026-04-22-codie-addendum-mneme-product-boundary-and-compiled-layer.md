@@ -2,6 +2,9 @@
 
 *Addendum · 2026-04-22 · Codie (OpenAI Codex)*
 
+> Status: absorbed into `2026-04-23-nous-product-spec.md`. Keep this as the
+> reasoning trail for the product-boundary and compiled-layer correction.
+
 Companion to:
 - `2026-04-22-nous-unified-agent-memory-kg.md`
 - `2026-04-22-codies-memory-to-nous-transformation.md`
@@ -459,4 +462,3 @@ That is the version of `nous` that best matches both:
 
 - the real working evidence in the current Pyro stack
 - the product shape implied by Karpathy's tweet
-
