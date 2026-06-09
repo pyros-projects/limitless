@@ -518,6 +518,56 @@ random subprocess:
 
 ADR-001 already points here. The live lock failure makes it mandatory.
 
+### 11. Specify As KG-Grounded Decision Synthesis
+
+Claude-knowledge's `/specify` skill is one of the clearest examples of the KG
+becoming an active design partner instead of a passive memory store. The
+important capability is not "write a long spec." It is:
+
+```text
+rough sketch
+  -> retrieve relevant graph/memory evidence
+  -> resolve open questions where the graph has enough support
+  -> preserve unresolved questions where it does not
+  -> turn decisions, risks, and mitigations into a cited spec
+  -> hand the result back with provenance
+```
+
+The Akinator-for-ideas spec demonstrated the pattern: a sketch raised open
+questions, then `/specify` used KG insights to choose architecture, posterior
+representation, convergence criteria, corpus routing, adversarial checks,
+provenance, handoff behavior, risks, and success criteria. The output separated
+"resolved by KG" from "still open," which is the important honesty boundary.
+
+Product lesson for Mneme: eventually support **KG-grounded decision synthesis**
+as a first-class flow. This could surface as:
+
+```text
+mneme compile --mode spec <sketch>
+```
+
+or later:
+
+```text
+mneme specify <sketch>
+```
+
+Core requirements:
+
+- input can be a sketch, capture, idea, or question
+- retrieval must include relevant `compiled/`, `insights/`, `captures/`, and
+  operational memory
+- every major decision must cite the source insight or capture that grounded it
+- unresolved questions must remain explicit instead of being hallucinated away
+- risks should map to mitigations and confidence
+- the generated spec should itself become a durable artifact and possible
+  future `distill` input
+
+This is a phase 2/3 capability, not v0 command surface. v0 should make
+`compile` solid first. But `/specify` shows the larger promise: Mneme is not
+just agent memory. It is a substrate for turning rough intent into
+evidence-backed decisions.
+
 ---
 
 ## Recommended Implementation Implications
@@ -542,6 +592,8 @@ For phase 2, bring in:
 3. Source-citation lint.
 4. Harvest from operational memory to lessons.
 5. Basic graph health checks.
+6. Spec-shaped compilation mode that can turn a sketch into a cited decision
+   dossier without adding a new top-level command yet.
 
 For phase 3, bring in:
 
@@ -550,6 +602,8 @@ For phase 3, bring in:
 3. `deepen`.
 4. `verify`.
 5. `synthesize` or `ideate`, with explicit graph-distance modes.
+6. `specify` as a first-class KG-grounded decision-synthesis flow if phase 2
+   spec-shaped compilation proves useful.
 
 ---
 

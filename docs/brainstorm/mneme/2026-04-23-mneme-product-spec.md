@@ -13,6 +13,8 @@ Supporting notes:
 - `2026-04-22-mneme-unified-agent-memory-kg.md` captures the original vision.
 - `2026-04-22-codies-memory-to-mneme-transformation.md` captures the code migration sketch.
 - `2026-04-22-codie-addendum-mneme-product-boundary-and-compiled-layer.md` is the product-boundary correction this spec absorbs.
+- `2026-05-01-memanto-prior-art-for-mneme.md` captures the Memanto comparison and the product-surface ideas Mneme can borrow without changing its kernel.
+- `2026-06-09-hindsight-prior-art-for-mneme.md` captures the Hindsight comparison and the retrieval/consolidation mechanics Mneme can borrow without changing its file-first truth model.
 
 This document is the source of truth when the supporting notes disagree.
 
@@ -66,6 +68,39 @@ The user should experience:
 - `mneme status` to see health, drift, stale inbox items, and index state
 
 The user should not have to install separate systems for operational memory, knowledge graph work, and retrieval.
+
+---
+
+## Prior-Art Boundary
+
+Memanto and Hindsight are useful prior art, not replacement directions.
+
+The borrowing rule is:
+
+> Borrow product ergonomics, not the source-of-truth model.
+
+Mneme should keep `codies-memory` as the operational kernel and QMD as the
+managed retrieval sidecar. Prior-art ideas are welcome only when they make the
+existing loop clearer:
+
+- explicit raw evidence versus synthesized answer modes for `mneme ask`
+- richer but optional metadata (`subtype`, confidence, provenance, actor/source,
+  source references, tags)
+- temporal query flags such as `--as-of`, `--changed-since`, and
+  `--current-only`
+- a host connector registry for `mneme bind`
+- batch and file capture into `captures/` with provenance
+- status/bootstrap dashboards that show memory health quickly
+- token-budgeted recall controls
+- source chunks or file refs beside extracted claims
+- candidate observations with proof counts and freshness signals
+- retrieval traces for debugging memory trust
+
+Do not copy Memanto's or Hindsight's cloud/service dependency, agent-only
+namespace model, database-as-canonical-truth posture, mandatory memory-hoarding
+posture, ungated auto-belief formation, or broad v0 command surface. Mneme's
+advantage is local truth, repo-aware project memory, boot packets, and
+promotion gates.
 
 ---
 
