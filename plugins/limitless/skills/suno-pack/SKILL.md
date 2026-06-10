@@ -92,13 +92,18 @@ prompt is version-specific, never copy-pasted across versions:**
 - **v5.5 / v5.0** — detailed descriptor stack (4–7 categories, 400–800
   chars): genre, era, mood, adjective+instrument pairs, stacked vocal
   descriptors, production texture, BPM.
-- **v4.5** — lean variant (≤500 chars) by default: genre first, core
-  instruments, mood, BPM. Short and clear beats detailed. For stubborn
-  niche genres, repeating the genre name measurably improves adherence.
-  The v4.5 reference offers two more styles when the concept calls for
-  them: conversational-narrative (structure direction in the style field —
-  works on v4.5, fails on v5.5) and the structured-object technique for
-  era/artist-flavored briefs.
+- **v4.5** — emit ALL prompt-style variants, each a translation of the
+  *same* concept (styles defined in the v4.5 reference). The vocal file
+  carries three — **A: lean tags**, **B: conversational-narrative**,
+  **C: structured-object** — the instrumental file two (A and C, with
+  the `vocals:` key dropped from C; conversational is excluded there
+  because its prose is vocal-contaminated by nature and its structure
+  narration is redundant when the lyrics block already carries
+  arrangement tags). Mark exactly ONE variant **Recommended**, chosen
+  from the concept: lean → niche genre adherence; conversational →
+  structure-arc briefs; structured-object → era/artist-flavored briefs.
+  All variants ≤500 chars, genre first; repeat the genre name for
+  stubborn niches.
 
 The lyrics field ports across versions unchanged (same metatag system).
 Write it as a lyricist, not a rhyme machine: concrete images from the
@@ -206,6 +211,36 @@ lean genre-first variant for v4.5>
 ```
 ```
 
+**v4.5 deviation — style variants:** in `lyrics_v4.5.md` the
+`## Style of Music` section carries three labeled variants instead of one
+block (two in `no_lyrics_v4.5.md`: A and C only). Shape:
+
+```markdown
+## Style of Music — pick one variant, test in order
+
+### A — lean tags · wins on niche genre adherence
+```text
+<lean variant>
+```
+
+### B — conversational · wins on structure-arc briefs · ★ Recommended
+```text
+<narrative variant>
+```
+
+### C — structured-object · wins on era/artist flavor
+*(reset Advanced Options before pasting)*
+```text
+<const-block variant>
+```
+
+Testing discipline: one roll per variant, judge on pairs (a flaw must
+repeat to count), then iterate only the winner.
+```
+
+The ★ Recommended marker goes on whichever variant the concept favors —
+users who don't want to experiment paste that one and ignore the rest.
+
 ### `no_lyrics_v<version>.md` — instrumental version
 
 Same layout and field order, with the full anti-vocal-hallucination kit from
@@ -258,7 +293,8 @@ Change nothing else while sweeping. Expect 2–4 rolls.
 
 | Rule | Why |
 |---|---|
-| Style prompt is per-version: detailed for v5.x, lean for v4.5 | the models obey different prompt shapes |
+| Style prompt is per-version: detailed for v5.x, variant menu for v4.5 | the models obey different prompt shapes |
+| v4.5 files ship all style variants with one ★ Recommended | which dialect wins is empirical; one roll each, iterate the winner |
 | Style ≤1000 chars (sweet spot 400–800 on v5.x, ≤500 on v4.5), genre first | overflow silently truncated; unrelated tag piles average into mush |
 | Canonical metatags only; `[Tag: descriptors]` for per-section direction | invented tags get ignored or sung |
 | Performance directions in bracket tags, never bare `(parentheses)` lines | parens are sung as backing vocals |
