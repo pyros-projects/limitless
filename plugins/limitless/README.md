@@ -12,7 +12,7 @@ This plugin folds the strongest living skills in this repo into one coherent pac
 | [**codies-research**](skills/codies-research/) | Runs source-backed research with direct answers and strong next-step branching | When you need current facts, verification, comparisons, or note updates |
 | [**surface-first-development**](skills/surface-first-development/) | Starts software work from the user-visible surface, then derives contracts and builds inward | When an app, CLI, API, workflow, or agent flow should be prototyped before architecture hardens |
 | [**searxng**](skills/searxng/) | Provides privacy-respecting web search through a self-hosted SearXNG instance | When the agent needs direct web search without external API keys |
-| [**suno-pack**](skills/suno-pack/) | Turns a track idea into a Suno-ready package: concept document, style + lyrics prompts, and an instrumental variant tuned to v5.5 behavior | When you want to make music in Suno — a song, beat, anthem, or instrumental |
+| [**suno-pack**](skills/suno-pack/) | Turns a track idea into a Suno-ready package: concept document, per-version vocal + instrumental prompts (v5.5/v5.0/v4.5 via `--versions`), and a v4.5→v5.5 cover pipeline with slider settings | When you want to make music in Suno — a song, beat, anthem, or instrumental |
 
 ## Installation
 

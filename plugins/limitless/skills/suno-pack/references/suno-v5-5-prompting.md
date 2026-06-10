@@ -136,7 +136,68 @@ threads, March–June 2026). Layer ALL of these:
 |---|---|
 | Weirdness | 40–60% default; <20% commercial/safe; 30% for stubborn niche genres; >80% chaos/sample-fishing only |
 | Style Influence | 40–70% balanced; 80–100% strict adherence (use for niche genres v5.5 tries to normalize) |
-| Audio Influence | covers/remixes only; 50–80% typical |
+| Audio Influence | covers/remixes only; see Cover Workflow — behavior is unstable, start ~50% and sweep |
+
+## Per-Version Prompting (all models remain selectable)
+
+The three usable model families obey different parts of the prompt. Pick per
+goal — or chain them (see Cover Workflow).
+
+| | v4.5 | v5.0 | v5.5 |
+|---|---|---|---|
+| Obeys best | genre & structure (best adherence, esp. niche) | balance of adherence + quality | nuanced production descriptors |
+| Audio quality | weakest (thinner mix) | strong | best, but stem-friendly/unmastered |
+| Variance | low | moderate | highest |
+| Prompt shape | **lean**: short, genre-first, core instruments, BPM; conversational works but short-and-clear wins; repeat the genre name for stubborn niches | detailed descriptor stack (same as v5.5) | detailed descriptor stack; subtle descriptors actually land |
+| Style limit | detailed prompts supported; aim ≤500 chars | 1,000 chars | 1,000 chars |
+| Suggested sliders | W 30% · S 80–100% | W 40–50% · S 70% | W 45% · S 70–80% |
+| Notes | has Creative Prompt Boosting (magic icon); fewer vocal-hallucination complaints | negative prompting introduced here | personalization layers; sibilance; genre normalization |
+
+Metatags work identically across all three (the system predates v4.5's
+"Better Prompts in Lyrics" release). The lyrics file ports across versions;
+the **style prompt does not** — derive a lean variant for v4.5 rather than
+pasting the v5.5 descriptor stack.
+
+**v4.5 depth lives in `suno-v4-5-prompting.md`** — read it whenever
+generating v4.5 prompts: three working prompt styles (lean tags,
+conversational-narrative, structured-object), the v4.5+ production tools,
+the Enhance button, and era/slider interplay lore. This file stays the
+shared truth for metatags, limits, instrumentals, and the cover workflow.
+
+## Cover Workflow (author cheap, render rich)
+
+Community-converged pipeline for prompt-faithful + high-quality output:
+**generate on v4.5** (obedient, converges in few rolls) until the take is
+right, then **Cover that take on v5.5** to upgrade audio quality while
+keeping song, structure, and arrangement.
+
+Cover mechanics:
+
+- Cover takes the source track + a style prompt + the three sliders
+  (Audio Influence appears only with audio input).
+- Keep the cover style prompt **minimal** — genre, era, production character,
+  BPM. The style field is weakly honored during covers anyway; a long prompt
+  just adds drift surface. Do NOT restate structure (the audio carries it).
+- Lyrics are carried by the source audio; don't re-enter them.
+
+**Audio Influence is the unstable part.** Documented community results
+disagree because Suno has changed cover behavior between backend updates:
+
+- systematic v5 test (r/SunoAI): faithful covers BEST at A≈30%, W0, S0 —
+  the old v4.5-era "set A to 96–100%" intuition is inverted
+- other users: A=10% still produced near-identical clones with the style
+  field ignored entirely; weeks earlier the same settings behaved opposite
+- niche-genre upgrade flow: A 50–80% (up to 100% "if really stubborn")
+
+**Protocol:** start W 10–20% · S 20–40% · A 50%. One roll, then sweep only
+Audio Influence: cover hugs the source too hard → drop toward 30%; cover
+drifts away from the song → raise toward 80%. Change nothing else while
+sweeping. Expect 2–4 rolls to find the current sweet spot.
+
+Caveat: covering a track to *replace its vocals* (with a Voice/Persona) is
+unreliable in v5.5 — one slider controls both voice strength and audio
+influence, and the source vocal tends to dominate. Strip the vocal stem
+first if vocal replacement is the goal.
 
 ## v5.5 Behaviors & Workarounds (community-tested)
 
@@ -174,3 +235,11 @@ threads, March–June 2026). Layer ALL of these:
   "Why does v5.5 keep adding in lyrics...", "New v5.5 is insane BUT....",
   "I think I may have figured out how to get SUNO to write niche genres"
   (v4.5→cover workflow, slider settings)
+- help.suno.com art. 5782849/5782977/5804417 (v4.5 detailed style
+  instructions, lyrics prompts, Creative Prompt Boosting), art. 6141377
+  (Creative Sliders official)
+- r/SunoAI cover-behavior threads: "Version 5 Suno Covers Test and results"
+  (A≈30 sweet spot, systematic sweep), "Suno v5 Cover feature is completely
+  broken. Audio Influence at 10%..." (contradicting behavior after backend
+  updates), "5.5 Voice Influence over Audio Influence (Cover)" (single-slider
+  vocal-replacement problem)
