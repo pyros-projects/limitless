@@ -15,6 +15,7 @@ Supporting notes:
 - `2026-04-22-codie-addendum-mneme-product-boundary-and-compiled-layer.md` is the product-boundary correction this spec absorbs.
 - `2026-05-01-memanto-prior-art-for-mneme.md` captures the Memanto comparison and the product-surface ideas Mneme can borrow without changing its kernel.
 - `2026-06-09-hindsight-prior-art-for-mneme.md` captures the Hindsight comparison and the retrieval/consolidation mechanics Mneme can borrow without changing its file-first truth model.
+- `2026-06-10-claude-addendum-kg-crossrefs-and-routing-non-goal.md` adds KG cross-references for the Hindsight comparison and makes cross-project routing an explicit non-goal with a named future design. Reviewed by Codie 2026-06-10.
 
 This document is the source of truth when the supporting notes disagree.
 
@@ -101,6 +102,34 @@ namespace model, database-as-canonical-truth posture, mandatory memory-hoarding
 posture, ungated auto-belief formation, or broad v0 command surface. Mneme's
 advantage is local truth, repo-aware project memory, boot packets, and
 promotion gates.
+
+The knowledge graph reviewed Hindsight independently from the research side
+(arxiv:2512.12818). Three KG claims travel with the borrow list:
+
+- Hindsight's retain/recall/reflect and the KG's distill/connect/deepen are an
+  independent convergence on the same three-phase pipeline: capture with
+  context, relate what was captured, improve existing knowledge from new
+  understanding. Skipping a phase degrades predictably (no capture = no
+  persistence; no connection = orphaned facts; no improvement = stale
+  knowledge). Mneme's processing paths must keep all three phases reachable:
+  Path A covers capture, Paths B/C cover relate-and-improve. This convergence
+  is the strongest argument that the borrow list is mechanics, not fashion.
+- Hindsight reports 91.4% on LongMemEval versus Mem0's 49.0%, and the KG reads
+  that result as strong evidence for TEMPR's multi-strategy recall
+  architecture: semantic + BM25 + entity/link-graph traversal + temporal
+  retrieval, fused by RRF and reranked. Treat this as system-level evidence
+  for ADR-001's multi-arm retrieval bet, and as justification for deferring
+  graph/temporal arms to phase 3 rather than dropping them.
+- The KG's five-archetypes claim (flat logs, project memory banks, extracted
+  fact stores, temporal knowledge graphs, atomic insight graphs each excel at
+  exactly one retrieval target) explains why Mneme is a four-layer product and
+  not one store with views. The archetype Mneme deliberately defers is the
+  temporal/entity graph — phase 3, consistent with the Hindsight note.
+
+KG sources:
+`hindsight-s-retain-recall-reflect-pipeline-maps-almost-exactly-to-this-vault-s-distill-connect-deepen-pipeline`,
+`hybrid-search-with-rrf-outperforms-both-pure-keyword-and-pure-semantic-search-for-agent-memory`,
+`five-archetypes-of-agent-memory-organization-solve-fundamentally-different-knowledge-problems`.
 
 ---
 
@@ -363,6 +392,35 @@ Those are v2 features after the single-agent product proves reliable.
 
 ---
 
+## Cross-Project Routing Policy
+
+One vault with `memory/projects/<slug>/` gives v1 **pull-based** cross-project
+access: an agent can ask across projects because the layers share one
+retrieval surface. That is search, not routing.
+
+Routing — project A proactively telling project B "this thing I just learned
+matters to you" — is explicitly out of scope for v1 and v2-as-currently-phased.
+The KG records that no current system has built this layer; Mneme should not
+pretend to be the exception before its core loop is real.
+
+When routing is eventually attempted, the KG already names the candidate
+design, and the spec's existing requirements happen to be its prerequisites:
+
+- provenance fields on every record (already a v1 requirement) reframe routing
+  as a policy problem over origin tags rather than an architecture problem,
+- three-tier progressive disclosure (which project knows → what it knows →
+  full content) keeps cross-project lookup affordable in tokens,
+- boot-time overlap detection against other projects' compiled indexes is the
+  cheap first increment — routing at boot, not push at write.
+
+KG sources: `cross-corpus-routing-map`,
+`cross-corpus-knowledge-routing-is-a-fundamentally-different-problem-from-within-corpus-search`,
+`every-current-cross-project-memory-system-is-pull-based...`,
+`progressive-disclosure-for-cross-project-memory-lookup-uses-three-tiers...`,
+`provenance-metadata-reframes-cross-corpus-routing-as-a-policy-problem...`.
+
+---
+
 ## V1 Write-Safety Contract
 
 Version 1 may bind multiple hosts, but only ships conservative shared-vault
@@ -529,6 +587,8 @@ Success criteria:
 - no automatic remote push
 - no finetuning loop
 - no full multi-agent conflict semantics
+- no cross-project knowledge routing (pull-based access through the shared
+  vault is the v1 model; see Cross-Project Routing Policy)
 - no conversational derivation beyond presets
 - no large skill pack as the primary interface
 

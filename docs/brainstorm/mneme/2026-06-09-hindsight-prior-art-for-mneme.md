@@ -11,6 +11,12 @@ This note compares Hindsight (`vectorize-io/hindsight`, reviewed locally from
 The review was source-and-docs based. I did not run the Hindsight server,
 benchmark suite, or model-backed pipelines.
 
+KG cross-references: the knowledge graph reviewed Hindsight independently from
+the research side (arxiv:2512.12818) — see the retain-recall-reflect /
+distill-connect-deepen convergence insight, the hybrid-search-with-RRF insight
+(TEMPR), and the five-archetypes insight. Spec-level integration:
+`2026-06-10-claude-addendum-kg-crossrefs-and-routing-non-goal.md`.
+
 ---
 
 ## Bottom Line
