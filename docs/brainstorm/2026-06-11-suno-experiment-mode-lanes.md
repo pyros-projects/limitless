@@ -20,18 +20,26 @@ confirmation line before firing.
 
 | Invocation | Behavior |
 |---|---|
-| `--mode experimental` / "surprise me" | One **random** lane, picked among currently *eligible* lanes (no seed yet → random over 2/4/5; seed exists → over all five) |
+| `--mode experimental` / "surprise me" | One **random** lane — the dice roll over all five, always |
 | `--mode experimental 3` / "give me experiment 3" | That specific lane |
-| `--mode experimental list` / "list all experiments" | The menu: number, name, mutation axis, one-liner, cost, seed requirement, current eligibility |
+| `--mode experimental list` / "list all experiments" | The menu: number, name, mutation axis, one-liner, cost, requirements |
 | "tame it" (after a Lane 4 keeper) | Lane 4 step 2 on the chosen survivor |
 | "lane 1 again, baroque boom bap" / "re-roll friction, poles swapped" | Repeat invocations — depth is just asking again |
 
+**There is no fail state — it's experimentation.** A lane with an unmet
+requirement is never excluded, errored, or silently re-rolled. The
+requirement gets resolved in conversation and the experiment proceeds.
+
 Mechanics per invocation:
 
-1. If the lane needs a seed (1, 3) and none is chosen: the skill says
-   so and proposes candidates from observables (library keepers, prior
-   takes, run-log scorecards) — human picks, or orders a faithful seed
-   roll first.
+1. **Requirement resolution.** If the lane needs a seed (1, 3) and none
+   is chosen, the skill asks: generate the faithful pack now (~10
+   credits, 2 takes), pick one of your existing tracks (skill proposes
+   candidates from observables — library keepers, prior takes, run-log
+   scorecards; with thousands of tracks this is often the best option),
+   provide a clip id directly, or swap to another lane. Same pattern
+   for any future requirement (e.g. seed audio for benched lanes):
+   resolve, never refuse.
 2. Roll once. Run log written (request + result blocks, lane metadata:
    invariant, axis, expected failure). Take-aware download to `audio/`.
 3. Report take + scorecard row skeleton (concept survival ≥3, surprise
