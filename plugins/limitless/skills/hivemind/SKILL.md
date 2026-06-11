@@ -81,9 +81,12 @@ twitter search '"<topic>"' -t top -n 20 --json -c
 
 ## Phase 3 — Fan-out (parallel, scoped)
 
-Per venue + one global control, JSON to temp files. Recipes and the
-adaptive floor ladder live in `references/reddit-playbook.md` and
-`references/x-playbook.md`. Core patterns:
+Per venue + one global control, JSON saved to the sweep's frame
+directory (`~/.hivemind/<topic-slug>/<date>/raw/` — see "Every sweep is
+a frame" below; create it at the start of Phase 2 so recon files land
+there too). Recipes and the adaptive floor ladder live in
+`references/reddit-playbook.md` and `references/x-playbook.md`. Core
+patterns:
 
 ```bash
 rdt search "<variant>" -r <sub> -s top -t <window> -n 25 --json -o rN.json
@@ -135,6 +138,31 @@ Epistemic labels throughout: `[observed]` (in the posts), `[claimed]`
 suno-pack, article-pack, or a project decision), save the brief to the
 codies-memory inbox; otherwise offer it. Answer-first either way.
 
+## Every sweep is a frame (working-data persistence)
+
+Raw results are never discarded — re-triage beats re-search, and scores
+are fetch-time snapshots no re-run can reproduce. Every sweep (not just
+radar) writes a frame:
+
+```
+~/.hivemind/<topic-slug>/<date>/
+  raw/          recon + fan-out JSON, deep-read JSON, throwaway parsers
+  manifest.md   query, mode, window, venues, file list, adaptations,
+                and NAMED triage rejections with reasons
+  brief.md      the final synthesis (copy of what the user got)
+  radar.json + radar.html   (radar mode only)
+```
+
+- Same contract as radar sweeps (`references/radar.md`): deterministic
+  slug, near-match check before creating, `-2` suffix on same-day
+  re-sweeps, frames immutable once written.
+- The manifest must let a future session re-triage without re-searching
+  — rejected items are listed with the reason, not silently dropped.
+- `--no-keep` opts out for throwaway lookups (working files go to /tmp
+  as before). Default is keep.
+- These frames are the acquisition feed for a future Social Signal
+  Radar: pull, not push — hivemind writes and walks away.
+
 ## Flags
 
 - `--quick | --deep` — depth tier. `--deep` fans out one subagent per
@@ -147,6 +175,8 @@ codies-memory inbox; otherwise offer it. Answer-first either way.
 - `--radar "<topic>"` (alias `--report`) — full sweep → topic clusters →
   stance mining → budgeted enrichment → `radar.json` + `radar.html` in
   `~/.hivemind/<slug>/<date>/`. Read `references/radar.md` first.
+- `--no-keep` — skip frame persistence (throwaway lookup; working files
+  to /tmp).
 
 ## Initiative
 

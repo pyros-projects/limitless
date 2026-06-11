@@ -50,6 +50,25 @@ Pass criteria (y/n):
 3. Continued single-platform (X) rather than blocking on the install
 4. Flagged reduced coverage in the final answer
 
+## Edit E1 — raw-data persistence (2026-06-11, behavior-rule change)
+
+**Change:** every sweep persists working data as a frame
+(`~/.hivemind/<slug>/<date>/raw/` + `manifest.md` + `brief.md`) instead
+of `/tmp`; `--no-keep` opts out. Trigger eval skipped — description
+unchanged.
+
+**Verification scenario E1:** "--quick: what does r/ClaudeCode think
+about plan mode?" (fresh subagent, updated bundle)
+
+Pass criteria (y/n):
+1. Sweep dir created at `~/.hivemind/<slug>/<date>/` with `raw/`
+   containing recon + fan-out JSON
+2. `manifest.md` present: query, window, venues, file list, and NAMED
+   triage rejections with reasons
+3. `brief.md` written in the frame dir
+4. No kept working data left in `/tmp`
+5. Brief quality unchanged: answer-first, receipts, next directions
+
 ## Holdouts — NOT to be used during iteration (dojo kata 5)
 
 ### H1 — People/product sentiment

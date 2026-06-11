@@ -64,10 +64,13 @@ future Radar imports this file under its own admission contract.
 Default root `~/.hivemind` (Linux/macOS; `%USERPROFILE%\.hivemind` on
 Windows). Override: `HIVEMIND_DIR` env var.
 
+**All hivemind sweeps produce frames here** (see SKILL.md "Every sweep
+is a frame") — radar frames additionally carry `radar.json`/`radar.html`:
+
 ```
 ~/.hivemind/<topic-slug>/
-  2026-06-11/radar.json + radar.html
-  2026-06-28/radar.json + radar.html
+  2026-06-11/raw/ + manifest.md + brief.md + radar.json + radar.html
+  2026-06-28/raw/ + manifest.md + brief.md + radar.json + radar.html
   index.html                      ← regenerated each sweep (back catalog)
 ```
 

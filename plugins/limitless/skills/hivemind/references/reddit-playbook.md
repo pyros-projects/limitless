@@ -55,9 +55,12 @@ quote you keep. Max 3 kept items per author across the whole sweep.
 
 ## Known CLI quirks (observed in dojo pressure tests, v0.4.1)
 
-- `-o` files store the **raw Reddit listing** (`data.data.children[].data`),
-  not the compact `{ok, data}` shape stdout gives — parse both shapes or
-  use stdout redirection.
+- The **raw Reddit listing shape** (`data.data.children[].data`) appears
+  in `-o` files AND on stdout for subreddit-scoped searches and `rdt
+  read` (the compact `{ok, data}` shape is only reliable for unscoped
+  compact searches) — always parse shape-tolerantly.
+- rdt may append a `▸ More:` pagination hint line after the JSON —
+  parse with `json.JSONDecoder().raw_decode` or strip trailing lines.
 - `rdt read` has no `-o` — redirect stdout.
 - Unquoted multi-word global searches drift to r/all virality; quote the
   phrase (`"agent memory"`) for the recon pass.

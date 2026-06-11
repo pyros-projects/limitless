@@ -124,6 +124,33 @@ Score: 8/8 both runs · No description change needed. Row 4 shows the
 "best answer lives in threads" catch-all carries platform-less community
 questions; row 5 shows article-pack doesn't steal idea-sourcing prompts.
 
+## Edit E1 — raw-data persistence (2026-06-11, post-ship)
+
+**Loophole (caught by Pyro):** raw sweep data (recon, fan-out, deep-read
+comment trees, triage pool) was written to `/tmp` and discarded — only
+the synthesized brief survived. Re-triage required re-searching, and
+fetch-time scores made frames irreproducible. Radar was the only mode
+producing durable output.
+
+**Bounded edits:** SKILL.md — Phase 3 now targets the frame dir; new
+"Every sweep is a frame" section (`~/.hivemind/<slug>/<date>/raw/` +
+`manifest.md` with named triage rejections + `brief.md`; `--no-keep`
+opt-out); flags list. radar.md — sweep-series contract generalized to
+all sweeps. Trigger eval skipped: description unchanged.
+
+**Verification (scenario E1, fresh subagent, `--quick` plan-mode query):
+5/5.** Frame created with full raw/ (recon + 4 fan-out + 5 deep-reads +
+parsers), manifest with named rejections and adaptations, brief.md
+written, zero /tmp leftovers, brief quality unchanged (answer-first,
+receipts, 4 next directions). Bonus accuracy fix harvested: raw-listing
+shape applies to scoped-search stdout too + `▸ More:` pagination line —
+reddit-playbook updated.
+
+**Data rescue:** the three pre-edit sweeps (suno-experiment-techniques,
+suno-optimal-prompts 2.7M, agentic-knowledge-graphs raw 4.6M) were
+rescued from /tmp into proper frames with retroactive manifests before
+the edit landed.
+
 ## Known limitations
 
 - **X CLI server-side filter bugs** (top tab × min-likes/exclude/lang →
