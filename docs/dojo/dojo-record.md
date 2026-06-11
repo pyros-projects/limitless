@@ -19,6 +19,12 @@ workflow loop is exercised end-to-end by its first student (hivemind, see
 `docs/dojo/hivemind-record.md`). Loopholes found there that trace to dojo
 prose get fixed in dojo and logged here.
 
+## Loopholes closed (post-ship)
+
+| # | Loophole | Edit that closed it |
+|---|---|---|
+| 1 | Ship checklist covered root README but not the per-plugin README — hivemind's first ship left `plugins/limitless/README.md` stale (caught by Pyro, 2026-06-11) | `references/packaging.md`: added per-plugin README as checklist step 4 |
+
 ## Rejected fixes
 
 | # | Attempted edit | Why it didn't survive |

@@ -30,9 +30,12 @@ House style:
    entry's `description` the same way.
 3. Root `README.md` — limitless plugin table row: skill count and
    what-it-does cell.
-4. `/reload-plugins` — confirm the skill appears in the listing.
-5. Smoke-invoke once with a tiny real input.
-6. Write/finalize the dojo record (below), commit, push.
+4. Per-plugin `README.md` (`plugins/<plugin>/README.md`) — add the skill
+   to its table (What It Does / When to Reach For It). Missed on
+   hivemind's first ship — caught by Pyro 2026-06-11.
+5. `/reload-plugins` — confirm the skill appears in the listing.
+6. Smoke-invoke once with a tiny real input.
+7. Write/finalize the dojo record (below), commit, push.
 
 ## Dojo Record Template
 
