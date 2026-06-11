@@ -269,13 +269,18 @@ via `dials:use`. The discipline:
    three distant codes; a blind reader must match output to code. Fail →
    ladders are mush, recalibrate.
 
-Promotion path: a forged system that proves out gets PR'd into
-`plugins/dials/` as a preset — reference file + thin trigger wrapper —
-and must pass dojo on the way in, same as the originals.
+**Forge creates systems, never skills.** Its output is always a data
+file in the registry, runnable via `dials:use` immediately. Becoming a
+preset *skill* is a separate, manual step — the promotion path: the
+reference file gets PR'd into `plugins/dials/`, a thin trigger wrapper
+(~20 lines of SKILL.md) is hand-written for it, and it passes dojo on
+the way in, same as the originals.
 
-Forge's own acceptance test: it must be able to re-derive Explain-Style
-from scratch and produce something at least as good as the hand-built
-preset. If it can't, forge isn't done.
+Forge's own acceptance test: derive Explain-Style from scratch and
+produce ladders and anchors at least as good as this document's
+hand-drafted sketch (the sketch is the hand-built comparator — the
+shipped preset can't be, since forge is what builds it). The cold-read
+pass is the objective gate on top.
 
 ## Mechanics & Invocation Grammar
 
@@ -361,8 +366,12 @@ sensible option — inference tables are the propose flow's evidence.
    executor contract; validates packaging + the standard format.
 3. **`dials:forge`** — hardest; validates the format generatively and the
    discriminator/cold-read discipline.
-4. **`dials:explain`** — built *with* forge as its first real student
-   (dogfooding both at once).
+4. **`dials:explain`** — the first system to walk the full pipeline
+   end-to-end: forge derives Explain-Style into `~/.dials/` (judged
+   against this doc's hand-drafted sketch) → cold-read calibration →
+   promotion into the plugin (reference file + hand-written trigger
+   wrapper + dojo). Forge makes the system; the skill is the promotion
+   wrapper. Dogfoods forge *and* the promotion path at once.
 5. **`dials:critique`**, then **`dials:visual`** — same pipeline, now
    cheap. Visual additionally mines taste-skill/frontend-design/
    canvas-design for ladder and floor material.
