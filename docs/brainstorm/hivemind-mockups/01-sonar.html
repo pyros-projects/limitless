@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIVEMIND RADAR — AI AGENTS — SONAR SCOPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050b07;
+  --bg-deep:#020503;
+  --ink:#33ff77;
+  --ink-bright:#a8ffc9;
+  --ink-soft:#8fe6ab;
+  --dim:#1a5c33;
+  --dim-2:#0d2e1a;
+  --amber:#ffb000;
+  --red:#cc5b50;
+  --glow:0 0 8px rgba(51,255,119,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg-deep)}
+body{
+  background:
+    radial-gradient(ellipse 120% 90% at 50% -10%, rgba(26,92,51,.18), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;line-height:1.65;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* CRT scanlines */
+body::before{
+  content:"";position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0px, rgba(0,0,0,.22) 1px, transparent 1px, transparent 3px);
+  mix-blend-mode:multiply;
+}
+/* screen-curvature vignette */
+body::after{
+  content:"";position:fixed;inset:0;z-index:9001;pointer-events:none;
+  background:radial-gradient(ellipse 95% 92% at 50% 50%, transparent 58%, rgba(0,0,0,.28) 82%, rgba(0,0,0,.62) 100%);
+}
+::selection{background:var(--ink);color:var(--bg-deep)}
+a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dotted var(--dim)}
+a:hover{color:var(--ink-bright);border-bottom-color:var(--ink);text-shadow:var(--glow)}
+
+/* ============ HEADER ============ */
+header.console{
+  border-bottom:1px solid var(--dim);
+  background:linear-gradient(180deg, rgba(13,46,26,.35), rgba(5,11,7,0));
+  padding:22px 36px 16px;
+}
+.console-grid{max-width:1480px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 48px;align-items:flex-end;justify-content:space-between}
+h1.title{
+  font-family:'VT323',monospace;font-weight:400;
+  font-size:58px;line-height:.9;letter-spacing:2px;
+  color:var(--ink);text-shadow:var(--glow), 0 0 28px rgba(51,255,119,.22);
+}
+h1 .sub{display:block;font-size:22px;color:var(--dim);letter-spacing:6px;text-shadow:none;margin-top:4px}
+h1 .sub b{color:var(--amber);font-weight:400}
+.meta-block{font-size:12px;color:var(--ink-soft);text-align:right}
+.meta-block .row{white-space:nowrap}
+.meta-block .k{color:var(--dim);display:inline-block;min-width:84px;text-align:left;text-transform:uppercase;letter-spacing:1px}
+.meta-block .v{color:var(--ink)}
+.meta-block .mock{color:var(--amber)}
+@media(max-width:1024px){
+  h1.title{font-size:44px}
+  .meta-block{text-align:left}
+  .meta-block .row{white-space:normal}
+}
+
+/* ============ CHANNEL BUTTONS ============ */
+nav.channels{
+  display:flex;gap:18px;justify-content:center;align-items:center;
+  padding:18px 36px 14px;border-bottom:1px solid var(--dim-2);
+}
+.channel-btn{
+  font-family:'VT323',monospace;font-size:26px;letter-spacing:3px;
+  background:linear-gradient(180deg,#0a1a10,#06130b);
+  border:1px solid var(--dim);border-radius:3px;
+  color:var(--dim);cursor:pointer;
+  padding:8px 28px 10px 20px;
+  box-shadow:0 4px 0 #020805, inset 0 1px 0 rgba(51,255,119,.12);
+  transition:transform .08s, box-shadow .08s, color .15s, border-color .15s;
+  display:inline-flex;align-items:center;gap:12px;
+}
+.channel-btn .led{
+  width:9px;height:9px;border-radius:50%;
+  background:#10301c;border:1px solid #0a2012;flex:none;
+  transition:background .15s, box-shadow .15s;
+}
+.channel-btn .ch{font-size:15px;color:var(--dim);letter-spacing:2px}
+.channel-btn:hover{color:var(--ink-soft);border-color:var(--ink-soft)}
+.channel-btn.active{
+  color:var(--ink);border-color:var(--ink);
+  transform:translateY(3px);
+  box-shadow:0 1px 0 #020805, inset 0 3px 8px rgba(0,0,0,.7);
+  text-shadow:var(--glow);
+}
+.channel-btn.active .led{background:var(--ink);box-shadow:0 0 10px var(--ink), 0 0 3px var(--ink)}
+.channel-btn:focus-visible{outline:1px dashed var(--amber);outline-offset:3px}
+
+/* ============ VIEWS ============ */
+.view{display:none}
+.view.active{display:block;animation:powerOn .35s ease-out}
+@keyframes powerOn{
+  0%{opacity:0;filter:brightness(2.4) saturate(.3);transform:scaleY(.96)}
+  60%{opacity:1;filter:brightness(1.4)}
+  100%{opacity:1;filter:none;transform:none}
+}
+
+/* ============ MAP VIEW ============ */
+.map-grid{
+  max-width:1320px;margin:0 auto;
+  display:grid;grid-template-columns:minmax(0,1fr) 300px;
+  gap:8px 32px;align-items:start;
+  padding:26px 36px 8px;
+}
+@media(max-width:1100px){.map-grid{grid-template-columns:1fr}}
+.scope-wrap{position:relative;max-width:820px;margin:0 auto;width:100%}
+.scope-svg{width:100%;height:auto;display:block}
+/* rotating sweep beam — clipped to scope circle (r=345/800) */
+.sweep{
+  position:absolute;left:6.875%;top:6.875%;width:86.25%;height:86.25%;
+  border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+  background:conic-gradient(from 0deg,
+    rgba(51,255,119,0) 0deg,
+    rgba(51,255,119,0) 282deg,
+    rgba(51,255,119,.045) 300deg,
+    rgba(51,255,119,.14) 338deg,
+    rgba(51,255,119,.42) 355deg,
+    rgba(168,255,201,.85) 359.4deg,
+    rgba(220,255,235,.95) 360deg);
+  animation:sweepRot 6s linear infinite;
+}
+@keyframes sweepRot{to{transform:rotate(360deg)}}
+.scope-status{
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 18px;
+  max-width:820px;margin:2px auto 0;
+  font-size:11px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;
+}
+.scope-status .amber{color:var(--amber)}
+
+/* SVG scope internals */
+.ring{fill:none;stroke:var(--dim);stroke-width:1;opacity:.55}
+.ring.outer{stroke:var(--ink);opacity:.5;stroke-width:1.4}
+.polar{stroke:var(--dim);stroke-width:.7;opacity:.3}
+.tick{stroke:var(--dim);stroke-width:1}
+.tick.major{stroke:var(--ink);opacity:.7}
+.deg-label{font-family:'VT323',monospace;font-size:14px;fill:var(--dim)}
+.ring-label{font-family:'VT323',monospace;font-size:13px;fill:var(--dim);opacity:.8}
+.edge{fill:none;stroke:var(--ink);stroke-width:1.1;stroke-dasharray:2 7;opacity:.38;stroke-linecap:round}
+.center-dot{fill:var(--ink)}
+
+/* blips */
+.blip{cursor:pointer}
+.blip .core{
+  fill:var(--ink);
+  animation:pingCore 6s linear infinite;
+  animation-delay:var(--d);
+  transform-box:fill-box;transform-origin:center;
+}
+@keyframes pingCore{
+  0%{opacity:1;fill:#d6ffe6;filter:drop-shadow(0 0 14px rgba(51,255,119,.9))}
+  6%{opacity:1;fill:#33ff77;filter:drop-shadow(0 0 8px rgba(51,255,119,.6))}
+  45%{opacity:.5;fill:#33ff77;filter:none}
+  100%{opacity:.45;fill:#33ff77;filter:none}
+}
+.blip .halo{
+  fill:none;stroke:var(--ink);stroke-width:1.5;
+  transform-box:fill-box;transform-origin:center;
+  animation:pingHalo 6s linear infinite;
+  animation-delay:var(--d);
+}
+@keyframes pingHalo{
+  0%{opacity:.9;transform:scale(1)}
+  18%{opacity:0;transform:scale(2.1)}
+  100%{opacity:0;transform:scale(2.1)}
+}
+.blip .label{font-family:'VT323',monospace;font-size:19px;fill:var(--ink);letter-spacing:1px}
+.blip .heat-readout{font-family:'VT323',monospace;font-size:15px;fill:var(--ink-soft);opacity:.9}
+.blip .heat-readout .up{fill:var(--ink)}
+.blip .heat-readout.cooling{fill:var(--amber)}
+.blip:hover .label{fill:var(--ink-bright)}
+.blip:hover .core{opacity:1;animation-play-state:paused;fill:#d6ffe6}
+/* chevron trail (rising) */
+.chev{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* cooling ghost ring */
+.ghost{
+  fill:none;stroke:var(--amber);stroke-width:1.3;
+  transform-box:fill-box;transform-origin:center;
+  animation:ghostFade 3.2s ease-out infinite;
+}
+@keyframes ghostFade{
+  0%{opacity:.6;transform:scale(1.1)}
+  100%{opacity:0;transform:scale(2.4)}
+}
+/* targeting bracket on hover */
+.bracket{opacity:0;transition:opacity .12s}
+.bracket path{fill:none;stroke:var(--ink-bright);stroke-width:1.6}
+.bracket text{font-family:'VT323',monospace;font-size:13px;fill:var(--amber);letter-spacing:2px}
+.blip:hover .bracket{opacity:1}
+
+/* side panel */
+.side-panel{display:flex;flex-direction:column;gap:20px;padding-top:8px}
+.panel-box{border:1px solid var(--dim);background:rgba(13,46,26,.14)}
+.panel-box h3{
+  font-family:'VT323',monospace;font-weight:400;font-size:22px;letter-spacing:3px;
+  color:var(--ink);border-bottom:1px solid var(--dim-2);
+  padding:8px 14px 6px;text-shadow:var(--glow);
+}
+.panel-box .inner{padding:10px 14px 14px;font-size:12px;color:var(--ink-soft)}
+.legend-row{display:flex;align-items:center;gap:10px;margin:7px 0}
+.legend-row .sym{flex:none;width:34px;text-align:center;font-family:'VT323',monospace;font-size:18px}
+.legend-row .sym.green{color:var(--ink)}
+.legend-row .sym.amber{color:var(--amber)}
+.legend-row .sym.dim{color:var(--dim)}
+.roster-row{
+  display:flex;align-items:baseline;gap:10px;width:100%;
+  background:none;border:none;border-bottom:1px dotted var(--dim-2);
+  color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:12px;
+  padding:7px 2px;cursor:pointer;text-align:left;
+}
+.roster-row:hover{color:var(--ink-bright);background:rgba(51,255,119,.05)}
+.roster-row .num{color:var(--dim);font-family:'VT323',monospace;font-size:16px}
+.roster-row .name{flex:1;letter-spacing:.5px}
+.roster-row .heat{font-family:'VT323',monospace;font-size:16px;color:var(--ink)}
+.roster-row .heat.cooling{color:var(--amber)}
+
+/* intercept ticker */
+.ticker{
+  border-top:1px solid var(--dim-2);border-bottom:1px solid var(--dim-2);
+  margin-top:18px;overflow:hidden;position:relative;
+  background:rgba(13,46,26,.18);
+}
+.ticker .tag{
+  position:absolute;left:0;top:0;bottom:0;z-index:2;
+  display:flex;align-items:center;padding:0 16px;
+  background:var(--bg);border-right:1px solid var(--dim);
+  font-family:'VT323',monospace;font-size:19px;letter-spacing:2px;color:var(--amber);
+  white-space:nowrap;
+}
+.ticker-inner{
+  display:inline-flex;white-space:nowrap;padding:9px 0;
+  animation:tickScroll 52s linear infinite;will-change:transform;
+}
+.ticker:hover .ticker-inner{animation-play-state:paused}
+@keyframes tickScroll{to{transform:translateX(-50%)}}
+.ticker-inner span{font-size:13px;color:var(--ink-soft);padding:0 38px}
+.ticker-inner b{font-weight:400;color:var(--ink);font-family:'VT323',monospace;font-size:17px;letter-spacing:1px;padding-right:10px}
+.ticker-inner i{font-style:normal;color:var(--dim)}
+
+/* ============ DOSSIER VIEW ============ */
+.dossier{max-width:1020px;margin:0 auto;padding:34px 36px 70px;position:relative}
+.dossier-boot{font-size:13px;color:var(--ink-soft);margin-bottom:6px}
+.dossier-boot .ok{color:var(--ink)}
+.cursor{
+  display:inline-block;width:.62em;height:1.05em;vertical-align:text-bottom;
+  background:var(--ink);box-shadow:var(--glow);
+  animation:blink 1.06s steps(2,start) infinite;
+}
+@keyframes blink{to{visibility:hidden}}
+.ascii-div{
+  color:var(--dim);white-space:nowrap;overflow:hidden;
+  font-size:13px;line-height:1.2;margin:26px 0 18px;user-select:none;
+}
+.ascii-div .lbl{color:var(--ink);letter-spacing:1px}
+.stamp{
+  display:inline-block;font-family:'VT323',monospace;font-weight:400;
+  border:3px double currentColor;border-radius:3px;
+  padding:1px 12px 0;letter-spacing:3px;text-transform:uppercase;
+  transform:rotate(-6deg);opacity:.9;line-height:1.25;
+  mix-blend-mode:screen;
+}
+.stamp.weak{
+  color:var(--amber);font-size:34px;letter-spacing:5px;
+  position:absolute;right:30px;top:18px;transform:rotate(7deg);
+  opacity:.85;pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle at 38% 60%, #000 55%, rgba(0,0,0,.55) 75%, #000 100%);
+          mask-image:radial-gradient(circle at 38% 60%, #000 55%, rgba(0,0,0,.55) 75%, #000 100%);
+}
+.stamp.observed{color:var(--ink);font-size:19px;transform:rotate(-5deg)}
+.stamp.inferred{color:var(--amber);font-size:19px;transform:rotate(-5deg)}
+.contact{margin:0 0 14px;scroll-margin-top:24px;position:relative}
+.contact-head{
+  font-family:'VT323',monospace;font-weight:400;
+  font-size:37px;line-height:1;letter-spacing:2px;color:var(--ink);
+  text-shadow:var(--glow);margin:4px 0 2px;
+}
+.contact-head .cnum{color:var(--dim)}
+.contact-tags{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.contact-tags .t{border:1px solid var(--dim);padding:1px 8px;margin-right:8px;display:inline-block}
+.contact-tags .t.vel-rising{color:var(--ink);border-color:var(--ink)}
+.contact-tags .t.vel-steady{color:var(--ink-soft)}
+.contact-tags .t.vel-cooling{color:var(--amber);border-color:var(--amber)}
+.heatbar{font-family:'VT323',monospace;font-size:18px;color:var(--ink);letter-spacing:1px;margin:0 0 12px}
+.heatbar .empty{color:var(--dim-2)}
+.heatbar .lbl{color:var(--dim);font-size:14px;letter-spacing:2px;margin-right:8px}
+.synth{
+  color:var(--ink-soft);font-size:14.5px;max-width:78ch;
+  padding:2px 0 6px;margin-bottom:14px;
+}
+.synth .lead{color:var(--ink);font-weight:500}
+.xmit{
+  border-left:3px solid var(--ink);
+  background:linear-gradient(90deg, rgba(51,255,119,.05), rgba(51,255,119,0) 70%);
+  padding:10px 18px 11px;margin:12px 0;max-width:84ch;
+}
+.xmit .pfx{font-family:'VT323',monospace;font-size:20px;letter-spacing:1px;color:var(--ink);margin-right:8px}
+.xmit q{quotes:"“" "”";color:#bdf2d0;font-size:14px}
+.xmit .src{display:block;margin-top:5px;font-size:11.5px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+.xmit .src .plat{border:1px solid var(--dim);padding:0 6px;margin-right:8px;color:var(--ink-soft)}
+.xmit .src .eng{color:var(--ink-soft)}
+.xmit.neg{
+  border-left-color:var(--red);
+  background:linear-gradient(90deg, rgba(204,91,80,.07), rgba(204,91,80,0) 70%);
+}
+.xmit.neg .pfx{color:var(--red)}
+.xmit.neg .src .plat{border-color:var(--red);color:var(--red)}
+.fieldline{font-size:13px;margin:10px 0;max-width:84ch;color:var(--ink-soft)}
+.fieldline .k{
+  font-family:'VT323',monospace;font-size:17px;letter-spacing:2px;
+  margin-right:10px;
+}
+.fieldline.contested .k{color:var(--amber)}
+.fieldline.contested{color:#e8c98a}
+.fieldline.enrich .k{color:var(--dim)}
+.fieldline.enrich a, .fieldline.enrich .pseudo{color:var(--ink-soft);border-bottom:1px dotted var(--dim);margin-right:4px}
+.fieldline .sep{color:var(--dim-2);padding:0 8px}
+.synth-row{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.annex{margin-top:46px}
+.annex-quote{
+  border:1px solid var(--dim-2);border-left:3px solid var(--ink);
+  padding:14px 20px;margin:14px 0;max-width:84ch;
+  background:rgba(13,46,26,.12);
+}
+.annex-quote .q{font-family:'VT323',monospace;font-size:23px;line-height:1.25;color:var(--ink);text-shadow:var(--glow)}
+.annex-quote .a{display:block;margin-top:6px;font-size:12px;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+
+/* ============ FOOTER ============ */
+footer.deck{
+  border-top:1px solid var(--dim);
+  padding:18px 36px 26px;margin-top:10px;
+  font-size:12px;color:var(--dim);
+  background:linear-gradient(0deg, rgba(13,46,26,.3), rgba(5,11,7,0));
+}
+footer.deck .inner{max-width:1320px;margin:0 auto;display:flex;justify-content:space-between;gap:10px 40px;flex-wrap:wrap}
+footer.deck .warn{color:var(--amber)}
+footer.deck .eot{color:var(--ink-soft)}
+@media(max-width:1024px){
+  .dossier{padding:28px 22px 60px}
+  .map-grid{padding:20px 20px 8px}
+  .stamp.weak{position:static;display:inline-block;margin:10px 0;font-size:26px}
+}
+</style>
+</head>
+<body>
+<header class="console">
+  <div class="console-grid">
+    <h1 class="title">HIVEMIND RADAR
+      <span class="sub">QUERY: <b>"AI AGENTS"</b> · SOCIAL-SIGNAL SWEEP</span>
+    </h1>
+    <div class="meta-block" role="contentinfo" aria-label="sweep metadata">
+      <div class="row"><span class="k">WINDOW</span> <span class="v">2026-05-12 → 2026-06-11 (30d)</span></div>
+      <div class="row"><span class="k">PLATFORMS</span> <span class="v">X + REDDIT</span></div>
+      <div class="row"><span class="k">VOLUME</span> <span class="v">214 posts triaged / 41 deep-read</span></div>
+      <div class="row"><span class="k">GENERATED</span> <span class="v">2026-06-11</span> · hivemind v0.1 · <span class="mock">MOCKUP</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="channels" aria-label="view selector">
+  <button class="channel-btn active" id="btn-map" onclick="showView('map')"><span class="led"></span><span class="ch">CH-1</span>MAP</button>
+  <button class="channel-btn" id="btn-dossier" onclick="showView('dossier')"><span class="led"></span><span class="ch">CH-2</span>DOSSIER</button>
+</nav>
+
+<!-- ================= MAP VIEW ================= -->
+<section class="view active" id="view-map">
+  <div class="map-grid">
+    <div>
+      <div class="scope-wrap">
+        <svg class="scope-svg" viewBox="0 0 800 800" role="img" aria-label="radar scope of 7 topics">
+          <defs>
+            <radialGradient id="scopeGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#0e3a20" stop-opacity=".55"/>
+              <stop offset="55%" stop-color="#072314" stop-opacity=".35"/>
+              <stop offset="100%" stop-color="#031007" stop-opacity=".15"/>
+            </radialGradient>
+          </defs>
+
+          <!-- scope face -->
+          <circle cx="400" cy="400" r="345" fill="#04140b"/>
+          <circle cx="400" cy="400" r="345" fill="url(#scopeGlow)"/>
+
+          <!-- polar grid: radial lines every 30deg (generated by JS into #polar) -->
+          <g id="polar"></g>
+
+          <!-- range rings -->
+          <circle class="ring" cx="400" cy="400" r="86"/>
+          <circle class="ring" cx="400" cy="400" r="172"/>
+          <circle class="ring" cx="400" cy="400" r="258"/>
+          <circle class="ring outer" cx="400" cy="400" r="345"/>
+          <text class="ring-label" x="405" y="318">R1</text>
+          <text class="ring-label" x="405" y="232">R2</text>
+          <text class="ring-label" x="405" y="146">R3</text>
+
+          <!-- bezel ticks + degree labels (generated by JS) -->
+          <g id="bezel"></g>
+
+          <!-- edges per "connects" -->
+          <path class="edge" d="M431 315 Q340 313 229 280"/>
+          <path class="edge" d="M431 315 Q511 318 631 292"/>
+          <path class="edge" d="M510 464 Q423 492 344 553"/>
+          <path class="edge" d="M510 464 Q488 540 496 665"/>
+          <path class="edge" d="M344 553 Q304 414 229 280"/>
+          <path class="edge" d="M496 665 Q317 558 109 506"/>
+
+          <circle class="center-dot" cx="400" cy="400" r="3"/>
+
+          <!-- T1 AGENT MEMORY · heat 32 · rising · brg 020 -->
+          <g class="blip" data-target="contact-t1" style="--d:-5.667s" transform="translate(431,315)" tabindex="0" role="button" aria-label="Agent Memory Systems, heat 32, rising">
+            <circle class="halo" r="20"/>
+            <circle class="core" r="20"/>
+            <g class="chev" transform="rotate(20)" opacity=".85"><path d="M-7 -32 L0 -26 L7 -32"/></g>
+            <g class="chev" transform="rotate(20)" opacity=".5"><path d="M-7 -41 L0 -35 L7 -41"/></g>
+            <g class="chev" transform="rotate(20)" opacity=".25"><path d="M-7 -50 L0 -44 L7 -50"/></g>
+            <text class="label" x="-32" y="2" text-anchor="end">T1 AGENT MEMORY</text>
+            <text class="heat-readout" x="-32" y="19" text-anchor="end">HEAT 32 ▲</text>
+            <g class="bracket">
+              <path d="M-32 -24 L-32 -32 L-24 -32 M24 -32 L32 -32 L32 -24 M32 24 L32 32 L24 32 M-24 32 L-32 32 L-32 24"/>
+              <text x="0" y="-40" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T2 MCP EVERYWHERE · heat 28 · rising · brg 120 -->
+          <g class="blip" data-target="contact-t2" style="--d:-4s" transform="translate(510,464)" tabindex="0" role="button" aria-label="MCP Everywhere, heat 28, rising">
+            <circle class="halo" r="19"/>
+            <circle class="core" r="19"/>
+            <g class="chev" transform="rotate(120)" opacity=".85"><path d="M-7 -31 L0 -25 L7 -31"/></g>
+            <g class="chev" transform="rotate(120)" opacity=".5"><path d="M-7 -40 L0 -34 L7 -40"/></g>
+            <g class="chev" transform="rotate(120)" opacity=".25"><path d="M-7 -49 L0 -43 L7 -49"/></g>
+            <text class="label" x="-30" y="-4" text-anchor="end">T2 MCP EVERYWHERE</text>
+            <text class="heat-readout" x="-30" y="13" text-anchor="end">HEAT 28 ▲</text>
+            <g class="bracket">
+              <path d="M-31 -23 L-31 -31 L-23 -31 M23 -31 L31 -31 L31 -23 M31 23 L31 31 L23 31 M-23 31 L-31 31 L-31 23"/>
+              <text x="0" y="-39" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T3 SKILLS ECOSYSTEM · heat 24 · rising · brg 200 -->
+          <g class="blip" data-target="contact-t3" style="--d:-2.667s" transform="translate(344,553)" tabindex="0" role="button" aria-label="Claude Code Skills Ecosystem, heat 24, rising">
+            <circle class="halo" r="17"/>
+            <circle class="core" r="17"/>
+            <g class="chev" transform="rotate(200)" opacity=".85"><path d="M-7 -29 L0 -23 L7 -29"/></g>
+            <g class="chev" transform="rotate(200)" opacity=".5"><path d="M-7 -38 L0 -32 L7 -38"/></g>
+            <g class="chev" transform="rotate(200)" opacity=".25"><path d="M-7 -47 L0 -41 L7 -47"/></g>
+            <text class="label" x="26" y="2">T3 SKILLS ECOSYSTEM</text>
+            <text class="heat-readout" x="26" y="19">HEAT 24 ▲</text>
+            <g class="bracket">
+              <path d="M-29 -21 L-29 -29 L-21 -29 M21 -29 L29 -29 L29 -21 M29 21 L29 29 L21 29 M-21 29 L-29 29 L-29 21"/>
+              <text x="0" y="-37" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T4 MULTI-AGENT ORCH · heat 19 · steady · brg 305 -->
+          <g class="blip" data-target="contact-t4" style="--d:-0.917s" transform="translate(229,280)" tabindex="0" role="button" aria-label="Multi-Agent Orchestration, heat 19, steady">
+            <circle class="halo" r="15"/>
+            <circle class="core" r="15"/>
+            <text class="label" x="0" y="-42" text-anchor="middle">T4 MULTI-AGENT ORCH</text>
+            <text class="heat-readout" x="0" y="-25" text-anchor="middle">HEAT 19 ■</text>
+            <g class="bracket">
+              <path d="M-27 -19 L-27 -27 L-19 -27 M19 -27 L27 -27 L27 -19 M27 19 L27 27 L19 27 M-19 27 L-27 27 L-27 19"/>
+              <text x="0" y="38" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T5 CONTEXT ROT · heat 14 · rising · brg 065 -->
+          <g class="blip" data-target="contact-t5" style="--d:-4.917s" transform="translate(631,292)" tabindex="0" role="button" aria-label="Context Rot, heat 14, rising">
+            <circle class="halo" r="12"/>
+            <circle class="core" r="12"/>
+            <g class="chev" transform="rotate(65)" opacity=".85"><path d="M-7 -24 L0 -18 L7 -24"/></g>
+            <g class="chev" transform="rotate(65)" opacity=".5"><path d="M-7 -33 L0 -27 L7 -33"/></g>
+            <g class="chev" transform="rotate(65)" opacity=".25"><path d="M-7 -42 L0 -36 L7 -42"/></g>
+            <text class="label" x="0" y="36" text-anchor="middle">T5 CONTEXT ROT</text>
+            <text class="heat-readout" x="0" y="53" text-anchor="middle">HEAT 14 ▲</text>
+            <g class="bracket">
+              <path d="M-24 -16 L-24 -24 L-16 -24 M16 -24 L24 -24 L24 -16 M24 16 L24 24 L16 24 M-16 24 L-24 24 L-24 16"/>
+              <text x="0" y="-32" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T6 INJECTION PANIC · heat 11 · steady · brg 160 -->
+          <g class="blip" data-target="contact-t6" style="--d:-3.333s" transform="translate(496,665)" tabindex="0" role="button" aria-label="Prompt Injection Panic, heat 11, steady">
+            <circle class="halo" r="11"/>
+            <circle class="core" r="11"/>
+            <text class="label" x="0" y="36" text-anchor="middle">T6 INJECTION PANIC</text>
+            <text class="heat-readout" x="0" y="53" text-anchor="middle">HEAT 11 ■</text>
+            <g class="bracket">
+              <path d="M-23 -15 L-23 -23 L-15 -23 M15 -23 L23 -23 L23 -15 M23 15 L23 23 L15 23 M-15 23 L-23 23 L-23 15"/>
+              <text x="0" y="-31" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+
+          <!-- T7 LOCAL AGENTS · heat 8 · cooling · brg 250 -->
+          <g class="blip" data-target="contact-t7" style="--d:-1.833s" transform="translate(109,506)" tabindex="0" role="button" aria-label="Local Agents on Small Models, heat 8, cooling">
+            <circle class="ghost" r="17"/>
+            <circle class="ghost" r="17" style="animation-delay:1.6s"/>
+            <circle class="halo" r="10"/>
+            <circle class="core" r="10"/>
+            <text class="label" x="24" y="0">T7 LOCAL AGENTS</text>
+            <text class="heat-readout cooling" x="24" y="17">HEAT 8 ▼</text>
+            <g class="bracket">
+              <path d="M-22 -14 L-22 -22 L-14 -22 M14 -22 L22 -22 L22 -14 M22 14 L22 22 L14 22 M-14 22 L-22 22 L-22 14"/>
+              <text x="0" y="-30" text-anchor="middle">LOCK</text>
+            </g>
+          </g>
+        </svg>
+        <div class="sweep" aria-hidden="true"></div>
+      </div>
+      <div class="scope-status">
+        <span>SWEEP 6.0 SEC · GAIN AUTO · MODE SOCIAL-SIGNAL</span>
+        <span>RANGE = INVERSE HEAT · <span class="amber">▼ COOLING</span> · ▲ RISING · ■ STEADY</span>
+      </div>
+    </div>
+
+    <aside class="side-panel">
+      <div class="panel-box">
+        <h3>SCOPE LEGEND</h3>
+        <div class="inner">
+          <div class="legend-row"><span class="sym green">●</span> blip size = heat · closer to center = hotter</div>
+          <div class="legend-row"><span class="sym green">⌃⌃</span> chevron trail = rising velocity</div>
+          <div class="legend-row"><span class="sym amber">◌</span> amber ghost ring = cooling</div>
+          <div class="legend-row"><span class="sym dim">╌╌</span> dotted arc = connected chatter</div>
+          <div class="legend-row"><span class="sym green">⊕</span> click a blip → dossier entry</div>
+        </div>
+      </div>
+      <div class="panel-box">
+        <h3>CONTACT ROSTER</h3>
+        <div class="inner">
+          <button class="roster-row" data-target="contact-t1"><span class="num">01</span><span class="name">AGENT MEMORY SYSTEMS</span><span class="heat">32 ▲</span></button>
+          <button class="roster-row" data-target="contact-t2"><span class="num">02</span><span class="name">MCP EVERYWHERE</span><span class="heat">28 ▲</span></button>
+          <button class="roster-row" data-target="contact-t3"><span class="num">03</span><span class="name">CLAUDE CODE SKILLS ECOSYSTEM</span><span class="heat">24 ▲</span></button>
+          <button class="roster-row" data-target="contact-t4"><span class="num">04</span><span class="name">MULTI-AGENT ORCHESTRATION</span><span class="heat">19 ■</span></button>
+          <button class="roster-row" data-target="contact-t5"><span class="num">05</span><span class="name">CONTEXT ROT</span><span class="heat">14 ▲</span></button>
+          <button class="roster-row" data-target="contact-t6"><span class="num">06</span><span class="name">PROMPT INJECTION PANIC</span><span class="heat">11 ■</span></button>
+          <button class="roster-row" data-target="contact-t7"><span class="num">07</span><span class="name">LOCAL AGENTS ON SMALL MODELS</span><span class="heat cooling">8 ▼</span></button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="ticker" aria-label="priority intercepts">
+    <div class="tag">PRIORITY INTERCEPTS</div>
+    <div class="ticker-inner">
+      <span><b>INTERCEPT 01</b> "Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature." <i>— @evalwonk</i></span>
+      <span><b>INTERCEPT 02</b> "MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'." <i>— r/mcp</i></span>
+      <span><b>INTERCEPT 03</b> "Your multi-agent system is just one agent with extra latency until proven otherwise." <i>— @distsys_dan</i></span>
+      <span aria-hidden="true"><b>INTERCEPT 01</b> "Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature." <i>— @evalwonk</i></span>
+      <span aria-hidden="true"><b>INTERCEPT 02</b> "MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'." <i>— r/mcp</i></span>
+      <span aria-hidden="true"><b>INTERCEPT 03</b> "Your multi-agent system is just one agent with extra latency until proven otherwise." <i>— @distsys_dan</i></span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DOSSIER VIEW ================= -->
+<section class="view" id="view-dossier">
+  <div class="dossier">
+    <span class="stamp weak">WEAK EVIDENCE</span>
+    <p class="dossier-boot">&gt; CH-2 SELECTED · DECRYPTING SWEEP DOSSIER ........ <span class="ok">OK</span><br>
+    &gt; 7 CONTACTS TRACKED · SORTED BY HEAT DESC · WINDOW 30D <span class="cursor"></span></p>
+
+    <!-- CONTACT 01 -->
+    <article class="contact" id="contact-t1">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 01 · T1</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 01 —</span> AGENT MEMORY SYSTEMS</h2>
+      <div class="contact-tags"><span class="t">TYPE: TOOL</span><span class="t vel-rising">VELOCITY: RISING ▲</span><span class="t">CONNECTS: T4 · T5</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>██████████ 32</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Memory moved from demo feature to procurement checkbox this month. The fight is structure (KG vs files), not value.</p>
+        <span class="stamp inferred">[ INFERRED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Persistent memory is what finally makes agents feel like colleagues instead of goldfish — teams report real continuity wins.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/ClaudeAI · u/contextkeeper · <span class="eng">890↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>Most 'agent memory' is RAG with extra steps and a worse failure mode: confidently stale context.</q>
+        <span class="src">SRC: <span class="plat">X</span>@evalwonk · <span class="eng">1.2k likes</span></span></div>
+      <div class="fieldline contested"><span class="k">CONTESTED:</span> graph-based vs plain-file memory; no resolution, both camps ship.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://github.com/letta-ai/letta">github.com/letta-ai/letta ↗</a><span class="sep">·</span><a href="https://arxiv.org/abs/2604.11883">arxiv.org/abs/2604.11883 ("Memory Architectures for LLM Agents", May 2026) ↗</a></div>
+    </article>
+
+    <!-- CONTACT 02 -->
+    <article class="contact" id="contact-t2">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 02 · T2</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 02 —</span> MCP EVERYWHERE</h2>
+      <div class="contact-tags"><span class="t">TYPE: RELEASE</span><span class="t vel-rising">VELOCITY: RISING ▲</span><span class="t">CONNECTS: T3 · T6</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>█████████<span class="empty">░</span> 28</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> MCP is now plumbing, not news. Discourse shifted from "what is it" to "who vets it."</p>
+        <span class="stamp observed">[ OBSERVED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>MCP hitting critical mass — every SaaS now ships a server; integration time collapsed from weeks to an afternoon.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/mcp · u/portforward · <span class="eng">640↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>An MCP server for everything means an attack surface for everything. Nobody is auditing these.</q>
+        <span class="src">SRC: <span class="plat">X</span>@secfault · <span class="eng">980 likes</span></span></div>
+      <div class="fieldline contested"><span class="k">CONTESTED:</span> registry quality (spam servers) vs open growth.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://github.com/modelcontextprotocol/servers">github.com/modelcontextprotocol/servers ↗</a><span class="sep">·</span><span class="pseudo">MCP spec changelog 2026-05</span></div>
+    </article>
+
+    <!-- CONTACT 03 -->
+    <article class="contact" id="contact-t3">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 03 · T3</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 03 —</span> CLAUDE CODE SKILLS ECOSYSTEM</h2>
+      <div class="contact-tags"><span class="t">TYPE: TOOL</span><span class="t vel-rising">VELOCITY: RISING ▲</span><span class="t">CONNECTS: T2 · T4</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>████████<span class="empty">░░</span> 24</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Skills are the new plugins; the discourse is a marketplace-curation debate with one viral take per week.</p>
+        <span class="stamp observed">[ OBSERVED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Skills turned my CLI into a team of specialists. The marketplace moment is here.</q>
+        <span class="src">SRC: <span class="plat">X</span>@tooluser · <span class="eng">2.1k likes</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>90% of published skills are README wrappers. Discovery is broken without quality signals.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/ClaudeCode · u/skillskeptic · <span class="eng">410↑</span></span></div>
+      <div class="fieldline contested"><span class="k">CONTESTED:</span> open marketplace vs curation.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://github.com/anthropics/claude-code">github.com/anthropics/claude-code ↗</a><span class="sep">·</span><span class="pseudo">awesome-claude-skills list</span></div>
+    </article>
+
+    <!-- CONTACT 04 -->
+    <article class="contact" id="contact-t4">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 04 · T4</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 04 —</span> MULTI-AGENT ORCHESTRATION</h2>
+      <div class="contact-tags"><span class="t">TYPE: TECHNIQUE</span><span class="t vel-steady">VELOCITY: STEADY ■</span><span class="t">CONNECTS: T1 · T3</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>██████<span class="empty">░░░░</span> 19</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Steady drumbeat, not hype spike — practitioners trading patterns, skeptics citing prod failures. Both right at different scales.</p>
+        <span class="stamp inferred">[ INFERRED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Orchestrator + specialist subagents cut our pipeline cost 60% vs one mega-prompt.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/AI_Agents · u/swarmherd · <span class="eng">530↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>Every multi-agent demo dies in production. Coordination overhead eats the gains.</q>
+        <span class="src">SRC: <span class="plat">X</span>@distsys_dan · <span class="eng">760 likes</span></span></div>
+      <div class="fieldline contested"><span class="k">CONTESTED:</span> when fan-out beats a single strong model.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://arxiv.org/abs/2605.02991">arxiv.org/abs/2605.02991 (orchestration patterns survey) ↗</a></div>
+    </article>
+
+    <!-- CONTACT 05 -->
+    <article class="contact" id="contact-t5">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 05 · T5</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 05 —</span> CONTEXT ROT</h2>
+      <div class="contact-tags"><span class="t">TYPE: DEBATE</span><span class="t vel-rising">VELOCITY: RISING ▲</span><span class="t">CONNECTS: T1</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>████<span class="empty">░░░░░░</span> 14</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Fast-rising vocabulary battle; the term is winning even where the diagnosis is disputed.</p>
+        <span class="stamp observed">[ OBSERVED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Naming it 'context rot' finally gives teams language for why long sessions degrade.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/LocalLLaMA · u/tokenbudget · <span class="eng">380↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>It's not rot, it's bad context management. Stop blaming the model for your prompt hygiene.</q>
+        <span class="src">SRC: <span class="plat">X</span>@ctxwindow · <span class="eng">540 likes</span></span></div>
+      <div class="fieldline contested"><span class="k">CONTESTED:</span> model limitation vs operator error.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://arxiv.org/abs/2603.17440">arxiv.org/abs/2603.17440 (long-context degradation study) ↗</a></div>
+    </article>
+
+    <!-- CONTACT 06 -->
+    <article class="contact" id="contact-t6">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 06 · T6</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 06 —</span> PROMPT INJECTION PANIC</h2>
+      <div class="contact-tags"><span class="t">TYPE: NEWS</span><span class="t vel-steady">VELOCITY: STEADY ■</span><span class="t">CONNECTS: T2</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>███<span class="empty">░░░░░░░</span> 11</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Security discourse is reactive and event-driven; expect a spike with every disclosure.</p>
+        <span class="stamp observed">[ OBSERVED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Good week for security: three major agent frameworks shipped injection mitigations.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/netsec · u/escapeseq · <span class="eng">290↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>Mitigations are theater while agents can still exfiltrate via any tool with network access.</q>
+        <span class="src">SRC: <span class="plat">X</span>@redteamtea · <span class="eng">1.5k likes</span></span></div>
+      <div class="fieldline contested"><span class="k">BACKGROUND:</span> triggered by a May 2026 disclosed exploit chain in a popular MCP server.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <span class="pseudo">disclosure writeup</span><span class="sep">·</span><span class="pseudo">OWASP LLM Top 10 (2026 update)</span></div>
+    </article>
+
+    <!-- CONTACT 07 -->
+    <article class="contact" id="contact-t7">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">CONTACT 07 · T7</span> ╞═══════════════════════════════════════════════════════════════</div>
+      <h2 class="contact-head"><span class="cnum">CONTACT 07 —</span> LOCAL AGENTS ON SMALL MODELS</h2>
+      <div class="contact-tags"><span class="t">TYPE: TECHNIQUE</span><span class="t vel-cooling">VELOCITY: COOLING ▼</span><span class="t">CONNECTS: T6</span></div>
+      <div class="heatbar"><span class="lbl">HEAT</span>██<span class="empty">░░░░░░░░</span> 8</div>
+      <div class="synth-row">
+        <p class="synth"><span class="lead">SYNTHESIS //</span> Real but niche; conversation migrated to dedicated communities, mainstream attention cooled.</p>
+        <span class="stamp observed">[ OBSERVED ]</span>
+      </div>
+      <div class="xmit pos"><span class="pfx">[+] XMIT</span><q>Qwen-flavored 8B models now run useful agent loops fully offline. Privacy people are thrilled.</q>
+        <span class="src">SRC: <span class="plat">REDDIT</span>r/LocalLLaMA · u/airgapped · <span class="eng">310↑</span></span></div>
+      <div class="xmit neg"><span class="pfx">[−] XMIT</span><q>Local agents remain a hobby. Tool-calling reliability under 30B is still a coin flip.</q>
+        <span class="src">SRC: <span class="plat">X</span>@gpupoor · <span class="eng">420 likes</span></span></div>
+      <div class="fieldline contested"><span class="k">COOLING NOTE:</span> mentions down ~40% vs April.</div>
+      <div class="fieldline enrich"><span class="k">ENRICHMENT:</span> <a href="https://github.com/ollama/ollama">github.com/ollama/ollama ↗</a><span class="sep">·</span><span class="pseudo">r/LocalLLaMA weekly agents thread</span></div>
+    </article>
+
+    <!-- ANNEX A: PRIORITY INTERCEPTS -->
+    <div class="annex">
+      <div class="ascii-div">═══════════════╡ <span class="lbl">ANNEX A · PRIORITY INTERCEPTS</span> ╞════════════════════════════════════════════════</div>
+      <div class="annex-quote"><span class="q">"Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature."</span><span class="a">INTERCEPT 01 · @evalwonk · X</span></div>
+      <div class="annex-quote"><span class="q">"MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'."</span><span class="a">INTERCEPT 02 · r/mcp · REDDIT</span></div>
+      <div class="annex-quote"><span class="q">"Your multi-agent system is just one agent with extra latency until proven otherwise."</span><span class="a">INTERCEPT 03 · @distsys_dan · X</span></div>
+    </div>
+
+    <div class="ascii-div">═══════════════╡ <span class="lbl">END OF DOSSIER</span> ╞═══════════════════════════════════════════════════════════════</div>
+  </div>
+</section>
+
+<footer class="deck">
+  <div class="inner">
+    <span class="warn">⚠ Social media is a weak-evidence surface — stances are sentiment, not validation.</span>
+    <span>Backed by radar.json (Social-Signal-Radar-compatible)</span>
+    <span class="eot">END OF TRANSMISSION <span class="cursor"></span></span>
+  </div>
+</footer>
+
+<script>
+function showView(name){
+  document.getElementById('view-map').classList.toggle('active', name === 'map');
+  document.getElementById('view-dossier').classList.toggle('active', name === 'dossier');
+  document.getElementById('btn-map').classList.toggle('active', name === 'map');
+  document.getElementById('btn-dossier').classList.toggle('active', name === 'dossier');
+  if(name === 'map'){ window.scrollTo(0, 0); }
+}
+
+/* blips + roster rows -> dossier entry */
+document.querySelectorAll('[data-target]').forEach(function(el){
+  function go(){
+    showView('dossier');
+    var t = document.getElementById(el.getAttribute('data-target'));
+    if(t){ requestAnimationFrame(function(){ t.scrollIntoView({behavior:'smooth', block:'start'}); }); }
+  }
+  el.addEventListener('click', go);
+  el.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); }
+  });
+});
+
+/* bezel: tick marks every 5deg, degree labels + faint polar spokes every 30deg */
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  var bez = document.getElementById('bezel');
+  var pol = document.getElementById('polar');
+  var cx = 400, cy = 400;
+  function pt(r, deg){
+    var a = deg * Math.PI / 180;
+    return [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+  }
+  for(var d = 0; d < 360; d += 5){
+    var major = (d % 30 === 0);
+    var p1 = pt(345, d), p2 = pt(major ? 358 : 352, d);
+    var ln = document.createElementNS(NS, 'line');
+    ln.setAttribute('x1', p1[0].toFixed(1)); ln.setAttribute('y1', p1[1].toFixed(1));
+    ln.setAttribute('x2', p2[0].toFixed(1)); ln.setAttribute('y2', p2[1].toFixed(1));
+    ln.setAttribute('class', major ? 'tick major' : 'tick');
+    bez.appendChild(ln);
+    if(major){
+      var lp = pt(376, d);
+      var tx = document.createElementNS(NS, 'text');
+      tx.setAttribute('x', lp[0].toFixed(1));
+      tx.setAttribute('y', (lp[1] + 5).toFixed(1));
+      tx.setAttribute('text-anchor', 'middle');
+      tx.setAttribute('class', 'deg-label');
+      tx.textContent = ('00' + d).slice(-3);
+      bez.appendChild(tx);
+      var q = pt(345, d);
+      var rl = document.createElementNS(NS, 'line');
+      rl.setAttribute('x1', cx); rl.setAttribute('y1', cy);
+      rl.setAttribute('x2', q[0].toFixed(1)); rl.setAttribute('y2', q[1].toFixed(1));
+      rl.setAttribute('class', 'polar');
+      pol.appendChild(rl);
+    }
+  }
+})();
+</script>
+</body>
+</html>

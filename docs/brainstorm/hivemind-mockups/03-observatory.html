@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Observatory — hivemind --radar · AI Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg0: #070b14;
+    --bg1: #0c1322;
+    --ink: #e8e6df;
+    --ink-dim: rgba(232, 230, 223, 0.62);
+    --ink-faint: rgba(232, 230, 223, 0.38);
+    --line: rgba(232, 230, 223, 0.14);
+    --teal: #4fd8b8;
+    --rose: #e0697e;
+    --amber: #d9a44a;
+    --serif: "Instrument Serif", Georgia, serif;
+    --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: linear-gradient(160deg, var(--bg0) 0%, var(--bg1) 55%, #0a101c 100%);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---------- atmosphere: nebula + starfield ---------- */
+  .nebula {
+    position: fixed; inset: 0; z-index: -3; pointer-events: none;
+    background:
+      radial-gradient(900px 620px at 16% 10%, rgba(38, 104, 92, 0.16), transparent 62%),
+      radial-gradient(1100px 720px at 86% 82%, rgba(128, 88, 36, 0.11), transparent 64%),
+      radial-gradient(760px 540px at 62% 28%, rgba(52, 82, 122, 0.10), transparent 60%);
+  }
+  .stars, .stars2 {
+    position: fixed; top: -10px; left: -10px; width: 1px; height: 1px;
+    border-radius: 50%; z-index: -2; pointer-events: none; background: transparent;
+  }
+  .stars {
+    box-shadow:
+      4vw 7vh 0 0 rgba(232,230,223,.34),   11vw 21vh 0 0 rgba(232,230,223,.22),
+      7vw 44vh 0 0 rgba(232,230,223,.30),  3vw 67vh 0 0 rgba(232,230,223,.20),
+      9vw 88vh 0 0 rgba(232,230,223,.28),  16vw 12vh 0 0 rgba(232,230,223,.22),
+      14vw 53vh 0 0 rgba(232,230,223,.32), 19vw 78vh 0 0 rgba(232,230,223,.20),
+      23vw 33vh 0 0 rgba(232,230,223,.26), 27vw 9vh  0 0 rgba(232,230,223,.20),
+      26vw 61vh 0 0 rgba(232,230,223,.30), 31vw 84vh 0 0 rgba(232,230,223,.22),
+      34vw 24vh 0 0 rgba(232,230,223,.28), 38vw 47vh 0 0 rgba(232,230,223,.20),
+      37vw 71vh 0 0 rgba(232,230,223,.26), 43vw 15vh 0 0 rgba(232,230,223,.30),
+      45vw 58vh 0 0 rgba(232,230,223,.20), 48vw 92vh 0 0 rgba(232,230,223,.24),
+      52vw 36vh 0 0 rgba(232,230,223,.30), 55vw 6vh  0 0 rgba(232,230,223,.22),
+      57vw 64vh 0 0 rgba(232,230,223,.26), 61vw 81vh 0 0 rgba(232,230,223,.20),
+      63vw 27vh 0 0 rgba(232,230,223,.32), 67vw 49vh 0 0 rgba(232,230,223,.22),
+      69vw 12vh 0 0 rgba(232,230,223,.26), 72vw 73vh 0 0 rgba(232,230,223,.20),
+      76vw 39vh 0 0 rgba(232,230,223,.30), 79vw 90vh 0 0 rgba(232,230,223,.22),
+      81vw 18vh 0 0 rgba(232,230,223,.26), 84vw 56vh 0 0 rgba(232,230,223,.20),
+      88vw 8vh  0 0 rgba(232,230,223,.30), 90vw 68vh 0 0 rgba(232,230,223,.24),
+      93vw 31vh 0 0 rgba(232,230,223,.28), 96vw 83vh 0 0 rgba(232,230,223,.20),
+      98vw 47vh 0 0 rgba(232,230,223,.26), 50vw 76vh 0 0 rgba(232,230,223,.18);
+  }
+  .stars2 {
+    width: 2px; height: 2px;
+    box-shadow:
+      8vw 31vh  0 0 rgba(232,230,223,.40), 21vw 66vh 0 0 rgba(232,230,223,.34),
+      18vw 5vh  0 0 rgba(79,216,184,.30),  33vw 91vh 0 0 rgba(232,230,223,.30),
+      41vw 38vh 0 0 rgba(232,230,223,.38), 47vw 10vh 0 0 rgba(217,164,74,.28),
+      59vw 55vh 0 0 rgba(232,230,223,.34), 66vw 86vh 0 0 rgba(232,230,223,.28),
+      74vw 22vh 0 0 rgba(232,230,223,.40), 83vw 44vh 0 0 rgba(79,216,184,.26),
+      91vw 14vh 0 0 rgba(232,230,223,.34), 95vw 62vh 0 0 rgba(232,230,223,.28),
+      28vw 50vh 0 0 rgba(232,230,223,.32), 13vw 95vh 0 0 rgba(217,164,74,.24),
+      64vw 3vh  0 0 rgba(232,230,223,.30), 86vw 96vh 0 0 rgba(232,230,223,.26);
+  }
+
+  .page {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 0 56px 0;
+  }
+
+  .mono { font-family: var(--mono); }
+
+  /* ---------- masthead ---------- */
+  .masthead {
+    padding: 44px 0 28px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px 48px;
+    align-items: end;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 14px;
+  }
+  .eyebrow .sep { color: var(--ink-faint); padding: 0 6px; }
+  .masthead h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(44px, 4.6vw, 64px);
+    line-height: 1.02;
+    letter-spacing: 0.005em;
+  }
+  .masthead h1 .q { font-style: italic; color: var(--teal); }
+  .subline {
+    margin-top: 10px;
+    font-size: 15.5px;
+    color: var(--ink-dim);
+    max-width: 60ch;
+  }
+  .sweepmeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    padding: 18px 0 4px;
+    grid-column: 1 / -1;
+  }
+  .sweepmeta .cell {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.7;
+  }
+  .sweepmeta .k {
+    display: block;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 9.5px;
+    color: var(--ink-faint);
+  }
+  .sweepmeta .v { color: var(--ink-dim); }
+  .sweepmeta .v b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- instrument switch ---------- */
+  .switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(232, 230, 223, 0.22);
+    border-radius: 8px;
+    padding: 4px;
+    background: rgba(7, 11, 20, 0.55);
+    box-shadow: inset 0 1px 0 rgba(232,230,223,0.05), 0 0 24px rgba(0,0,0,0.4);
+  }
+  .sw-btn {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: color .25s ease, background .25s ease, box-shadow .25s ease;
+  }
+  .sw-btn .lamp {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(232,230,223,0.22);
+    transition: background .25s ease, box-shadow .25s ease;
+  }
+  .sw-btn:hover { color: var(--ink); }
+  .sw-btn[aria-pressed="true"] {
+    color: var(--teal);
+    background: rgba(79, 216, 184, 0.09);
+    border-color: rgba(79, 216, 184, 0.35);
+    box-shadow: 0 0 18px rgba(79, 216, 184, 0.12), inset 0 0 12px rgba(79,216,184,0.06);
+  }
+  .sw-btn[aria-pressed="true"] .lamp {
+    background: var(--teal);
+    box-shadow: 0 0 8px rgba(79, 216, 184, 0.9);
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ---------- MAP: the star chart plate ---------- */
+  #view-map { padding: 40px 0 24px; }
+  .plate {
+    border: 1px solid rgba(232, 230, 223, 0.18);
+    outline: 1px solid rgba(232, 230, 223, 0.06);
+    outline-offset: 7px;
+    border-radius: 3px;
+    background:
+      radial-gradient(720px 460px at 30% 32%, rgba(38, 104, 92, 0.10), transparent 62%),
+      radial-gradient(820px 520px at 78% 72%, rgba(128, 88, 36, 0.08), transparent 62%),
+      linear-gradient(170deg, rgba(10, 16, 28, 0.92), rgba(7, 11, 20, 0.96));
+    padding: 10px 10px 0;
+    margin: 0 8px;
+  }
+  .plate svg { display: block; width: 100%; height: auto; }
+  .plate-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    border-top: 1px solid rgba(232, 230, 223, 0.10);
+    padding: 14px 14px 16px;
+    flex-wrap: wrap;
+  }
+  .plate-caption .title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 21px;
+    color: var(--ink);
+  }
+  .plate-caption .subtitle {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+  .legend {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-dim);
+  }
+  .legend .li { display: inline-flex; align-items: center; gap: 8px; }
+  .lg-dot { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle, #eef4f0 0%, rgba(79,216,184,0.5) 55%, transparent 75%); }
+  .lg-tail { width: 22px; height: 2px; background: linear-gradient(90deg, rgba(79,216,184,0.85), transparent); }
+  .lg-ring { width: 11px; height: 11px; border-radius: 50%; border: 1px dashed rgba(217,164,74,0.8); }
+  .lg-line { width: 22px; height: 0; border-top: 1px solid rgba(232,230,223,0.35); }
+  .map-hint {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 18px 0 4px;
+  }
+  .map-hint .tick { color: var(--teal); }
+
+  /* SVG internals */
+  .grid line { stroke: rgba(232, 230, 223, 0.045); stroke-width: 1; }
+  .grid .ecliptic {
+    fill: none;
+    stroke: rgba(232, 230, 223, 0.08);
+    stroke-width: 1;
+    stroke-dasharray: 3 9;
+  }
+  .grid text {
+    font-family: var(--mono);
+    font-size: 9px;
+    fill: rgba(232, 230, 223, 0.26);
+    letter-spacing: 0.1em;
+  }
+  .constellation line {
+    stroke: rgba(232, 230, 223, 0.16);
+    stroke-width: 1;
+  }
+  .bgstar { fill: #e8e6df; }
+  .twinkle { animation: twinkle 6s ease-in-out infinite; }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.12; }
+    50% { opacity: 0.65; }
+  }
+
+  .star { cursor: pointer; outline: none; }
+  .star .halo { animation: pulse 5.6s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  .star .core { transition: filter .3s ease; }
+  .star:hover .core, .star:focus-visible .core { filter: brightness(1.25); }
+  .star .label-name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    fill: var(--ink);
+    text-anchor: middle;
+  }
+  .star .label-mag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+  }
+  .star.rising .label-mag { fill: var(--teal); }
+  .star.steady .label-mag { fill: rgba(232, 230, 223, 0.55); }
+  .star.cooling .label-mag { fill: var(--amber); }
+
+  .star .cross line {
+    stroke: rgba(232, 230, 223, 0.0);
+    stroke-width: 1;
+    transition: stroke .25s ease;
+  }
+  .star:hover .cross line, .star:focus-visible .cross line { stroke: rgba(232, 230, 223, 0.38); }
+
+  .star .tip {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    transform: translateY(4px);
+  }
+  .star:hover .tip, .star:focus-visible .tip { opacity: 1; transform: translateY(0); }
+  .tip rect {
+    fill: rgba(7, 11, 20, 0.93);
+    stroke: rgba(232, 230, 223, 0.25);
+    stroke-width: 1;
+  }
+  .tip .tipname {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    fill: var(--ink);
+  }
+  .tip .tipdata {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    fill: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+  .fade-ring {
+    fill: none;
+    stroke: rgba(217, 164, 74, 0.55);
+    stroke-width: 1;
+    stroke-dasharray: 4 6;
+    animation: fadering 7s ease-in-out infinite;
+  }
+  @keyframes fadering {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.12; }
+  }
+
+  /* ---------- LOG: the observation report ---------- */
+  #view-log { padding: 44px 0 16px; }
+  .log-grid {
+    display: grid;
+    grid-template-columns: 268px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  .rail {
+    position: sticky;
+    top: 28px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: rgba(7, 11, 20, 0.55);
+    padding: 20px 0 14px;
+  }
+  .rail-h {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0 18px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .toc { list-style: none; padding: 8px 0; }
+  .toc a {
+    display: grid;
+    grid-template-columns: 16px 1fr 24px;
+    grid-template-rows: auto auto;
+    gap: 2px 10px;
+    align-items: center;
+    padding: 9px 18px;
+    text-decoration: none;
+    color: var(--ink-dim);
+    border-left: 2px solid transparent;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .toc a:hover { color: var(--ink); background: rgba(232, 230, 223, 0.03); }
+  .toc a.active {
+    color: var(--ink);
+    background: rgba(79, 216, 184, 0.06);
+    border-left-color: var(--teal);
+  }
+  .toc .vel { font-family: var(--mono); font-size: 12px; grid-row: 1 / 3; }
+  .toc .vel.rising { color: var(--teal); }
+  .toc .vel.steady { color: rgba(232, 230, 223, 0.5); }
+  .toc .vel.cooling { color: var(--amber); }
+  .toc .name { font-size: 13.5px; line-height: 1.3; }
+  .toc .mag {
+    font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint);
+    grid-row: 1 / 3; text-align: right;
+  }
+  .toc .bar {
+    grid-column: 2 / 3;
+    height: 3px;
+    background: rgba(232, 230, 223, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .toc .bar i {
+    display: block; height: 100%;
+    background: linear-gradient(90deg, rgba(79, 216, 184, 0.85), rgba(79, 216, 184, 0.35));
+    border-radius: 2px;
+  }
+  .toc a[data-vel="cooling"] .bar i { background: linear-gradient(90deg, rgba(217,164,74,0.85), rgba(217,164,74,0.3)); }
+  .toc a[data-vel="steady"] .bar i { background: linear-gradient(90deg, rgba(232,230,223,0.55), rgba(232,230,223,0.18)); }
+  .rail-note {
+    padding: 12px 18px 2px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    line-height: 1.8;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+
+  .log-main { min-width: 0; }
+  .log-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .log-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 1.1;
+    margin-bottom: 40px;
+  }
+  .log-title em { color: var(--teal); }
+
+  .entry {
+    border-top: 1px solid var(--line);
+    padding: 38px 0 44px;
+    scroll-margin-top: 28px;
+  }
+  .entry-head { margin-bottom: 18px; }
+  .entry-index {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  .entry-index .type { color: var(--ink-faint); }
+  .entry h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 34px;
+    line-height: 1.08;
+  }
+  .entry-meta {
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.05em;
+  }
+  .entry-meta .vel-rising { color: var(--teal); }
+  .entry-meta .vel-steady { color: rgba(232, 230, 223, 0.6); }
+  .entry-meta .vel-cooling { color: var(--amber); }
+  .entry-meta a.xref {
+    color: var(--ink-dim);
+    text-decoration: underline dotted rgba(232,230,223,0.35);
+    text-underline-offset: 3px;
+  }
+  .entry-meta a.xref:hover { color: var(--teal); }
+
+  .meter { margin: 18px 0 24px; max-width: 560px; }
+  .meter-bar {
+    display: flex;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    background: rgba(232, 230, 223, 0.07);
+  }
+  .meter-bar .m-pos { background: linear-gradient(90deg, #3ec3a4, var(--teal)); box-shadow: 0 0 10px rgba(79,216,184,0.5); }
+  .meter-bar .m-neg { background: linear-gradient(90deg, var(--rose), #c25064); }
+  .meter-caption {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+  }
+  .meter-caption .p { color: rgba(79, 216, 184, 0.85); }
+  .meter-caption .n { color: rgba(224, 105, 126, 0.85); }
+
+  .synthesis {
+    font-size: 17.5px;
+    line-height: 1.65;
+    max-width: 68ch;
+    color: var(--ink);
+    margin-bottom: 26px;
+  }
+  .synthesis .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 20px;
+    color: var(--teal);
+    padding-right: 2px;
+  }
+  .tag {
+    display: inline-block;
+    vertical-align: 2px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 2px 8px 1px;
+    border-radius: 2px;
+    margin-left: 8px;
+    white-space: nowrap;
+  }
+  .tag.observed { color: var(--teal); border: 1px solid rgba(79, 216, 184, 0.45); background: rgba(79, 216, 184, 0.06); }
+  .tag.inferred { color: var(--amber); border: 1px dashed rgba(217, 164, 74, 0.55); background: rgba(217, 164, 74, 0.05); }
+
+  blockquote.q {
+    position: relative;
+    margin: 0 0 18px;
+    padding: 14px 22px 13px;
+    max-width: 64ch;
+    border-left: 2px solid;
+    background: linear-gradient(90deg, rgba(232, 230, 223, 0.035), transparent 70%);
+  }
+  blockquote.q.pos { border-color: var(--teal); box-shadow: inset 3px 0 14px -6px rgba(79, 216, 184, 0.55); }
+  blockquote.q.neg { border-color: var(--rose); box-shadow: inset 3px 0 14px -6px rgba(224, 105, 126, 0.55); }
+  .q-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .q.pos .q-label { color: var(--teal); }
+  .q.neg .q-label { color: var(--rose); }
+  .q-text {
+    font-family: var(--serif);
+    font-size: 21px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .receipt {
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+  .receipt .plat { color: var(--ink-faint); }
+  .receipt .eng { color: var(--ink); }
+
+  .note {
+    max-width: 64ch;
+    margin: 22px 0;
+    padding: 11px 16px;
+    border-left: 2px solid var(--amber);
+    background: rgba(217, 164, 74, 0.05);
+    font-size: 14.5px;
+    color: var(--ink-dim);
+  }
+  .note .note-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .enrich {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .enrich .enrich-label {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: 6px;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-dim);
+    border: 1px solid rgba(232, 230, 223, 0.2);
+    border-radius: 2px;
+    padding: 4px 10px;
+    background: rgba(7, 11, 20, 0.5);
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .chip:hover { border-color: rgba(79, 216, 184, 0.5); color: var(--ink); }
+  .chip .ref-mark { color: var(--teal); margin-right: 6px; }
+
+  /* ---------- notable transmissions ---------- */
+  .transmissions {
+    border-top: 1px solid var(--line);
+    padding: 46px 0 18px;
+  }
+  .transmissions .t-kicker {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .transmissions h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 32px;
+    margin-bottom: 28px;
+  }
+  .t-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .t-card {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: linear-gradient(165deg, rgba(12, 19, 34, 0.9), rgba(7, 11, 20, 0.92));
+    padding: 48px 22px 20px;
+    overflow: hidden;
+  }
+  .t-card::before {
+    content: "\201C";
+    position: absolute;
+    top: -8px;
+    left: 8px;
+    font-family: var(--serif);
+    font-size: 110px;
+    line-height: 1;
+    color: rgba(79, 216, 184, 0.22);
+  }
+  .t-card:nth-child(2)::before { color: rgba(217, 164, 74, 0.22); }
+  .t-card:nth-child(3)::before { color: rgba(224, 105, 126, 0.22); }
+  .t-quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19.5px;
+    line-height: 1.42;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .t-attr {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+  }
+  .t-attr::before { content: "— "; }
+
+  /* ---------- footer ---------- */
+  .colophon {
+    margin-top: 40px;
+    border-top: 1px solid var(--line);
+    padding: 26px 0 44px;
+    text-align: center;
+  }
+  .colophon .seal {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .colophon p {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 2;
+    color: var(--ink-faint);
+    letter-spacing: 0.05em;
+  }
+  .colophon .star-sep { color: rgba(217, 164, 74, 0.55); padding: 0 8px; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1180px) {
+    .page { padding: 0 36px; }
+    .log-grid { grid-template-columns: 232px minmax(0, 1fr); gap: 36px; }
+    .t-cards { gap: 14px; }
+    .t-quote { font-size: 17.5px; }
+  }
+  @media (max-width: 1024px) {
+    .masthead { grid-template-columns: 1fr; align-items: start; }
+    .switch { justify-self: start; }
+  }
+</style>
+</head>
+<body>
+<div class="nebula" aria-hidden="true"></div>
+<div class="stars" aria-hidden="true"></div>
+<div class="stars2" aria-hidden="true"></div>
+
+<div class="page">
+
+  <!-- ============ MASTHEAD ============ -->
+  <header class="masthead">
+    <div class="mast-left">
+      <div class="eyebrow">hivemind v0.1 <span class="sep">·</span> mockup <span class="sep">·</span> radar sweep</div>
+      <h1>The Observatory <span class="q">&ldquo;AI&nbsp;Agents&rdquo;</span></h1>
+      <p class="subline">A night-sky survey of social discourse. Seven constellations resolved from the noise floor of X and Reddit, charted by heat and velocity.</p>
+    </div>
+    <div class="switch" role="group" aria-label="View switch">
+      <button type="button" class="sw-btn" id="btn-map" aria-pressed="true"><span class="lamp"></span>Star Chart</button>
+      <button type="button" class="sw-btn" id="btn-log" aria-pressed="false"><span class="lamp"></span>Observation Log</button>
+    </div>
+    <div class="sweepmeta">
+      <div class="cell"><span class="k">Query</span><span class="v"><b>&quot;AI Agents&quot;</b></span></div>
+      <div class="cell"><span class="k">Window</span><span class="v">2026-05-12 → 2026-06-11 <b>(30d)</b></span></div>
+      <div class="cell"><span class="k">Platforms</span><span class="v"><b>X + Reddit</b></span></div>
+      <div class="cell"><span class="k">Volume</span><span class="v"><b>214</b> posts triaged / <b>41</b> deep-read</span></div>
+      <div class="cell"><span class="k">Generated</span><span class="v"><b>2026-06-11</b></span></div>
+      <div class="cell"><span class="k">Instrument</span><span class="v">hivemind v0.1 · mockup</span></div>
+    </div>
+  </header>
+
+  <!-- ============ VIEW: STAR CHART ============ -->
+  <section class="view active" id="view-map" aria-label="Star chart of topics">
+    <div class="plate">
+      <svg viewBox="0 0 1200 720" role="img" aria-label="Constellation map of seven discourse topics sized by heat">
+        <defs>
+          <radialGradient id="haloTeal" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#bff2e2" stop-opacity="0.95"/>
+            <stop offset="32%" stop-color="#4fd8b8" stop-opacity="0.34"/>
+            <stop offset="100%" stop-color="#4fd8b8" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="haloSteady" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#eef0f4" stop-opacity="0.9"/>
+            <stop offset="32%" stop-color="#c8cdd7" stop-opacity="0.26"/>
+            <stop offset="100%" stop-color="#c8cdd7" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="haloAmber" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ecd0a0" stop-opacity="0.8"/>
+            <stop offset="32%" stop-color="#d9a44a" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#d9a44a" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="tailGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#4fd8b8" stop-opacity="0.42"/>
+            <stop offset="100%" stop-color="#4fd8b8" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <!-- declination / right-ascension grid -->
+        <g class="grid" aria-hidden="true">
+          <line x1="0" y1="120" x2="1200" y2="120"/>
+          <line x1="0" y1="240" x2="1200" y2="240"/>
+          <line x1="0" y1="360" x2="1200" y2="360"/>
+          <line x1="0" y1="480" x2="1200" y2="480"/>
+          <line x1="0" y1="600" x2="1200" y2="600"/>
+          <line x1="200" y1="0" x2="200" y2="720"/>
+          <line x1="400" y1="0" x2="400" y2="720"/>
+          <line x1="600" y1="0" x2="600" y2="720"/>
+          <line x1="800" y1="0" x2="800" y2="720"/>
+          <line x1="1000" y1="0" x2="1000" y2="720"/>
+          <ellipse class="ecliptic" cx="600" cy="360" rx="468" ry="296"/>
+          <text x="12" y="116">+30°</text>
+          <text x="12" y="236">+15°</text>
+          <text x="12" y="356">0°</text>
+          <text x="12" y="476">−15°</text>
+          <text x="12" y="596">−30°</text>
+          <text x="193" y="14">22h</text>
+          <text x="393" y="14">23h</text>
+          <text x="596" y="14">0h</text>
+          <text x="795" y="14">1h</text>
+          <text x="995" y="14">2h</text>
+        </g>
+
+        <!-- background field stars -->
+        <g aria-hidden="true">
+          <circle class="bgstar" cx="120" cy="80" r="1.1" opacity="0.25"/>
+          <circle class="bgstar twinkle" cx="305" cy="640" r="1.4" style="animation-delay:-1.2s; animation-duration:5.4s"/>
+          <circle class="bgstar" cx="520" cy="120" r="0.9" opacity="0.2"/>
+          <circle class="bgstar twinkle" cx="700" cy="80" r="1.3" style="animation-delay:-3.6s; animation-duration:7.2s"/>
+          <circle class="bgstar" cx="980" cy="150" r="1.1" opacity="0.25"/>
+          <circle class="bgstar twinkle" cx="1120" cy="260" r="1.5" style="animation-delay:-2.1s; animation-duration:6.4s"/>
+          <circle class="bgstar" cx="150" cy="420" r="1" opacity="0.22"/>
+          <circle class="bgstar twinkle" cx="90" cy="560" r="1.2" style="animation-delay:-4.4s; animation-duration:8s"/>
+          <circle class="bgstar" cx="560" cy="620" r="1" opacity="0.2"/>
+          <circle class="bgstar twinkle" cx="760" cy="560" r="1.3" style="animation-delay:-0.6s; animation-duration:5.8s"/>
+          <circle class="bgstar" cx="870" cy="660" r="0.9" opacity="0.22"/>
+          <circle class="bgstar twinkle" cx="1150" cy="620" r="1.2" style="animation-delay:-5.2s; animation-duration:6.8s"/>
+          <circle class="bgstar" cx="350" cy="90" r="1" opacity="0.22"/>
+          <circle class="bgstar twinkle" cx="1060" cy="60" r="1.3" style="animation-delay:-2.9s; animation-duration:7.6s"/>
+          <circle class="bgstar" cx="640" cy="280" r="0.8" opacity="0.18"/>
+          <circle class="bgstar" cx="240" cy="330" r="0.9" opacity="0.2"/>
+          <circle class="bgstar twinkle" cx="470" cy="390" r="1.1" style="animation-delay:-1.8s; animation-duration:6.1s"/>
+          <circle class="bgstar" cx="900" cy="300" r="0.9" opacity="0.2"/>
+        </g>
+
+        <!-- constellation lines (connects) -->
+        <g class="constellation" aria-hidden="true">
+          <line x1="430" y1="300" x2="420" y2="510"/>   <!-- t1 - t4 -->
+          <line x1="430" y1="300" x2="250" y2="200"/>   <!-- t1 - t5 -->
+          <line x1="790" y1="250" x2="640" y2="430"/>   <!-- t2 - t3 -->
+          <line x1="790" y1="250" x2="920" y2="420"/>   <!-- t2 - t6 -->
+          <line x1="640" y1="430" x2="420" y2="510"/>   <!-- t3 - t4 -->
+          <line x1="920" y1="420" x2="1040" y2="560"/>  <!-- t6 - t7 -->
+        </g>
+
+        <!-- ===== t1 · Agent Memory Systems · heat 32 · rising ===== -->
+        <g class="star rising" data-topic="t1" tabindex="0" role="button"
+           aria-label="Agent Memory Systems, heat 32, rising. Open log entry."
+           transform="translate(430,300)">
+          <circle class="hit" r="58" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-86" y1="0" x2="-30" y2="0"/><line x1="30" y1="0" x2="86" y2="0"/>
+            <line x1="0" y1="-86" x2="0" y2="-30"/><line x1="0" y1="30" x2="0" y2="86"/>
+          </g>
+          <path d="M 24 -3 L 122 -13 L 122 13 L 24 3 Z" fill="url(#tailGrad)" transform="rotate(-160.6)"/>
+          <circle class="halo" r="56" fill="url(#haloTeal)" style="animation-delay:-0.4s; animation-duration:5.2s"/>
+          <circle class="core" r="9" fill="#d9f6ec"/>
+          <text class="label-name" y="46">Agent Memory Systems</text>
+          <text class="label-mag" y="63">mag 32 ↑</text>
+          <g class="tip" transform="translate(-105,-138)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Agent Memory Systems</text>
+            <text class="tipdata" x="11" y="36">tool · heat 32 · rising ↑</text>
+            <text class="tipdata" x="11" y="49">+890↑ vs −1.2k · links t4 t5</text>
+          </g>
+        </g>
+
+        <!-- ===== t2 · MCP Everywhere · heat 28 · rising ===== -->
+        <g class="star rising" data-topic="t2" tabindex="0" role="button"
+           aria-label="MCP Everywhere, heat 28, rising. Open log entry."
+           transform="translate(790,250)">
+          <circle class="hit" r="52" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-80" y1="0" x2="-27" y2="0"/><line x1="27" y1="0" x2="80" y2="0"/>
+            <line x1="0" y1="-80" x2="0" y2="-27"/><line x1="0" y1="27" x2="0" y2="80"/>
+          </g>
+          <path d="M 21 -3 L 112 -12 L 112 12 L 21 3 Z" fill="url(#tailGrad)" transform="rotate(-30)"/>
+          <circle class="halo" r="50" fill="url(#haloTeal)" style="animation-delay:-2.2s; animation-duration:6s"/>
+          <circle class="core" r="8" fill="#d9f6ec"/>
+          <text class="label-name" y="42">MCP Everywhere</text>
+          <text class="label-mag" y="59">mag 28 ↑</text>
+          <g class="tip" transform="translate(-105,-130)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">MCP Everywhere</text>
+            <text class="tipdata" x="11" y="36">release · heat 28 · rising ↑</text>
+            <text class="tipdata" x="11" y="49">+640↑ vs −980 · links t3 t6</text>
+          </g>
+        </g>
+
+        <!-- ===== t3 · Claude Code Skills Ecosystem · heat 24 · rising ===== -->
+        <g class="star rising" data-topic="t3" tabindex="0" role="button"
+           aria-label="Claude Code Skills Ecosystem, heat 24, rising. Open log entry."
+           transform="translate(640,430)">
+          <circle class="hit" r="47" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-74" y1="0" x2="-25" y2="0"/><line x1="25" y1="0" x2="74" y2="0"/>
+            <line x1="0" y1="-74" x2="0" y2="-25"/><line x1="0" y1="25" x2="0" y2="74"/>
+          </g>
+          <path d="M 19 -2.5 L 100 -11 L 100 11 L 19 2.5 Z" fill="url(#tailGrad)" transform="rotate(40)"/>
+          <circle class="halo" r="45" fill="url(#haloTeal)" style="animation-delay:-3.8s; animation-duration:5.7s"/>
+          <circle class="core" r="7" fill="#d9f6ec"/>
+          <text class="label-name" y="-54">Claude Code Skills Ecosystem</text>
+          <text class="label-mag" y="-38">mag 24 ↑</text>
+          <g class="tip" transform="translate(-105,-126)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Claude Code Skills</text>
+            <text class="tipdata" x="11" y="36">tool · heat 24 · rising ↑</text>
+            <text class="tipdata" x="11" y="49">+2.1k vs −410↑ · links t2 t4</text>
+          </g>
+        </g>
+
+        <!-- ===== t4 · Multi-Agent Orchestration · heat 19 · steady ===== -->
+        <g class="star steady" data-topic="t4" tabindex="0" role="button"
+           aria-label="Multi-Agent Orchestration, heat 19, steady. Open log entry."
+           transform="translate(420,510)">
+          <circle class="hit" r="40" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-66" y1="0" x2="-22" y2="0"/><line x1="22" y1="0" x2="66" y2="0"/>
+            <line x1="0" y1="-66" x2="0" y2="-22"/><line x1="0" y1="22" x2="0" y2="66"/>
+          </g>
+          <circle class="halo" r="38" fill="url(#haloSteady)" style="animation-delay:-1.5s; animation-duration:6.6s"/>
+          <circle class="core" r="6" fill="#eef0f4"/>
+          <text class="label-name" y="40">Multi-Agent Orchestration</text>
+          <text class="label-mag" y="57">mag 19 →</text>
+          <g class="tip" transform="translate(-105,-118)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Multi-Agent Orchestration</text>
+            <text class="tipdata" x="11" y="36">technique · heat 19 · steady →</text>
+            <text class="tipdata" x="11" y="49">+530↑ vs −760 · links t1 t3</text>
+          </g>
+        </g>
+
+        <!-- ===== t5 · Context Rot · heat 14 · rising ===== -->
+        <g class="star rising" data-topic="t5" tabindex="0" role="button"
+           aria-label="Context Rot, heat 14, rising. Open log entry."
+           transform="translate(250,200)">
+          <circle class="hit" r="33" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-60" y1="0" x2="-19" y2="0"/><line x1="19" y1="0" x2="60" y2="0"/>
+            <line x1="0" y1="-60" x2="0" y2="-19"/><line x1="0" y1="19" x2="0" y2="60"/>
+          </g>
+          <path d="M 14 -2 L 86 -9 L 86 9 L 14 2 Z" fill="url(#tailGrad)" transform="rotate(-155.4)"/>
+          <circle class="halo" r="31" fill="url(#haloTeal)" style="animation-delay:-4.6s; animation-duration:5s"/>
+          <circle class="core" r="5" fill="#d9f6ec"/>
+          <text class="label-name" y="36">Context Rot</text>
+          <text class="label-mag" y="53">mag 14 ↑</text>
+          <g class="tip" transform="translate(-100,-110)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Context Rot</text>
+            <text class="tipdata" x="11" y="36">debate · heat 14 · rising ↑</text>
+            <text class="tipdata" x="11" y="49">+380↑ vs −540 · links t1</text>
+          </g>
+        </g>
+
+        <!-- ===== t6 · Prompt Injection Panic · heat 11 · steady ===== -->
+        <g class="star steady" data-topic="t6" tabindex="0" role="button"
+           aria-label="Prompt Injection Panic, heat 11, steady. Open log entry."
+           transform="translate(920,420)">
+          <circle class="hit" r="29" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-56" y1="0" x2="-17" y2="0"/><line x1="17" y1="0" x2="56" y2="0"/>
+            <line x1="0" y1="-56" x2="0" y2="-17"/><line x1="0" y1="17" x2="0" y2="56"/>
+          </g>
+          <circle class="halo" r="27" fill="url(#haloSteady)" style="animation-delay:-2.8s; animation-duration:7s"/>
+          <circle class="core" r="4.5" fill="#eef0f4"/>
+          <text class="label-name" y="-38">Prompt Injection Panic</text>
+          <text class="label-mag" y="-22">mag 11 →</text>
+          <g class="tip" transform="translate(-105,-104)" aria-hidden="true">
+            <rect width="210" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Prompt Injection Panic</text>
+            <text class="tipdata" x="11" y="36">news · heat 11 · steady →</text>
+            <text class="tipdata" x="11" y="49">+290↑ vs −1.5k · links t2</text>
+          </g>
+        </g>
+
+        <!-- ===== t7 · Local Agents on Small Models · heat 8 · cooling ===== -->
+        <g class="star cooling" data-topic="t7" tabindex="0" role="button"
+           aria-label="Local Agents on Small Models, heat 8, cooling. Open log entry."
+           transform="translate(1040,560)">
+          <circle class="hit" r="30" fill="transparent" stroke="none"/>
+          <g class="cross" aria-hidden="true">
+            <line x1="-52" y1="0" x2="-15" y2="0"/><line x1="15" y1="0" x2="52" y2="0"/>
+            <line x1="0" y1="-52" x2="0" y2="-15"/><line x1="0" y1="15" x2="0" y2="52"/>
+          </g>
+          <circle class="halo" r="22" fill="url(#haloAmber)" opacity="0.6" style="animation-delay:-1s; animation-duration:7.4s"/>
+          <circle class="fade-ring" r="18"/>
+          <circle class="fade-ring" r="26" style="animation-delay:-3.5s"/>
+          <circle class="core" r="4" fill="#e6c98f" opacity="0.85"/>
+          <text class="label-name" y="44">Local Agents on Small Models</text>
+          <text class="label-mag" y="61">mag 8 ↓</text>
+          <g class="tip" transform="translate(-120,-100)" aria-hidden="true">
+            <rect width="222" height="58" rx="3"/>
+            <text class="tipname" x="11" y="20">Local Agents, Small Models</text>
+            <text class="tipdata" x="11" y="36">technique · heat 8 · cooling ↓ (−40%)</text>
+            <text class="tipdata" x="11" y="49">+310↑ vs −420 · links t6</text>
+          </g>
+        </g>
+      </svg>
+
+      <div class="plate-caption">
+        <div>
+          <div class="title">Plate I — Discourse over AI Agents, June 2026</div>
+          <div class="subtitle">214 objects surveyed · 41 resolved · exposure 30 nights · fields: X + Reddit</div>
+        </div>
+        <div class="legend" aria-label="Chart legend">
+          <span class="li"><span class="lg-dot"></span>size &amp; glow ∝ heat</span>
+          <span class="li"><span class="lg-tail"></span>comet tail = rising</span>
+          <span class="li"><span class="lg-ring"></span>fading ring = cooling</span>
+          <span class="li"><span class="lg-line"></span>connected discourse</span>
+        </div>
+      </div>
+    </div>
+    <p class="map-hint"><span class="tick">✦</span> select a star to open its entry in the observation log <span class="tick">✦</span></p>
+  </section>
+
+  <!-- ============ VIEW: OBSERVATION LOG ============ -->
+  <section class="view" id="view-log" aria-label="Observation log report">
+    <div class="log-grid">
+
+      <!-- sticky rail / table of contents -->
+      <nav class="rail" aria-label="Log contents">
+        <div class="rail-h">Log Contents · 7 objects</div>
+        <ul class="toc">
+          <li><a href="#topic-t1" data-vel="rising"><span class="vel rising">↑</span><span class="name">Agent Memory Systems</span><span class="mag">32</span><span class="bar"><i style="width:100%"></i></span></a></li>
+          <li><a href="#topic-t2" data-vel="rising"><span class="vel rising">↑</span><span class="name">MCP Everywhere</span><span class="mag">28</span><span class="bar"><i style="width:87.5%"></i></span></a></li>
+          <li><a href="#topic-t3" data-vel="rising"><span class="vel rising">↑</span><span class="name">Claude Code Skills Ecosystem</span><span class="mag">24</span><span class="bar"><i style="width:75%"></i></span></a></li>
+          <li><a href="#topic-t4" data-vel="steady"><span class="vel steady">→</span><span class="name">Multi-Agent Orchestration</span><span class="mag">19</span><span class="bar"><i style="width:59.4%"></i></span></a></li>
+          <li><a href="#topic-t5" data-vel="rising"><span class="vel rising">↑</span><span class="name">Context Rot</span><span class="mag">14</span><span class="bar"><i style="width:43.8%"></i></span></a></li>
+          <li><a href="#topic-t6" data-vel="steady"><span class="vel steady">→</span><span class="name">Prompt Injection Panic</span><span class="mag">11</span><span class="bar"><i style="width:34.4%"></i></span></a></li>
+          <li><a href="#topic-t7" data-vel="cooling"><span class="vel cooling">↓</span><span class="name">Local Agents on Small Models</span><span class="mag">8</span><span class="bar"><i style="width:25%"></i></span></a></li>
+        </ul>
+        <div class="rail-note">heat bar ∝ magnitude<br>↑ rising · → steady · ↓ cooling</div>
+      </nav>
+
+      <!-- main log column -->
+      <div class="log-main">
+        <div class="log-kicker">Observation Log · Sweep 2026-06-11</div>
+        <h2 class="log-title">Seven objects resolved over <em>&ldquo;AI Agents&rdquo;</em></h2>
+
+        <!-- ===== OBS 01 / t1 ===== -->
+        <article class="entry" id="topic-t1">
+          <header class="entry-head">
+            <div class="entry-index">Obs 01 · t1 <span class="type">· type: tool</span></div>
+            <h3>Agent Memory Systems</h3>
+            <div class="entry-meta">heat 32 · velocity <span class="vel-rising">rising ↑</span> · connects <a class="xref" href="#topic-t4">t4</a>, <a class="xref" href="#topic-t5">t5</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 42.6 percent positive, 57.4 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:42.6%"></span><span class="m-neg" style="width:57.4%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 42.6% (890↑)</span><span>engagement split</span><span class="n">▼ negative 57.4% (1.2k)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Memory moved from demo feature to procurement checkbox this month. The fight is structure (KG vs files), not value.<span class="tag inferred">inferred</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Persistent memory is what finally makes agents feel like colleagues instead of goldfish — teams report real continuity wins.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/ClaudeAI · u/contextkeeper · <span class="eng">890↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;Most 'agent memory' is RAG with extra steps and a worse failure mode: confidently stale context.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @evalwonk · <span class="eng">1.2k likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Contested</span>graph-based vs plain-file memory; no resolution, both camps ship.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>github.com/letta-ai/letta</span>
+            <span class="chip"><span class="ref-mark">✦</span>arxiv.org/abs/2604.11883 — &ldquo;Memory Architectures for LLM Agents&rdquo;, May 2026</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 02 / t2 ===== -->
+        <article class="entry" id="topic-t2">
+          <header class="entry-head">
+            <div class="entry-index">Obs 02 · t2 <span class="type">· type: release</span></div>
+            <h3>MCP Everywhere</h3>
+            <div class="entry-meta">heat 28 · velocity <span class="vel-rising">rising ↑</span> · connects <a class="xref" href="#topic-t3">t3</a>, <a class="xref" href="#topic-t6">t6</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 39.5 percent positive, 60.5 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:39.5%"></span><span class="m-neg" style="width:60.5%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 39.5% (640↑)</span><span>engagement split</span><span class="n">▼ negative 60.5% (980)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> MCP is now plumbing, not news. Discourse shifted from &ldquo;what is it&rdquo; to &ldquo;who vets it.&rdquo;<span class="tag observed">observed</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;MCP hitting critical mass — every SaaS now ships a server; integration time collapsed from weeks to an afternoon.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/mcp · u/portforward · <span class="eng">640↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;An MCP server for everything means an attack surface for everything. Nobody is auditing these.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @secfault · <span class="eng">980 likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Contested</span>registry quality (spam servers) vs open growth.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>github.com/modelcontextprotocol/servers</span>
+            <span class="chip"><span class="ref-mark">✦</span>MCP spec changelog 2026-05</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 03 / t3 ===== -->
+        <article class="entry" id="topic-t3">
+          <header class="entry-head">
+            <div class="entry-index">Obs 03 · t3 <span class="type">· type: tool</span></div>
+            <h3>Claude Code Skills Ecosystem</h3>
+            <div class="entry-meta">heat 24 · velocity <span class="vel-rising">rising ↑</span> · connects <a class="xref" href="#topic-t2">t2</a>, <a class="xref" href="#topic-t4">t4</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 83.7 percent positive, 16.3 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:83.7%"></span><span class="m-neg" style="width:16.3%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 83.7% (2.1k)</span><span>engagement split</span><span class="n">▼ negative 16.3% (410↑)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Skills are the new plugins; the discourse is a marketplace-curation debate with one viral take per week.<span class="tag observed">observed</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Skills turned my CLI into a team of specialists. The marketplace moment is here.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @tooluser · <span class="eng">2.1k likes</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;90% of published skills are README wrappers. Discovery is broken without quality signals.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/ClaudeCode · u/skillskeptic · <span class="eng">410↑</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Contested</span>open marketplace vs curation.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>github.com/anthropics/claude-code</span>
+            <span class="chip"><span class="ref-mark">✦</span>awesome-claude-skills list</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 04 / t4 ===== -->
+        <article class="entry" id="topic-t4">
+          <header class="entry-head">
+            <div class="entry-index">Obs 04 · t4 <span class="type">· type: technique</span></div>
+            <h3>Multi-Agent Orchestration</h3>
+            <div class="entry-meta">heat 19 · velocity <span class="vel-steady">steady →</span> · connects <a class="xref" href="#topic-t1">t1</a>, <a class="xref" href="#topic-t3">t3</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 41.1 percent positive, 58.9 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:41.1%"></span><span class="m-neg" style="width:58.9%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 41.1% (530↑)</span><span>engagement split</span><span class="n">▼ negative 58.9% (760)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Steady drumbeat, not hype spike — practitioners trading patterns, skeptics citing prod failures. Both right at different scales.<span class="tag inferred">inferred</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Orchestrator + specialist subagents cut our pipeline cost 60% vs one mega-prompt.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/AI_Agents · u/swarmherd · <span class="eng">530↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;Every multi-agent demo dies in production. Coordination overhead eats the gains.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @distsys_dan · <span class="eng">760 likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Contested</span>when fan-out beats a single strong model.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>arxiv.org/abs/2605.02991 — orchestration patterns survey</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 05 / t5 ===== -->
+        <article class="entry" id="topic-t5">
+          <header class="entry-head">
+            <div class="entry-index">Obs 05 · t5 <span class="type">· type: debate</span></div>
+            <h3>Context Rot</h3>
+            <div class="entry-meta">heat 14 · velocity <span class="vel-rising">rising ↑</span> · connects <a class="xref" href="#topic-t1">t1</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 41.3 percent positive, 58.7 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:41.3%"></span><span class="m-neg" style="width:58.7%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 41.3% (380↑)</span><span>engagement split</span><span class="n">▼ negative 58.7% (540)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Fast-rising vocabulary battle; the term is winning even where the diagnosis is disputed.<span class="tag observed">observed</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Naming it 'context rot' finally gives teams language for why long sessions degrade.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/LocalLLaMA · u/tokenbudget · <span class="eng">380↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;It's not rot, it's bad context management. Stop blaming the model for your prompt hygiene.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @ctxwindow · <span class="eng">540 likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Contested</span>model limitation vs operator error.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>arxiv.org/abs/2603.17440 — long-context degradation study</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 06 / t6 ===== -->
+        <article class="entry" id="topic-t6">
+          <header class="entry-head">
+            <div class="entry-index">Obs 06 · t6 <span class="type">· type: news</span></div>
+            <h3>Prompt Injection Panic</h3>
+            <div class="entry-meta">heat 11 · velocity <span class="vel-steady">steady →</span> · connects <a class="xref" href="#topic-t2">t2</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 16.2 percent positive, 83.8 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:16.2%"></span><span class="m-neg" style="width:83.8%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 16.2% (290↑)</span><span>engagement split</span><span class="n">▼ negative 83.8% (1.5k)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Security discourse is reactive and event-driven; expect a spike with every disclosure.<span class="tag observed">observed</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Good week for security: three major agent frameworks shipped injection mitigations.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/netsec · u/escapeseq · <span class="eng">290↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;Mitigations are theater while agents can still exfiltrate via any tool with network access.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @redteamtea · <span class="eng">1.5k likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Background</span>triggered by a May 2026 disclosed exploit chain in a popular MCP server.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>disclosure writeup</span>
+            <span class="chip"><span class="ref-mark">✦</span>OWASP LLM Top 10 (2026 update)</span>
+          </div>
+        </article>
+
+        <!-- ===== OBS 07 / t7 ===== -->
+        <article class="entry" id="topic-t7">
+          <header class="entry-head">
+            <div class="entry-index">Obs 07 · t7 <span class="type">· type: technique</span></div>
+            <h3>Local Agents on Small Models</h3>
+            <div class="entry-meta">heat 8 · velocity <span class="vel-cooling">cooling ↓</span> · connects <a class="xref" href="#topic-t6">t6</a></div>
+          </header>
+          <div class="meter" aria-label="Engagement split: 42.5 percent positive, 57.5 percent negative">
+            <div class="meter-bar"><span class="m-pos" style="width:42.5%"></span><span class="m-neg" style="width:57.5%"></span></div>
+            <div class="meter-caption"><span class="p">▲ positive 42.5% (310↑)</span><span>engagement split</span><span class="n">▼ negative 57.5% (420)</span></div>
+          </div>
+          <p class="synthesis"><span class="lede">Synthesis.</span> Real but niche; conversation migrated to dedicated communities, mainstream attention cooled.<span class="tag observed">observed</span></p>
+          <blockquote class="q pos">
+            <div class="q-label">▲ Positive signal</div>
+            <p class="q-text">&ldquo;Qwen-flavored 8B models now run useful agent loops fully offline. Privacy people are thrilled.&rdquo;</p>
+            <footer class="receipt"><span class="plat">Reddit ·</span> r/LocalLLaMA · u/airgapped · <span class="eng">310↑</span></footer>
+          </blockquote>
+          <blockquote class="q neg">
+            <div class="q-label">▼ Negative signal</div>
+            <p class="q-text">&ldquo;Local agents remain a hobby. Tool-calling reliability under 30B is still a coin flip.&rdquo;</p>
+            <footer class="receipt"><span class="plat">X ·</span> @gpupoor · <span class="eng">420 likes</span></footer>
+          </blockquote>
+          <div class="note"><span class="note-label">Cooling note</span>mentions down ~40% vs April.</div>
+          <div class="enrich">
+            <span class="enrich-label">Chart references</span>
+            <span class="chip"><span class="ref-mark">✦</span>github.com/ollama/ollama</span>
+            <span class="chip"><span class="ref-mark">✦</span>r/LocalLLaMA weekly agents thread</span>
+          </div>
+        </article>
+
+        <!-- ===== notable transmissions ===== -->
+        <section class="transmissions" aria-label="Notable transmissions">
+          <div class="t-kicker">Intercepted at high gain</div>
+          <h2>Notable Transmissions</h2>
+          <div class="t-cards">
+            <figure class="t-card">
+              <blockquote class="t-quote">Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature.</blockquote>
+              <figcaption class="t-attr">@evalwonk</figcaption>
+            </figure>
+            <figure class="t-card">
+              <blockquote class="t-quote">MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'.</blockquote>
+              <figcaption class="t-attr">r/mcp</figcaption>
+            </figure>
+            <figure class="t-card">
+              <blockquote class="t-quote">Your multi-agent system is just one agent with extra latency until proven otherwise.</blockquote>
+              <figcaption class="t-attr">@distsys_dan</figcaption>
+            </figure>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="colophon">
+    <div class="seal">— end of plate —</div>
+    <p>
+      Social media is a weak-evidence surface — stances are sentiment, not validation.
+      <span class="star-sep">✦</span>
+      Backed by radar.json (Social-Signal-Radar-compatible)
+    </p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var viewMap = document.getElementById("view-map");
+  var viewLog = document.getElementById("view-log");
+  var btnMap = document.getElementById("btn-map");
+  var btnLog = document.getElementById("btn-log");
+
+  function setView(name) {
+    var mapActive = name === "map";
+    viewMap.classList.toggle("active", mapActive);
+    viewLog.classList.toggle("active", !mapActive);
+    btnMap.setAttribute("aria-pressed", mapActive ? "true" : "false");
+    btnLog.setAttribute("aria-pressed", mapActive ? "false" : "true");
+  }
+
+  btnMap.addEventListener("click", function () {
+    setView("map");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  btnLog.addEventListener("click", function () {
+    setView("log");
+  });
+
+  // Star click → open observation log at that topic
+  function openTopic(id) {
+    setView("log");
+    var target = document.getElementById("topic-" + id);
+    if (!target) return;
+    requestAnimationFrame(function () {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  var stars = document.querySelectorAll(".star[data-topic]");
+  Array.prototype.forEach.call(stars, function (star) {
+    star.addEventListener("click", function () {
+      openTopic(star.getAttribute("data-topic"));
+    });
+    star.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        openTopic(star.getAttribute("data-topic"));
+      }
+    });
+  });
+
+  // Scrollspy: highlight current entry in the rail
+  var tocLinks = document.querySelectorAll(".toc a");
+  var entries = document.querySelectorAll(".entry");
+
+  function setActive(id) {
+    Array.prototype.forEach.call(tocLinks, function (a) {
+      a.classList.toggle("active", a.getAttribute("href") === "#" + id);
+    });
+  }
+
+  if ("IntersectionObserver" in window) {
+    var spy = new IntersectionObserver(function (hits) {
+      hits.forEach(function (hit) {
+        if (hit.isIntersecting) setActive(hit.target.id);
+      });
+    }, { rootMargin: "-30% 0px -60% 0px", threshold: 0 });
+    Array.prototype.forEach.call(entries, function (e) { spy.observe(e); });
+  }
+})();
+</script>
+</body>
+</html>
