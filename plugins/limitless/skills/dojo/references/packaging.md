@@ -35,7 +35,10 @@ House style:
    hivemind's first ship — caught by Pyro 2026-06-11.
 5. `/reload-plugins` — confirm the skill appears in the listing.
 6. Smoke-invoke once with a tiny real input.
-7. Write/finalize the dojo record (below), commit, push.
+7. Persist the full evidence set under the target repo's docs/dojo/:
+   `<skill>-scenarios.md` (battery + verbatim prompts as sent),
+   `<skill>-runs/` (every test workspace's output files + README table).
+8. Write/finalize the dojo record (below) linking both, commit, push.
 
 ## Dojo Record Template
 

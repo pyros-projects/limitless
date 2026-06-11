@@ -50,7 +50,12 @@ adversarial variants (time pressure, sunk cost, authority pressure).
 
 1. **Intake.** What skill, which tier, new or edit. Design the test
    scenarios NOW — one per archetype the skill claims to handle, each
-   with pre-written y/n pass criteria. **Hold 1–2 scenarios back**: never
+   with pre-written y/n pass criteria. **Persist the battery immediately
+   to `docs/dojo/<skill>-scenarios.md`** in the target repo — and during
+   kata 2–6, append every subagent prompt VERBATIM as actually sent,
+   plus each run's result line. Dojo artifacts live in the repo's
+   `docs/dojo/`, never only in /tmp — the operator reads how the test
+   went; that is the point of the dojo. **Hold 1–2 scenarios back**: never
    used during iteration, run once at the end (kata 5). If a transcript
    or session sparked the skill, mine it for scenario material. See
    `references/pressure-testing.md` for scenario and criteria design.
@@ -90,7 +95,13 @@ adversarial variants (time pressure, sunk cost, authority pressure).
    `references/trigger-evals.md`.
 
 7. **Package & record.** Plugin layout, manifest/README updates, reload,
-   smoke-invoke. Write the **dojo record** to `docs/dojo/<skill>-record.md`:
+   smoke-invoke. **Preserve the run outputs**: copy every test
+   workspace (baselines, pressure, holdouts) into
+   `docs/dojo/<skill>-runs/<run-name>/` with a short README table —
+   the produced files ARE the readable evidence. Leak-check anything
+   copied from scratch space before it enters the repo. Then write the
+   **dojo record** to `docs/dojo/<skill>-record.md`, linking the
+   scenarios file and the runs dir:
    baseline findings, loopholes closed, rejected fixes, graduation
    result, trigger score, known limitations. Every skill carries its belt
    rank. See `references/packaging.md` for the checklist and template.
