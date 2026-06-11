@@ -12,22 +12,38 @@ remains the backlog)*
 
 ---
 
-## Round protocol
+## Invocation API — one lane at a time (decided by Pyro)
 
-1. **Intake:** seed selection where needed (human picks, skill proposes
-   from observables only), budget confirmation ("round 1 ≈ N credits —
-   go?"), sweep checkbox for Lane 1's slider sweep (declared exception,
-   off by default).
-2. **Round 1:** exactly one roll per active lane (5 rolls ≈ 50–60
-   credits at observed v4.5/v5.5 rates). Every roll writes a run log
-   (request + result blocks, lane metadata: invariant, axis, expected
-   failure).
-3. **Report:** takes land in `audio/` (take-aware names), scorecard
-   skeleton pre-filled with receipts.
-4. **Human judges** (scorecard: concept survival ≥3, surprise ≥4,
-   artifact cost ≤3 → keep), then explicitly orders round 2: re-roll a
-   lane, advance a two-step lane, try Lane 1's next genre, or stop —
-   you might already have your banger.
+Experimental mode never batches lanes. One invocation = one lane = one
+roll. The invocation is the consent; cost (~10 credits) is stated in the
+confirmation line before firing.
+
+| Invocation | Behavior |
+|---|---|
+| `--mode experimental` / "surprise me" | One **random** lane, picked among currently *eligible* lanes (no seed yet → random over 2/4/5; seed exists → over all five) |
+| `--mode experimental 3` / "give me experiment 3" | That specific lane |
+| `--mode experimental list` / "list all experiments" | The menu: number, name, mutation axis, one-liner, cost, seed requirement, current eligibility |
+| "tame it" (after a Lane 4 keeper) | Lane 4 step 2 on the chosen survivor |
+| "lane 1 again, baroque boom bap" / "re-roll friction, poles swapped" | Repeat invocations — depth is just asking again |
+
+Mechanics per invocation:
+
+1. If the lane needs a seed (1, 3) and none is chosen: the skill says
+   so and proposes candidates from observables (library keepers, prior
+   takes, run-log scorecards) — human picks, or orders a faithful seed
+   roll first.
+2. Roll once. Run log written (request + result blocks, lane metadata:
+   invariant, axis, expected failure). Take-aware download to `audio/`.
+3. Report take + scorecard row skeleton (concept survival ≥3, surprise
+   ≥4, artifact cost ≤3 → keep). The scorecard accumulates across
+   invocations.
+4. Lane 1's audio-influence sweep (4 rolls) remains the declared
+   exception — only on explicit request, never via "surprise me".
+
+Pack authoring is unchanged and free: `experiment_map.md` (all five
+lanes on paper) ships with every experimental pack and doubles as the
+`list` menu source. Per-pack credit ceiling is tracked as a running
+total across run logs.
 
 **Optional Pass 0 — Producer's Ear (diagnostic, not a lane):** cover the
 seed at weirdness 0 / style 0 / audio influence 100, matched lyrics,
@@ -153,7 +169,7 @@ second candidate word, human-ordered.
   create`, `generate cover`, per-clip-id downloads, run logs).
 - Lanes 1 and 3 need a seed clip → decision #2 applies (human picks,
   skill proposes from observables).
-- Lane 4 step 2 and all re-rolls are *next-round* actions — the
-  automated surface is always exactly five rolls.
+- Lane 4 step 2 and all re-rolls are separate invocations — the
+  automated surface is always exactly one roll.
 - Scorecard, experiment_map.md, and runs/ ledger ship with the pack as
   immutable publications.
