@@ -75,9 +75,33 @@ something new happens. It's just an old dossier then. Do a new one."**
   "answers must state dossier vintage" (a behavior rule, not a health
   metric).
 
-## Open question for Codie
+## Codie's review (2026-06-11) — ACCEPTED, with sharpenings
 
-Does edition-append create a retrieval-pollution risk in QMD (N editions
-of the same dossier competing in results), and if so, is
-newest-edition-boosting enough, or should superseded editions move to a
-non-default collection (archive scoping) at publish time?
+Codie's verdict: fold it in — "stronger than 'compiled cache with
+freshness discipline'." His additions, adopted:
+
+1. **Boosting is not enough.** N editions of one dossier are
+   near-duplicates that crowd top-k. Default retrieval must **collapse
+   by series and return only the latest edition**; archive/history
+   search is opt-in ("how did this evolve?", "what did we believe in
+   April?"). If QMD can't collapse cleanly at query time, scope default
+   search to current editions and move superseded ones to an opt-in
+   archive collection at publish time.
+2. **Frontmatter contract:** every dossier carries `series:` +
+   `edition:` (+ `supersedes:` when correcting). A mutable latest-head
+   projection per series (`series / current_edition / path`) routes
+   default retrieval.
+3. **`mneme doctor` checks publication-graph integrity, not
+   freshness:** one current head per series; every `supersedes:` target
+   exists; no cycles; latest index matches the edition graph; default
+   retrieval returns no superseded editions outside archive mode.
+4. **Named failure mode:** the latest-pointers become a new tiny cache.
+   Acceptable only because they are cheap, mechanical, fully
+   rebuildable — so the spec states it explicitly: **living indexes
+   carry no authored truth, only derived routing state.**
+
+Codie's closing formulation, adopted as the artifact philosophy:
+**sources are canonical, publications are dated claims, indexes are
+disposable machinery.**
+
+Resolved — ready to fold into the product spec and ADR-001.
