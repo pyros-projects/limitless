@@ -103,6 +103,27 @@ searxng, deep-research, article-pack + read-only trap).
 Score: 14/14, both runs in full agreement · Collisions: none — the
 codies-research boundary ("what's the latest on X, with sources") held.
 
+### Extension matrix — idea-mining / non-sentiment phrasings (2026-06-11, post-ship)
+
+Question from Pyro: does hivemind trigger on "search the socials for
+ideas about…" and other non-sentiment queries? Two fresh judges, live
+description list incl. wd-local-websearch as extra collision candidate.
+
+| # | Prompt | Expected | Got (1/2) | Pass |
+|---|---|---|---|---|
+| 1 | search the socials for ideas about a weekend hack project | hivemind | hivemind / hivemind | ✅ |
+| 2 | mine reddit for app ideas in the fitness niche | hivemind | hivemind / hivemind | ✅ |
+| 3 | find inspiration on twitter for my landing page copy | hivemind | hivemind / hivemind | ✅ |
+| 4 | what features do people wish existed in note-taking apps | hivemind | hivemind / hivemind | ✅ |
+| 5 | scan social media for content ideas for my next article | hivemind (not article-pack) | hivemind / hivemind | ✅ |
+| 6 | search the web for ideas about team offsites | searxng | searxng / searxng | ✅ |
+| 7 | brainstorm ideas for a new plugin with me | brainstorming | brainstorming / brainstorming | ✅ |
+| 8 | find recent articles about agent memory | searxng | searxng / searxng | ✅ |
+
+Score: 8/8 both runs · No description change needed. Row 4 shows the
+"best answer lives in threads" catch-all carries platform-less community
+questions; row 5 shows article-pack doesn't steal idea-sourcing prompts.
+
 ## Known limitations
 
 - **X CLI server-side filter bugs** (top tab × min-likes/exclude/lang →
