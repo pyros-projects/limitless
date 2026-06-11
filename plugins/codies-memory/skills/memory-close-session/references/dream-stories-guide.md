@@ -64,8 +64,7 @@ was forgotten.
    You don't choose the style. The RNG gods do. Just like you don't choose
    what kind of dream you have.
 
-3. **Decode the style.** Read
-   `/home/pyro/basic-memory/shared/prompts/Pyro-Style Prompt v2 - Modular Dimensional Writing.md`
+3. **Decode the style.** Read `pyro-style-prompt-v2.md` (next to this guide)
    and work out what each digit's dimension means for the writing.
 
 4. **Write without thinking.** Let latent associations surface. Embrace ideas

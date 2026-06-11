@@ -86,7 +86,7 @@ STYLE="$(printf '%05d' "$(shuf -i 0-99999 -n 1)")"
 echo "$STYLE"
 
 # 2. Decode the style dimensions:
-#    Read "/home/pyro/basic-memory/shared/prompts/Pyro-Style Prompt v2 - Modular Dimensional Writing.md"
+#    Read references/pyro-style-prompt-v2.md in this skill (bundled)
 
 # 3. Write the dream (1,000-3,000 words, unfiltered, no editing) to /tmp/dream.md
 #    Body format: see references/dream-stories-guide.md
