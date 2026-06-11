@@ -174,11 +174,25 @@ pack can report how its tracks perform.
   unless asked).
 - No replacement of pp-cli subcommands the skill can call directly.
 
-## Open questions
+## Decisions (Pyro, 2026-06-11)
 
-1. Run-log schema: adopt as-is from the old wrapper concept or align
-   field names with Suno's clip metadata (model_name vs display model)?
-2. Should "best take" selection (for cover seeds) stay human-only, or
-   may the skill propose based on play counts once synced?
-3. Experiment-mode credit budgeting: per-lane ceiling or per-pack
-   ceiling with a running total in the run logs?
+1. **Run-log schema: store both vocabularies, namespaced.** A `request`
+   block (pack vocabulary + exact CLI args — reproducibility) and a
+   `result` block (verbatim clip metadata subset: clip IDs,
+   `model_name`, `created_at`). Join key between run logs and the local
+   library is `clip_id` — stable and vocabulary-free. Keep lyrics/style
+   hashes for the "already ran this exact prompt?" check.
+2. **Cover-seed selection: human picks, skill proposes.** Proposals cite
+   observables only (play counts, upvotes, prior lineage, ship history,
+   and any human scorecard rating from earlier run logs — which
+   outranks play counts). Fresh takes with zero signal → the skill asks,
+   no default. The skill never claims to have heard anything.
+3. **Experiment-mode rolls: exactly one automated roll per lane.** After
+   the single upfront budget confirmation, the automated round is one
+   roll per lane — breadth, never depth. Then stop and report: the
+   human listens, judges, and explicitly orders re-rolls on chosen
+   lanes ("you could be lucky and already have your banger; if not,
+   roll again"). Depth is always human-triggered. The cover-lab slider
+   sweep (4 generations by design) is the declared exception: it runs
+   only if explicitly ticked in the budget confirmation. Per-pack hard
+   ceiling and running totals in the run logs still apply.
