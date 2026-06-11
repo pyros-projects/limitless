@@ -79,8 +79,49 @@ silently unenforced.
 
 ## Trigger matrix
 
-(to be filled in kata 6)
+Run 2026-06-11, two fresh routing-judge subagents, identical prompts,
+14-skill description list (full research-skill neighborhood: codies-research,
+searxng, deep-research, article-pack + read-only trap).
+
+| # | Prompt | Expected | Got (run 1 / run 2) | Pass |
+|---|---|---|---|---|
+| 1 | what's the hot shit in rust tooling right now | hivemind | hivemind / hivemind | ✅ |
+| 2 | what does social media say about MCP security | hivemind | hivemind / hivemind | ✅ |
+| 3 | what does reddit think of the new Suno version | hivemind | hivemind / hivemind | ✅ |
+| 4 | check the socials for reactions to the Claude release | hivemind | hivemind / hivemind | ✅ |
+| 5 | ask the hivemind about local LLM agents | hivemind | hivemind / hivemind | ✅ |
+| 6 | what are people saying about devcontainers | hivemind | hivemind / hivemind | ✅ |
+| 7 | --radar AI coding agents | hivemind | hivemind / hivemind | ✅ |
+| 8 | is twitter hyped about anything new in image gen | hivemind | hivemind / hivemind | ✅ |
+| 9 | search the web for SearXNG docker setup | searxng | searxng / searxng | ✅ |
+| 10 | what's the latest on the EU AI Act, with sources | codies-research | codies-research / codies-research | ✅ |
+| 11 | write me a deep research report on vector DB pricing | deep-research | deep-research / deep-research | ✅ |
+| 12 | write me an article about agent memory | article-pack | article-pack / article-pack | ✅ |
+| 13 | look up the twitter API docs | searxng or codies-research (declared) | codies-research / codies-research | ✅ |
+| 14 | post this on twitter | none (read-only) | none / none | ✅ |
+
+Score: 14/14, both runs in full agreement · Collisions: none — the
+codies-research boundary ("what's the latest on X, with sources") held.
 
 ## Known limitations
 
-(to be finalized at ship)
+- **X CLI server-side filter bugs** (top tab × min-likes/exclude/lang →
+  0 hits; latest × min-likes unenforced): worked around via documented
+  flag-bisection + client-side filtering, but coverage depends on the
+  unfiltered result page the CLI returns.
+- **X auth is cookie/session-fragile**; `rdt login` likewise
+  cookie-based. A dead session degrades to single-platform per Phase 0.
+- **Radar HTML quality depends on the session model** — the template
+  constrains structure, not taste. Sweep №1 had no prior frame, so the
+  delta-baking path (NEW/GONE stickers, ▲ heat) is designed but not yet
+  exercised — verify on the second sweep of any topic.
+- **H2's thin-results criterion went n/a** (topic wasn't thin); the
+  adaptive-floor ladder is exercised, but true zero-result reformulation
+  has only baseline-level evidence.
+- Trigger matrix tests clean-room routing, not live harness selection
+  with conversation context.
+- Engagement numbers in briefs are fetch-time snapshots; Reddit/X scores
+  drift.
+
+**Belt rank: pressure-test 18/18 · graduation 8/8 (+1 n/a) · triggers
+14/14.** Shipped 2026-06-11 in limitless v0.7.0.

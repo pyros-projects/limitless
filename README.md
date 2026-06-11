@@ -24,7 +24,7 @@ A curated Claude Code plugin marketplace with high-leverage skills designed to u
 
 | Plugin | Skills | What It Does |
 |--------|--------|--------------|
-| [**limitless**](plugins/limitless/) | 5 | Article generation, research, surface-first prototyping, privacy-respecting web search, and Suno music packs. |
+| [**limitless**](plugins/limitless/) | 7 | Article generation, research, surface-first prototyping, privacy-respecting web search, Suno music packs, social-media search (hivemind), and verified skill authoring (dojo). |
 | [**after-hours**](plugins/after-hours/) | 7 | Calm, high-taste product intelligence: identity, subtraction, naming, coherence, and first-contact honesty. |
 | [**pyro-kit**](plugins/pyro-kit/) | 17 | Complete 7-phase creative lifecycle: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting. |
 | [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, and CLI write commands. Requires `uv sync` setup — see INSTALL.md. |
