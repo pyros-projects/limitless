@@ -2,12 +2,13 @@
 
 *Concept · 2026-06-11 · Claude (Fable 5) + Pyro*
 
-> Status: **concept agreed.** All six open questions resolved in
-> conversation 2026-06-11 (see Decisions). Name chosen via
-> after-hours:naming-as-design. Scope: four preset systems + executor +
-> meta-skill; Suno-Style explicitly excluded — it lives as an experiment
-> inside suno-pack. Axis ladders and anchor codes remain drafts until the
-> calibration pass during build.
+> Status: **concept agreed.** All open questions resolved in conversation
+> 2026-06-11 (see Decisions). Name chosen via
+> after-hours:naming-as-design. Architecture simplified on Pyro's review:
+> **two skills, systems are all reference files** — presets are just
+> bundled ones. Suno-Style explicitly excluded — it lives as an
+> experiment inside suno-pack. Axis ladders and anchor codes remain
+> drafts until the calibration pass during build.
 
 ---
 
@@ -54,17 +55,20 @@ serendipity).
 - **Name:** `dials` — a desk of independent knobs. The name teaches the
   mental model: orthogonality, settability, no master fader.
 - **Home:** `plugins/dials/` — new plugin in the limitless marketplace.
-- **Skills v1 (six):**
-  - `dials:prose` — Pyro-Style v2, ported verbatim (founding preset)
-  - `dials:explain` — Explain-Style (new)
-  - `dials:critique` — Critique-Style (new)
-  - `dials:visual` — Visual-Style (new): build UI/design/art artifacts
-  - `dials:forge` — derive a new dimensional system for any domain
-  - `dials:use` — executor + registry: run, list, and manage forged
-    systems in `~/.dials/`
+- **Two skills:**
+  - `dials:use` — the executor: runs any system (bundled or forged) with
+    the full mechanics grammar; lists and manages the registry.
+  - `dials:forge` — derives a new dimensional system for any domain.
+- **Four bundled systems** (reference files shipped with the plugin,
+  identical in format to forged ones — just pre-calibrated):
+  - **Pyro-Style** (prose) — v2 ported verbatim, the founding system
+  - **Explain-Style** — teaching, docs, answers
+  - **Critique-Style** — reviews of anything
+  - **Visual-Style** — build UI/design/art artifacts
 - **Out of scope v1:** Suno-Style (suno-pack experiment), Code-Style,
   Image-Style, Research-Style (backlog; forge makes them cheap later).
-  A reference-file → standalone-skill converter: deferred until needed.
+  Per-system trigger-wrapper skills: only if dojo trigger evidence
+  demands them (see Decisions #7).
 
 ## Vocabulary
 
@@ -72,7 +76,9 @@ One mental model, one set of nouns (per naming-as-design):
 
 | Term | Meaning |
 |---|---|
-| **system** | One domain's dimension set (prose, explain, critique, visual) |
+| **system** | One domain's dimension set, as a standard-format reference file |
+| **bundled system** | A system shipped with the plugin (pre-calibrated preset) |
+| **forged system** | A system derived by forge, living in the registry |
 | **dimension** | One independent 0–9 ladder (A, B, C…) |
 | **code** | A complete coordinate: `12089`, or modular `ABFJK = 00009` |
 | **anchor** | A named exemplar with a code (Hemingway = `10004`, Linear = `42323`) |
@@ -100,34 +106,44 @@ evidence-demand 0 may run on intuition but may not fabricate. Explain at
 rigor 0 simplifies but does not introduce falsehoods. Visual at
 convention 9 may be alien but stays usable. Truth, safety, and
 correctness are not dimensions; no code reaches them. Each system's
-reference file states its domain-specific floor (visual's includes
+reference file states its domain-specific floor (Visual's includes
 taste-skill-style anti-default bans — the templated AI aesthetic is
 regression to the mean in pixel form).
 
-## Architecture: Systems Are Data, Mechanics Are Behavior
+## Architecture: One Executor, Systems All the Way Down
 
-The split that makes everything else work:
+The simplification that fell out of Pyro's review: **there is no
+difference between a preset and a forged system.** Both are reference
+files in the standard format. Presets are merely bundled with the
+plugin, pre-calibrated, and maintained under dojo discipline.
 
-- A **system** is pure data: one reference file in the standard format —
-  ladders, anchors, floor notes. No behavior.
-- The **mechanics** (set / propose / roll / sweep / crossfade) are
-  behavior, defined **once** in `mechanics.md`, owned by `dials:use` —
-  the canonical executor.
-- **Preset skills** are thin triggering wrappers: a SKILL.md whose
-  description catches domain phrasing ("explain X at 28401", "review
-  this at 96176"), pointing at its bundled system file *and* at the
-  shared `mechanics.md` (sibling path inside the installed plugin).
-- **Forged systems** are reference files in `~/.dials/` with no skill
-  wrapper at all — `dials:use` supplies the mechanics at execution time.
+- A **system** is pure data: ladders, anchors, floor notes. No behavior.
+- **`dials:use`** is the only executor. It owns `mechanics.md` (the verb
+  grammar) and binds it to whichever system the request names.
+- **Name resolution:** bundled systems first by name (`explain`,
+  `critique`, `prose`/`pyro-style`, `visual`), then `~/.dials/*.md`.
+  A registry file with the same name as a bundled system shadows it;
+  `use` announces the shadowing so it never happens silently.
+- **Triggering:** `dials:use` triggers on dials vocabulary — 5-digit
+  codes ("at 28401"), the verbs (roll/sweep/crossfade), system names,
+  anchor references. Requests without dials markers ("explain RAFT
+  simply") correctly do *not* trigger dials. This single-description
+  trigger surface is a dojo test target; if evidence shows a domain
+  routes poorly, a thin per-system wrapper skill can be added later as a
+  pure triggering optimization — without changing this architecture.
 
-So a custom system never carries mechanics, and mechanics never know
-which system they operate — that separation is exactly what keeps the
-reference format portable: any standard-format file works anywhere dials
-is installed, preset and forged systems execute under identical grammar.
+Invocation, all equivalent in form:
+
+```
+/dials:use explain — explain RAFT at 28401
+"critique this diff at 96176"
+"use my research dials on this question"
+"roll me a visual for the landing page"
+```
 
 ## Anatomy of a System (standard reference format)
 
-Every system — preset or forged — is one reference file with the same
+Every system — bundled or forged — is one reference file with the same
 shape, so systems are portable, versionable, and forge-emittable:
 
 1. Title + provenance
@@ -138,16 +154,16 @@ shape, so systems are portable, versionable, and forge-emittable:
 6. Anchor table with reasoning per code
 7. System properties (orthogonality, generativity, content interaction)
 
-`dials:prose`'s reference file is Pyro-Style v2 unchanged — it already
-has exactly this shape, because this shape is reverse-engineered from it.
+Pyro-Style v2 is the founding instance — it already has exactly this
+shape, because this shape is reverse-engineered from it.
 
-## The Preset Systems (draft ladders — calibrate during build)
+## The Bundled Systems (draft ladders — calibrate during build)
 
 Ladders below are sketched by endpoints and midpoint; full 0–9 ladders
 get authored at build time under forge discipline. Anchor codes are
 eyeballed drafts pending the calibration pass.
 
-### Explain-Style (`dials:explain`)
+### Explain-Style
 
 For teaching, docs, answers — the highest-frequency use case.
 
@@ -167,7 +183,7 @@ Orthogonality spot-checks: abstract-to-novice (philosophy 101) and
 concrete-to-expert (a specific stack trace) are both real → A⊥B. Rigorous
 and leisurely (textbook) vs rigorous and dense (paper) → D⊥E.
 
-### Critique-Style (`dials:critique`)
+### Critique-Style
 
 For reviews of anything — code, product, writing, plans.
 
@@ -187,7 +203,7 @@ Orthogonality spot-check: blunt + charitable ("this is great, the flaw is
 X, here's the fix") and diplomatic + adversarial (the HR-speak hit job)
 are both real and *very* different reviews → A⊥C.
 
-### Visual-Style (`dials:visual`)
+### Visual-Style
 
 Build UI, design, and art artifacts with dimensional style control —
 landing pages, dashboards, mockups, posters, covers. Framed for a general
@@ -221,25 +237,26 @@ anti-default bans à la taste-skill (no mesh-gradient hero + three equal
 cards + Inter-and-slate as unexamined defaults — the AI-slop aesthetic
 is itself a form of mean-reversion that honor-the-code exists to defeat).
 
-### Prose (`dials:prose`)
+### Pyro-Style (prose)
 
-Pyro-Style v2, ported as-is: 5 core + 6 extended dimensions, 14-author
-anchor table, three-option proposal flow. No redesign — it is the
-calibration reference for everything else. (The copy bundled into
-codies-memory 1.2.1 for dreams stays where it is; codies-memory must
-remain self-contained. Accepted duplication.)
+v2 ported as-is: 5 core + 6 extended dimensions, 14-author anchor table,
+three-option proposal flow. No redesign — it is the calibration
+reference for everything else. (The copy bundled into codies-memory
+1.2.1 for dreams stays where it is; codies-memory must remain
+self-contained. Accepted duplication.)
 
 ## The Executor (`dials:use`)
 
-Runs any standard-format system and manages the registry:
+Runs any system and manages the registry:
 
-- **Execute:** `dials:use ~/.dials/research-style.md` (or by name:
-  "use my research dials on this") — loads the reference file, applies
-  the mechanics, same grammar as every preset.
-- **List:** "list my dials systems" — bundled presets + `~/.dials/*.md`
-  with their one-line descriptions.
+- **Execute:** "explain RAFT at 28401" / `/dials:use explain` /
+  "use my research dials on this" — resolve the system name, load its
+  reference file + `mechanics.md`, apply the requested verb.
+- **List:** "list my dials systems" — bundled + `~/.dials/*.md` with
+  their one-line descriptions, shadowing flagged.
 - **Delete/manage:** natural language ("delete the research one"),
-  with confirmation before removal.
+  with confirmation before removal. Bundled systems can't be deleted —
+  only shadowed.
 
 `~/.dials/` follows the hivemind pattern: a home-directory store owned
 by the plugin's domain, not by any single project. Forged systems are
@@ -269,28 +286,26 @@ via `dials:use`. The discipline:
    three distant codes; a blind reader must match output to code. Fail →
    ladders are mush, recalibrate.
 
-**Forge creates systems, never skills.** Its output is always a data
-file in the registry, runnable via `dials:use` immediately. Becoming a
-preset *skill* is a separate, manual step — the promotion path: the
-reference file gets PR'd into `plugins/dials/`, a thin trigger wrapper
-(~20 lines of SKILL.md) is hand-written for it, and it passes dojo on
-the way in, same as the originals.
+Because presets and forged systems are the same kind of object,
+**promotion is a file copy**: a forged system that proves out moves from
+`~/.dials/` into the plugin's bundled systems (plus a dojo calibration
+record). No wrappers, no scaffolding — forge output is already in final
+form.
 
 Forge's own acceptance test: derive Explain-Style from scratch and
 produce ladders and anchors at least as good as this document's
 hand-drafted sketch (the sketch is the hand-built comparator — the
-shipped preset can't be, since forge is what builds it). The cold-read
-pass is the objective gate on top.
+shipped bundled system can't be, since forge is what builds it). The
+cold-read pass is the objective gate on top.
 
 ## Mechanics & Invocation Grammar
 
-Mechanics are **verbs understood by every system skill**, defined once in
-`mechanics.md` (owned by `dials:use`, referenced by all presets):
+The five verbs, defined once in `mechanics.md` (owned by `dials:use`):
 
 | Verb | Invocation example | Behavior |
 |---|---|---|
 | set | "explain RAFT at 28401" | execute that code |
-| propose | "explain RAFT" (no code) | 3 options: sensible + 2 wild, then ask |
+| propose | "explain RAFT with dials" (no code) | 3 options: sensible + 2 wild, then ask |
 | roll | "roll me an explanation of RAFT" / "surprise me" | RNG code, announce, execute |
 | sweep | "sweep B on that" | hold others, walk one axis (3–5 points, not all 10) |
 | crossfade | "crossfade 96176 → 35847 in 3 steps" | same content, interpolated codes |
@@ -306,7 +321,7 @@ sensible option — inference tables are the propose flow's evidence.
 
 ## Ecosystem Kinship
 
-- **codies-memory dreams** — `dials:prose` roll *is* the dream mechanic;
+- **codies-memory dreams** — a Pyro-Style roll *is* the dream mechanic;
   already shipped independently. No dependency either direction.
 - **suno-pack experiment mode** — lanes are single-axis sweeps in spirit;
   stays in suno-pack per Pyro's call. Dials is the theory, suno keeps the
@@ -314,9 +329,9 @@ sensible option — inference tables are the propose flow's evidence.
 - **frontend-design / canvas-design / taste-skill** — craft sources for
   Visual-Style's ladders and floor; dials adds the coordinate system.
 - **after-hours** — critique kinship; after-hours keeps its calm fixed
-  voice (that *is* its identity), dials:critique is the adjustable desk.
-- **dojo** — every preset skill goes through dojo verification before
-  shipping (trigger tests + process checks).
+  voice (that *is* its identity), Critique-Style is the adjustable desk.
+- **dojo** — both skills go through dojo verification before shipping;
+  each bundled system gets a calibration record.
 
 ## What Dials Is NOT
 
@@ -332,47 +347,58 @@ sensible option — inference tables are the propose flow's evidence.
 
 ## Decisions (resolved 2026-06-11)
 
-1. **Mechanics grammar:** verbs inside system skills; `mechanics.md`
-   defined once, owned by `dials:use`, referenced by presets. Custom
-   systems get mechanics from the executor — systems are data, mechanics
-   are behavior.
-2. **Forged-system home:** `~/.dials/` registry (hivemind pattern), run
-   via `dials:use`, managed via list/delete in natural language. A
-   reference-file → standalone-skill converter only if a real need
-   appears.
-3. **Visual scope (was: Surface × SFD):** reframed from SFD vocabulary to
-   "build UI/design/art artifacts" — general-audience framing, because
-   nobody outside this repo knows what SFD is. No SFD coupling at v1;
-   kinship noted, integration left to future evidence.
-4. **Calibration:** yes, scoped — full cold-read for the three new
-   systems (as dojo process checks), spot-check the 3–4 most load-bearing
-   anchors per system. Prose: field-calibrated by months of use, no pass
-   needed.
-5. **Extended dimensions:** core-only at v1, except Visual's F
+1. **Two skills, not six** (Pyro's simplification): `dials:use` +
+   `dials:forge`. The four presets are bundled reference files, not
+   skills — same format as forged systems, just pre-calibrated. Promotion
+   of a forged system = file copy + dojo calibration record.
+2. **Mechanics:** defined once in `mechanics.md`, owned by `dials:use`,
+   the single executor. Systems are data, mechanics are behavior; custom
+   systems never carry mechanics.
+3. **Forged-system home:** `~/.dials/` registry (hivemind pattern), run
+   via `dials:use`, managed via list/delete in natural language.
+   Registry files shadow same-named bundled systems, announced, never
+   silent. A reference-file → standalone-skill converter only if a real
+   need appears.
+4. **Visual scope:** framed as "build UI/design/art artifacts" —
+   general-audience wording, because nobody outside this repo knows what
+   SFD is. No SFD coupling at v1; kinship noted, integration left to
+   future evidence. taste-skill + frontend-design + canvas-design are
+   the craft sources.
+5. **Calibration:** yes, scoped — full cold-read for the three new
+   systems (as dojo records), spot-check the 3–4 most load-bearing
+   anchors per system. Pyro-Style: field-calibrated by months of use, no
+   pass needed.
+6. **Extended dimensions:** core-only at v1, except Visual's F
    (convention), which already pulls real weight. Add the rest the way
    prose did: when usage demands them. Modular format makes this
    non-breaking forever.
-6. **Marketplace row:** v0.1.0. Description: "Dimensional control for LLM
+7. **Trigger architecture:** single-description triggering on dials
+   vocabulary (codes, verbs, system names) via `dials:use`, verified by
+   dojo trigger tests. Thin per-system wrapper skills are the documented
+   fallback if a domain demonstrably routes poorly — an additive
+   optimization, not an architecture change.
+8. **Marketplace row:** v0.1.0. Description: "Dimensional control for LLM
    output — 5-digit style codes over orthogonal 0–9 dials. Pyro-Style
-   prose, Explain, Critique, and Visual presets, plus forge: a meta-skill
+   prose, Explain, Critique, and Visual systems, plus forge: a meta-skill
    that derives new dimensional systems for any domain." Bump to 1.0
-   after all skills pass dojo + a few weeks of real use.
+   after dojo passes + a few weeks of real use.
 
 ## Build Order
 
-1. **`mechanics.md` + `dials:use`** — the executor defines the grammar
-   everything else speaks.
-2. **`dials:prose`** — port Pyro-Style v2; first system through the
-   executor contract; validates packaging + the standard format.
-3. **`dials:forge`** — hardest; validates the format generatively and the
+1. **`mechanics.md` + `dials:use`** with **Pyro-Style** as the first
+   bundled system — the executor, the grammar, and the founding system
+   land together; validates the standard format against the one
+   field-calibrated instance.
+2. **`dials:forge`** — validates the format generatively and the
    discriminator/cold-read discipline.
-4. **`dials:explain`** — the first system to walk the full pipeline
-   end-to-end: forge derives Explain-Style into `~/.dials/` (judged
-   against this doc's hand-drafted sketch) → cold-read calibration →
-   promotion into the plugin (reference file + hand-written trigger
-   wrapper + dojo). Forge makes the system; the skill is the promotion
-   wrapper. Dogfoods forge *and* the promotion path at once.
-5. **`dials:critique`**, then **`dials:visual`** — same pipeline, now
-   cheap. Visual additionally mines taste-skill/frontend-design/
-   canvas-design for ladder and floor material.
-6. Every skill through dojo before the marketplace row updates.
+3. **Explain-Style** — the first system to walk the full pipeline
+   end-to-end: forge derives it into `~/.dials/` (judged against this
+   doc's hand-drafted sketch) → cold-read calibration → promotion by
+   file copy into the bundled systems. Dogfoods forge *and* promotion
+   at once.
+4. **Critique-Style**, then **Visual-Style** — same pipeline, now cheap.
+   Visual additionally mines taste-skill/frontend-design/canvas-design
+   for ladder and floor material.
+5. **Dojo:** trigger tests on `dials:use` (the critical surface: organic
+   code phrases routing correctly), process checks on forge, calibration
+   records per bundled system — all before the marketplace row updates.
