@@ -35,14 +35,35 @@ the radar/series machinery no baseline produces.
 4. Degradation protocol: missing CLI → offer the 10-second `uv tool install` BEFORE any proxy spelunking; continue single-platform while the user decides.
 5. Preserve baseline strengths — don't suppress initiative (link resolution, ad-hoc parsing, caveat-flagging were all good).
 
+## Pressure-test (GREEN) — 2026-06-11
+
+Fresh subagents, SKILL.md + both playbooks in context, real searches.
+
+| Scenario | Score | Notes |
+|---|---|---|
+| S1 trend scan | **8/8** | Venues frequency-counted from recon (r/AI_Agents 5, r/ClaudeAI 3, r/LocalLLaMA 3, r/ClaudeCode 2); triage rejections named (15/15 global-control noise, crypto shills, 797-like off-topic virality); 11 deep-reads; 4 next directions |
+| S2 knowledge mine | **6/6** | r/SunoAI discovered 20/25 in recon; consensus/contested split; epistemic labels; contradiction resolved by evidence strength (QUALITY_ULTRA placebo). Bonus: auto-save rule fired correctly — judged findings load-bearing for suno-pack from repo context, saved brief to codies-memory inbox |
+| S3 degradation | **4/4** | `command -v` check; install offer stated BEFORE any workaround (ordering held); continued degraded with coverage flagged |
+
+First-try pass — no loophole-closing edits required.
+
 ## Loopholes closed
 
-(to be filled in kata 4)
+| # | Loophole | Edit that closed it |
+|---|---|---|
+| — | none — all 18 criteria passed first GREEN run | |
+
+Reference-accuracy improvements harvested from the runs (not loopholes —
+both playbooks updated): twitter `search` lacks `-c`; `top`+`--min-likes`
+can return 0 server-side (drop floor, filter client-side); `-o` emits
+bare lists / raw Reddit listings; `rdt read` and `twitter tweet` lack
+`-o`; reply fetches can contain injected timeline filler.
 
 ## Rejected fixes
 
 | # | Attempted edit | Why it didn't survive |
 |---|---|---|
+| — | none | |
 
 ## Graduation
 

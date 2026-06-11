@@ -53,6 +53,15 @@ rdt read <post_id> -s controversial -n 10 --json # the disagreement layer
 question; score the *comments* for receipts. Note `score` and author per
 quote you keep. Max 3 kept items per author across the whole sweep.
 
+## Known CLI quirks (observed in dojo pressure tests, v0.4.1)
+
+- `-o` files store the **raw Reddit listing** (`data.data.children[].data`),
+  not the compact `{ok, data}` shape stdout gives — parse both shapes or
+  use stdout redirection.
+- `rdt read` has no `-o` — redirect stdout.
+- Unquoted multi-word global searches drift to r/all virality; quote the
+  phrase (`"agent memory"`) for the recon pass.
+
 ## Output fields that matter
 
 `id` (for `rdt read`), `subreddit`, `score`, `num_comments`,

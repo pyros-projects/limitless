@@ -44,6 +44,18 @@ twitter user-posts <handle> -n 20   # an author who keeps appearing
 Replies and quote-tweets are X's comment section — a confident claim
 with 40 corrective replies is a different datum than the claim alone.
 
+## Known CLI quirks (observed in dojo pressure tests, v0.8.5)
+
+- `twitter search` has **no `-c` flag** (only the global `twitter -c`).
+- `-t top` combined with `--min-likes` can return **0 hits server-side**
+  even when matching tweets exist. If a floored top-search returns 0 but
+  recon showed in-window hits: drop the floor, filter engagement
+  client-side from the JSON, and state the adaptation.
+- `-o` writes a bare JSON list (stdout wraps in `{ok, data}`); subcommands
+  `tweet` and `user-posts` have no `-o` — redirect stdout.
+- Reply fetches can include injected timeline-filler tweets — verify each
+  "reply" actually references the thread before counting it as evidence.
+
 ## Output fields that matter
 
 `id`, `text`, `author.screenName`, `author.verified`, `metrics` (likes,
