@@ -14,7 +14,7 @@ from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
     cmd_promote, cmd_refresh, cmd_validate, _resolve_agent,
 )
-from codies_memory.vault import GLOBAL_DIRS, PROJECT_DIRS
+from codies_memory.vault import GLOBAL_DIRS, PROJECT_DIRS, resolve_global_vault
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +166,93 @@ class TestCmdBoot:
         assert "Project Packet" in captured.out
         # No warning when project vault is found
         assert "no project vault found" not in captured.err
+
+
+class TestCmdBootBudgetReport:
+
+    def test_boot_reports_budget_usage(self, tmp_path, monkeypatch, capsys):
+        """Boot output ends with a budget report covering slices and total."""
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        working_dir = tmp_path / "myapp"
+        working_dir.mkdir()
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        cmd_init(argparse.Namespace(
+            agent="claude", type="project", slug="myapp",
+            working_dir=str(working_dir),
+        ))
+        monkeypatch.chdir(working_dir)
+
+        cmd_boot(argparse.Namespace(agent="claude", branch="main", budget=4000))
+
+        captured = capsys.readouterr()
+        assert "=== Boot Budget ===" in captured.out
+        assert "identity:" in captured.out
+        assert "exempt" in captured.out
+        assert "total:" in captured.out
+        assert "left" in captured.out
+
+    def test_boot_warns_when_slice_nearly_full(self, tmp_path, monkeypatch, capsys):
+        """Slices at 90%+ capacity carry an explicit warning marker."""
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        working_dir = tmp_path / "myapp"
+        working_dir.mkdir()
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        cmd_init(argparse.Namespace(
+            agent="claude", type="project", slug="myapp",
+            working_dir=str(working_dir),
+        ))
+
+        gv = resolve_global_vault("claude")
+        session = gv / "projects" / "myapp" / "sessions" / "SS-20260611-big.md"
+        session.parent.mkdir(parents=True, exist_ok=True)
+        session.write_text(
+            "---\nid: SS-20260611\ntitle: Big Session\ntype: session\nstatus: active\ntrust: working\nscope: project\ncreated: '2026-06-11'\nupdated: '2026-06-11'\n---\n\n"
+            + ("word " * 500)
+            + "\n"
+        )
+        monkeypatch.chdir(working_dir)
+
+        cmd_boot(argparse.Namespace(agent="claude", branch="main", budget=400))
+
+        captured = capsys.readouterr()
+        assert "over 90% full" in captured.out
+
+
+class TestCmdBootRefresh:
+
+    def test_boot_regenerates_warm_summaries(self, tmp_path, monkeypatch, capsys):
+        """Boot rebuilds warm artifacts so stale summaries never surface."""
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+
+        gv = resolve_global_vault("claude")
+        (gv / "identity" / "self.md").write_text(
+            "---\ntitle: self\ntype: identity\n---\n\nFresh identity fact."
+        )
+        (gv / "boot").mkdir(exist_ok=True)
+        (gv / "boot" / "global-summary.md").write_text(
+            "# Global Summary\nSTALE SUMMARY CONTENT\n"
+        )
+
+        working_dir = tmp_path / "unrelated"
+        working_dir.mkdir()
+        monkeypatch.chdir(working_dir)
+
+        cmd_boot(argparse.Namespace(agent="claude", branch="main", budget=4000))
+
+        captured = capsys.readouterr()
+        assert "STALE SUMMARY CONTENT" not in captured.out
+        assert "Fresh identity fact." in captured.out
+        assert "STALE SUMMARY CONTENT" not in (gv / "boot" / "global-summary.md").read_text()
 
 
 # ---------------------------------------------------------------------------

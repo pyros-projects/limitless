@@ -64,7 +64,7 @@ Only proceed to the next step after `self.md` and `rules.md` have real content.
 Run boot to confirm everything loads:
 
 ```bash
-codies-memory boot --agent <name> --budget 4000
+codies-memory boot --agent <name> --budget 12000
 ```
 
 You should see your identity content in the output — not just placeholder text. If boot shows real identity, setup is complete.
@@ -108,7 +108,7 @@ Keep it exactly in this format — brief, scannable, no extra explanation.
 ## Step 1: Boot (Every Session)
 
 ```bash
-codies-memory boot --agent <name> --budget 4000
+codies-memory boot --agent <name> --budget 12000
 ```
 
 This assembles your boot packet from:
@@ -119,6 +119,8 @@ This assembles your boot packet from:
 5. Branch overlay and last session summary
 
 Read the output — it contains your identity, project context, and recent state.
+
+The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
 
 ## Step 2: Learn How Memory Works
 

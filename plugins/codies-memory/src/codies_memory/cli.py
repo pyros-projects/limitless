@@ -51,6 +51,18 @@ def _resolve_project_vault(args: argparse.Namespace) -> tuple[Path, Path]:
     return global_vault, project_vault
 
 
+def _format_usage_line(name: str, stats: dict) -> str:
+    """Format one boot-budget line; flag slices at 90%+ of capacity."""
+    used = stats["used"]
+    cap = stats["budget"]
+    pct = (used / cap * 100) if cap else 0.0
+    left = max(0, cap - used)
+    line = f"{name}: {used}/{cap} tokens ({pct:.0f}%) — {left} left"
+    if pct >= 90:
+        line += "  ⚠ over 90% full"
+    return line
+
+
 def _normalize_inline_body(body: str) -> str:
     """Normalize inline body text from CLI flags.
 
@@ -122,6 +134,9 @@ def cmd_boot(args: argparse.Namespace) -> None:
     if project_vault is None:
         print("Warning: no project vault found; global-only boot.", file=sys.stderr)
 
+    # Rebuild warm summaries so boot never serves stale derived artifacts.
+    write_warm_artifacts(global_vault, project_vault=project_vault)
+
     packet = assemble_boot(
         global_vault=global_vault,
         project_vault=project_vault,
@@ -133,6 +148,14 @@ def cmd_boot(args: argparse.Namespace) -> None:
     print()
     print("=== Project Packet ===")
     print(packet["project_packet"])
+
+    usage = packet["usage"]
+    print()
+    print("=== Boot Budget ===")
+    print(f"identity: {usage['identity']['used']} tokens (exempt — no limit)")
+    for name, stats in usage["layers"].items():
+        print(_format_usage_line(name, stats))
+    print(_format_usage_line("total", usage["total"]))
 
 
 def cmd_capture(args: argparse.Namespace) -> None:
@@ -507,8 +530,8 @@ def main() -> None:
     boot_parser.add_argument(
         "--budget",
         type=int,
-        default=4000,
-        help="Token budget (default: 4000).",
+        default=12000,
+        help="Token budget for non-identity layers; identity never counts (default: 12000).",
     )
     boot_parser.add_argument(
         "--working-dir",

@@ -39,18 +39,22 @@ class TestComputeLayerBudgets:
         budgets = compute_layer_budgets(4000)
         assert sum(budgets.values()) <= 4000
 
+    def test_identity_has_no_slice(self) -> None:
+        # Identity is exempt from truncation, so it gets no budget slice.
+        budgets = compute_layer_budgets(4000)
+        assert "global_identity" not in budgets
+
     def test_contains_required_keys(self) -> None:
         budgets = compute_layer_budgets(4000)
-        assert "global_identity" in budgets
+        assert "global_procedural" in budgets
         assert "project_context" in budgets
-
-    def test_global_identity_proportion(self) -> None:
-        budgets = compute_layer_budgets(4000)
-        assert budgets["global_identity"] >= 800
+        assert "project_working" in budgets
+        assert "branch_session" in budgets
 
     def test_project_context_proportion(self) -> None:
+        # Half of the budget goes to project context.
         budgets = compute_layer_budgets(4000)
-        assert budgets["project_context"] >= 1200
+        assert budgets["project_context"] >= 1900
 
 
 # ---------------------------------------------------------------------------
@@ -101,10 +105,10 @@ class TestAssembleBoot:
         assert "helpful AI assistant" in result["global_packet"]
         assert "memory management system" in result["project_packet"]
 
-    def test_respects_total_budget(
+    def test_identity_is_never_truncated(
         self, tmp_global_vault: Path, tmp_project_vault: Path
     ) -> None:
-        # Write large content into identity
+        # Identity larger than the entire budget must still surface in full.
         large_text = " ".join(["alpha"] * 2000)
         (tmp_global_vault / "identity" / "self.md").write_text(large_text)
 
@@ -115,10 +119,37 @@ class TestAssembleBoot:
 
         result = assemble_boot(tmp_global_vault, tmp_project_vault, budget=500)
 
-        total_tokens = estimate_tokens(result["global_packet"]) + estimate_tokens(
-            result["project_packet"]
+        assert large_text in result["global_packet"]
+        # Non-identity layers still respect their budgets.
+        assert estimate_tokens(result["project_packet"]) <= 600
+
+    def test_reports_layer_usage(
+        self, tmp_global_vault: Path, tmp_project_vault: Path
+    ) -> None:
+        (tmp_global_vault / "identity" / "self.md").write_text(
+            "I am a helpful AI assistant."
         )
-        assert total_tokens <= 600
+        (tmp_project_vault / "project").mkdir(parents=True, exist_ok=True)
+        (tmp_project_vault / "project" / "overview.md").write_text(
+            "Project overview text."
+        )
+
+        result = assemble_boot(tmp_global_vault, tmp_project_vault, budget=4000)
+
+        usage = result["usage"]
+        assert usage["identity"]["budget"] is None
+        assert usage["identity"]["used"] > 0
+        layers = usage["layers"]
+        assert set(layers) == {
+            "global_procedural",
+            "project_context",
+            "project_working",
+            "branch_session",
+        }
+        assert layers["project_context"]["used"] > 0
+        assert layers["project_context"]["budget"] == 2000
+        assert usage["total"]["budget"] == sum(l["budget"] for l in layers.values())
+        assert usage["total"]["used"] == sum(l["used"] for l in layers.values())
 
     def test_prefers_warm_summaries_when_present(
         self, tmp_global_vault: Path, tmp_project_vault: Path

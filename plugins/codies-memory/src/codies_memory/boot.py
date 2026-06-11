@@ -25,22 +25,23 @@ def estimate_tokens(text: str) -> int:
 # Layer budgets
 # ---------------------------------------------------------------------------
 
-def compute_layer_budgets(total: int = 4000) -> dict:
-    """Return token budgets for the five memory layers.
+def compute_layer_budgets(total: int = 12000) -> dict:
+    """Return token budgets for the four truncatable memory layers.
+
+    Identity gets no slice — it is never truncated or budgeted (see
+    :func:`assemble_boot`), so the full *total* is real capacity.
 
     Proportions:
-      - global_identity    25%   (1000 of 4000)
-      - global_procedural  12.5% (500  of 4000)
-      - project_context    37.5% (1500 of 4000)
-      - project_working    12.5% (500  of 4000)
-      - branch_session     12.5% (500  of 4000)
+      - global_procedural  1/6 (2000 of 12000)
+      - project_context    1/2 (6000 of 12000)
+      - project_working    1/6 (2000 of 12000)
+      - branch_session     1/6 (2000 of 12000)
     """
     return {
-        "global_identity": int(total * 0.25),
-        "global_procedural": int(total * 0.125),
-        "project_context": int(total * 0.375),
-        "project_working": int(total * 0.125),
-        "branch_session": int(total * 0.125),
+        "global_procedural": int(total / 6),
+        "project_context": int(total / 2),
+        "project_working": int(total / 6),
+        "branch_session": int(total / 6),
     }
 
 
@@ -101,28 +102,48 @@ def assemble_boot(
     global_vault: Path,
     project_vault: Path | None = None,
     branch: str = "main",
-    budget: int = 4000,
+    budget: int = 12000,
 ) -> dict:
     """Assemble the five-layer boot packet from *global_vault* and *project_vault*.
 
-    Returns a dict with two keys:
+    Returns a dict with three keys:
 
     - ``"global_packet"`` — layers 1 + 2 joined with ``"\\n\\n---\\n\\n"``
     - ``"project_packet"`` — layers 3 + 4 + 5 joined (empty string if no project vault)
+    - ``"usage"`` — token demand vs budget: ``{"identity": {...}, "layers": {...}, "total": {...}}``
+      where ``used`` is the raw (pre-truncation) token estimate per layer
 
-    Each layer is independently truncated to its budget before joining.
+    Layers 2-5 are independently truncated to their budgets before joining.
+    Layer 1 (identity) is exempt: identity files are never truncated or
+    budgeted, so the agent's sense of self survives boot regardless of budget.
     """
     budgets = compute_layer_budgets(budget)
 
-    # Layer 1: global identity
-    layer1_raw = _read_layer_files(global_vault, ["identity"])
-    layer1 = truncate_to_budget(layer1_raw, budgets["global_identity"])
+    # Layer 1: global identity — never truncated
+    layer1 = _read_layer_files(global_vault, ["identity"])
 
     # Layer 2: global warm summary when available, otherwise procedural raws
     layer2_raw = _read_if_exists(global_vault / "boot" / "global-summary.md")
     if not layer2_raw:
         layer2_raw = _read_layer_files(global_vault, ["procedural/lessons", "procedural/skills"])
     layer2 = truncate_to_budget(layer2_raw, budgets["global_procedural"])
+
+    usage_layers = {
+        "global_procedural": {
+            "used": estimate_tokens(layer2_raw),
+            "budget": budgets["global_procedural"],
+        },
+    }
+
+    def _usage(layers: dict) -> dict:
+        return {
+            "identity": {"used": estimate_tokens(layer1), "budget": None},
+            "layers": layers,
+            "total": {
+                "used": sum(s["used"] for s in layers.values()),
+                "budget": sum(s["budget"] for s in layers.values()),
+            },
+        }
 
     separator = "\n\n---\n\n"
     global_layers = [l for l in [layer1, layer2] if l]
@@ -132,6 +153,7 @@ def assemble_boot(
         return {
             "global_packet": separator.join(global_layers),
             "project_packet": "",
+            "usage": _usage(usage_layers),
         }
 
     # Layer 3: project summary when available, otherwise raw project files
@@ -139,10 +161,18 @@ def assemble_boot(
     if not layer3_raw:
         layer3_raw = _read_layer_files(project_vault, ["project"])
     layer3 = truncate_to_budget(layer3_raw, budgets["project_context"])
+    usage_layers["project_context"] = {
+        "used": estimate_tokens(layer3_raw),
+        "budget": budgets["project_context"],
+    }
 
     # Layer 4: project working memory (threads + decisions)
     layer4_raw = _read_layer_files(project_vault, ["threads", "decisions"])
     layer4 = truncate_to_budget(layer4_raw, budgets["project_working"])
+    usage_layers["project_working"] = {
+        "used": estimate_tokens(layer4_raw),
+        "budget": budgets["project_working"],
+    }
 
     # Layer 5: recent episodes summary when available, otherwise branch overlay + latest session
     layer5_raw = _read_if_exists(project_vault / "boot" / "recent-episodes.md")
@@ -165,12 +195,17 @@ def assemble_boot(
 
         layer5_raw = "\n\n---\n\n".join(overlay_parts)
     layer5 = truncate_to_budget(layer5_raw, budgets["branch_session"])
+    usage_layers["branch_session"] = {
+        "used": estimate_tokens(layer5_raw),
+        "budget": budgets["branch_session"],
+    }
 
     project_layers = [l for l in [layer3, layer4, layer5] if l]
 
     return {
         "global_packet": separator.join(global_layers),
         "project_packet": separator.join(project_layers),
+        "usage": _usage(usage_layers),
     }
 
 

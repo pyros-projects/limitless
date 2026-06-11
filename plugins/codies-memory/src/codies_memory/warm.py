@@ -12,16 +12,26 @@ MAX_RECENT_EPISODES = 5
 
 
 def _first_content_line(text: str) -> str:
-    """Return the first non-empty content line after frontmatter."""
+    """Return the first non-empty, non-heading content line after frontmatter."""
     if text.startswith("---"):
         parts = text.split("---", 2)
         if len(parts) >= 3:
             text = parts[2]
     for line in text.splitlines():
         stripped = line.strip()
-        if stripped:
+        if stripped and not stripped.startswith("#"):
             return stripped
     return ""
+
+
+def _content_excerpt(text: str, limit: int) -> str:
+    """Return a single-line excerpt of all content lines, skipping markdown headings."""
+    content_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            content_lines.append(stripped)
+    return _truncate_line(" ".join(content_lines), limit=limit)
 
 
 def _truncate_line(text: str, limit: int = 140) -> str:
@@ -39,6 +49,11 @@ def _summarize_identity_file(path: Path) -> str | None:
     if not excerpt:
         return None
     return f"- `{path.stem}`: {excerpt}"
+
+
+def _recency_key(record: dict) -> str:
+    fm = record["frontmatter"]
+    return str(fm.get("updated") or fm.get("created") or "")
 
 
 def _summarize_record_line(record: dict, extra_key: str | None = None) -> str:
@@ -66,11 +81,35 @@ def build_global_summary(global_vault: Path) -> str:
     if identity_lines:
         lines.extend(["## Identity", *identity_lines, ""])
 
+    threads = list_records(global_vault, "thread", scope="global", status="active")
+    threads.sort(key=_recency_key, reverse=True)
+    if threads:
+        lines.append("## Global Threads")
+        for record in threads[:5]:
+            lines.append(_summarize_record_line(record))
+        lines.append("")
+
+    decisions = list_records(global_vault, "decision", scope="global", status="active")
+    decisions.sort(key=_recency_key, reverse=True)
+    if decisions:
+        lines.append("## Global Decisions")
+        for record in decisions[:5]:
+            lines.append(_summarize_record_line(record, extra_key="rationale"))
+        lines.append("")
+
     lessons = list_records(global_vault, "lesson", scope="global")
     if lessons:
         lines.append("## Global Lessons")
         for record in lessons[:5]:
             lines.append(_summarize_record_line(record, extra_key="applies_to"))
+        lines.append("")
+
+    reflections = list_records(global_vault, "reflection", scope="global", status="active")
+    reflections.sort(key=_recency_key, reverse=True)
+    if reflections:
+        lines.append("## Recent Reflections")
+        for record in reflections[:3]:
+            lines.append(_summarize_record_line(record))
         lines.append("")
 
     skills_dir = global_vault / "procedural" / "skills"
@@ -153,7 +192,7 @@ def build_recent_episodes(project_vault: Path) -> str:
         title = fm.get("title", session_file.stem)
         created = fm.get("created") or fm.get("updated") or "unknown-date"
         next_step = fm.get("next_step")
-        excerpt = _truncate_line(_first_content_line(record["body"]), limit=MAX_RECENT_EPISODE_CHARS)
+        excerpt = _content_excerpt(record["body"], limit=MAX_RECENT_EPISODE_CHARS)
         lines.append(f"## {created} — {title}")
         if excerpt:
             lines.append(excerpt)

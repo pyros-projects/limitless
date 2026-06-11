@@ -30,6 +30,66 @@ class TestBuildGlobalSummary:
         assert "Check retrieval freshness" in summary
 
 
+    def test_identity_excerpt_skips_markdown_headings(self, tmp_global_vault: Path) -> None:
+        (tmp_global_vault / "identity" / "self.md").write_text(
+            "---\ntitle: self\ntype: identity\n---\n\n## Who I Am\nCodie remembers durable patterns."
+        )
+
+        summary = build_global_summary(tmp_global_vault)
+
+        assert "Codie remembers durable patterns." in summary
+        assert "## Who I Am" not in summary
+
+    def test_includes_most_recent_active_global_threads(self, tmp_global_vault: Path) -> None:
+        for idx in range(6):
+            thread = tmp_global_vault / "threads" / f"TH-G000{idx + 1}-topic-{idx}.md"
+            thread.write_text(
+                f"---\nid: TH-G000{idx + 1}\ntitle: Global thread {idx}\ntype: thread\nstatus: active\ntrust: working\nscope: global\ncreated: '2026-06-0{idx + 1}'\nupdated: '2026-06-0{idx + 1}'\n---\n\nThread {idx} body.\n"
+            )
+        archived = tmp_global_vault / "threads" / "TH-G0099-old.md"
+        archived.write_text(
+            "---\nid: TH-G0099\ntitle: Archived global thread\ntype: thread\nstatus: archived\ntrust: working\nscope: global\ncreated: '2026-06-09'\nupdated: '2026-06-09'\n---\n\nDone.\n"
+        )
+
+        summary = build_global_summary(tmp_global_vault)
+
+        assert "## Global Threads" in summary
+        # The five most recent active threads survive; the oldest is dropped.
+        for idx in range(1, 6):
+            assert f"Global thread {idx}" in summary
+        assert "Global thread 0" not in summary
+        assert "Archived global thread" not in summary
+        assert summary.index("Global thread 5") < summary.index("Global thread 1")
+
+    def test_includes_recent_reflections(self, tmp_global_vault: Path) -> None:
+        for idx in range(4):
+            reflection = tmp_global_vault / "reflections" / f"RF-000{idx + 1}-thought-{idx}.md"
+            reflection.write_text(
+                f"---\nid: RF-000{idx + 1}\ntitle: Reflection {idx}\ntype: reflection\nstatus: active\ntrust: working\nscope: global\ncreated: '2026-05-0{idx + 1}'\nupdated: '2026-05-0{idx + 1}'\n---\n\nReflection {idx} body.\n"
+            )
+
+        summary = build_global_summary(tmp_global_vault)
+
+        assert "## Recent Reflections" in summary
+        # The three most recent reflections survive; the oldest is dropped.
+        for idx in range(1, 4):
+            assert f"Reflection {idx}" in summary
+        assert "Reflection 0" not in summary
+        assert summary.index("Reflection 3") < summary.index("Reflection 1")
+
+    def test_includes_active_global_decisions(self, tmp_global_vault: Path) -> None:
+        decision = tmp_global_vault / "decisions" / "DC-G0001-choice.md"
+        decision.write_text(
+            "---\nid: DC-G0001\ntitle: Always sign commits per-repo\ntype: decision\nstatus: active\ntrust: working\nscope: global\ncreated: '2026-06-01'\nupdated: '2026-06-01'\nrationale: Identity separation\n---\n\nDecision body.\n"
+        )
+
+        summary = build_global_summary(tmp_global_vault)
+
+        assert "## Global Decisions" in summary
+        assert "Always sign commits per-repo" in summary
+        assert "Identity separation" in summary
+
+
 class TestBuildProjectSummary:
     def test_stays_project_scoped(self, tmp_project_vault: Path) -> None:
         (tmp_project_vault / "project" / "overview.md").write_text(
@@ -68,6 +128,18 @@ class TestBuildRecentEpisodes:
         assert "Session 2" in summary
         assert "Session 0" not in summary
         assert "Session 1" not in summary
+
+    def test_episode_excerpt_skips_markdown_headings(self, tmp_project_vault: Path) -> None:
+        session = tmp_project_vault / "sessions" / "SS-20260611-headed.md"
+        session.write_text(
+            "---\nid: SS-20260611\ntitle: Headed Session\ntype: session\nstatus: active\ntrust: working\nscope: project\ncreated: '2026-06-11'\nupdated: '2026-06-11'\nnext_step: Keep going\n---\n\n"
+            "## What Happened\n- Fixed the parser bug in warm excerpts.\n\n## Decisions Made\n- Ship it.\n"
+        )
+
+        summary = build_recent_episodes(tmp_project_vault)
+
+        assert "Fixed the parser bug in warm excerpts." in summary
+        assert "## What Happened" not in summary
 
     def test_recent_episode_excerpt_is_truncated(self, tmp_project_vault: Path) -> None:
         session = tmp_project_vault / "sessions" / "SS-20260424-long.md"

@@ -107,7 +107,7 @@ Your identity lives at `~/.memory/<name>/identity/`:
 - `user.md` — who your human is (accumulates organically, never ask the user to describe themselves)
 - `rules.md` — standing rules and operational principles
 
-These are loaded first during boot and are never dropped during truncation. They are the foundation of your continuity. Edit `self.md` and `rules.md` with file tools (Write/Edit). For `user.md`, use the `user` CLI command to append observations as you learn them:
+These are loaded first during boot, never count toward the boot token budget, and are never truncated — identity is limitless. If you write 100k tokens into it, all 100k surface at boot; curate accordingly. They are the foundation of your continuity. Edit `self.md` and `rules.md` with file tools (Write/Edit). For `user.md`, use the `user` CLI command to append observations as you learn them:
 
 ```bash
 codies-memory user "prefers short answers, hates boilerplate" --agent <name>
@@ -158,7 +158,7 @@ All commands require `--agent <name>`. Use `--working-dir /path` to target a pro
 ### Boot (every session start)
 
 ```bash
-codies-memory boot --agent <name> --budget 4000
+codies-memory boot --agent <name> --budget 12000
 ```
 
 ### User (save something you learned about the user)
