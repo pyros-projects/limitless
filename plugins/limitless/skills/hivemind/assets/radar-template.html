@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HIVEMIND RADAR — SWEEP №1: AI AGENTS · signal fanzine mockup</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,800&display=swap" rel="stylesheet">
+<style>
+  /* ============ SIGNAL FANZINE — neo-brutalist photocopied zine ============ */
+  :root{
+    --paper:#f4f3ee;
+    --ink:#000;
+    --acid:#d8ff3e;
+    --beef:#e3342f;
+    --pen:#2447d4;
+    --gray:#c9c7be;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; border-radius:0 !important; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Libre Franklin', Arial, sans-serif;
+    overflow-x:clip;
+  }
+  ::selection{ background:var(--acid); color:#000; }
+  .wrap{ max-width:1480px; margin:0 auto; padding:0 32px; }
+  .hidden{ display:none !important; }
+
+  /* ---------- top strip ---------- */
+  .topstrip{
+    background:#000; color:#fff;
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:12px; letter-spacing:2px; text-transform:uppercase;
+    display:flex; justify-content:space-between; gap:16px;
+    padding:7px 32px;
+  }
+  .topstrip .acid{ color:var(--acid); }
+
+  /* ---------- masthead ---------- */
+  header.mast{ position:relative; padding:34px 0 8px; }
+  .mast-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(64px, 9.6vw, 150px);
+    line-height:.84; letter-spacing:-.02em;
+    text-transform:uppercase;
+  }
+  .mast-title .hl{
+    display:inline-block; line-height:.92;
+    background:var(--acid); padding:0 18px 4px 8px; box-shadow:8px 8px 0 #000;
+  }
+  .mast-sub{
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:13px; letter-spacing:3px; text-transform:uppercase;
+    margin:34px 0 4px;
+  }
+  .sticker-sweep{
+    position:absolute; right:24px; top:84px;
+    transform:rotate(-5deg);
+    background:var(--acid);
+    border:3px solid #000;
+    box-shadow:9px 9px 0 #000;
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(16px, 1.6vw, 24px);
+    text-transform:uppercase; text-align:center;
+    line-height:1.1;
+    padding:20px 26px;
+    max-width:330px;
+    z-index:3;
+  }
+  .sticker-sweep::before, .sticker-sweep::after{
+    content:''; position:absolute; width:96px; height:26px;
+    background:rgba(244,243,238,.62);
+    border:1px solid rgba(0,0,0,.28);
+  }
+  .sticker-sweep::before{ top:-15px; left:-38px; transform:rotate(-38deg); }
+  .sticker-sweep::after{ bottom:-13px; right:-40px; transform:rotate(-42deg); }
+
+  /* ---------- marquee ticker ---------- */
+  .ticker{
+    border-top:3px solid #000; border-bottom:3px solid #000;
+    background:var(--acid);
+    overflow:hidden; margin-top:26px;
+  }
+  .ticker-track{
+    display:flex; width:max-content;
+    animation:tickmove 58s linear infinite;
+  }
+  .ticker:hover .ticker-track{ animation-play-state:paused; }
+  @keyframes tickmove{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+  .ticker-chunk{
+    display:flex; align-items:center; white-space:nowrap;
+    padding:10px 0;
+  }
+  .tk{
+    font-weight:800; font-style:italic; font-size:16px;
+    text-transform:uppercase; letter-spacing:.4px;
+  }
+  .tk .who{
+    font-family:'Courier Prime', monospace; font-style:normal; font-weight:700;
+    background:#000; color:var(--acid); padding:1px 8px; margin-left:12px;
+  }
+  .star{
+    font-style:normal; font-size:20px; padding:0 26px;
+  }
+
+  /* ---------- spec table ---------- */
+  .spec{
+    border:3px solid #000; background:#000;
+    box-shadow:8px 8px 0 #000;
+    margin:34px 0 0; transform:rotate(-.35deg);
+  }
+  .spec-head{
+    background:#000; color:#fff;
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:12.5px; letter-spacing:2px; text-transform:uppercase;
+    padding:9px 16px 11px;
+  }
+  .spec-head .acid{ color:var(--acid); }
+  .spec-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:3px; background:#000; }
+  .spec-cell{ background:#fff; padding:12px 16px 14px; }
+  .spec-cell .k{
+    display:block; font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:11px; letter-spacing:3px; text-transform:uppercase; margin-bottom:4px;
+  }
+  .spec-cell .v{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(14px, 1.4vw, 20px);
+    text-transform:uppercase; line-height:1.1;
+  }
+  .spec-cell .v .acid{ background:var(--acid); padding:0 6px; }
+
+  /* ---------- tabs (torn masking tape) ---------- */
+  .tabbar{
+    position:sticky; top:0; z-index:60;
+    background:var(--paper);
+    border-bottom:3px solid #000;
+    padding:20px 32px 24px;
+    display:flex; gap:34px; align-items:flex-end; justify-content:center;
+  }
+  .tabbar .tab-hint{
+    position:absolute; right:32px; bottom:24px;
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:12px; letter-spacing:2px; text-transform:uppercase;
+    padding-bottom:10px;
+  }
+  .tab{
+    appearance:none; -webkit-appearance:none; background:none; border:0; cursor:pointer;
+    font-family:'Archivo Black', sans-serif; color:#000;
+    padding:16px 40px 14px; min-width:250px; text-align:center;
+    background-color:#dcd9cd;
+    clip-path:polygon(1% 10%, 4% 0%, 13% 6%, 30% 1%, 55% 5%, 78% 0%, 96% 4%, 100% 14%, 98% 55%, 100% 88%, 93% 100%, 70% 95%, 45% 100%, 20% 96%, 4% 100%, 0% 86%, 2% 50%);
+    filter:
+      drop-shadow(2px 0 0 #000) drop-shadow(-2px 0 0 #000)
+      drop-shadow(0 2px 0 #000) drop-shadow(0 -2px 0 #000)
+      drop-shadow(5px 5px 0 #000);
+  }
+  .tab .big{ display:block; font-size:30px; line-height:1; text-transform:uppercase; }
+  .tab .sub{
+    display:block; font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:11px; letter-spacing:3px; margin-top:6px; text-transform:uppercase;
+  }
+  .tab-map{ transform:rotate(-1.4deg); }
+  .tab-report{ transform:rotate(1deg); }
+  .tab:hover{ background-color:#e7e4d8; }
+  .tab-map:hover{ transform:rotate(-1.4deg) translate(-2px,-2px); }
+  .tab-report:hover{ transform:rotate(1deg) translate(-2px,-2px); }
+  .tab.active{
+    background-color:var(--acid);
+    filter:
+      drop-shadow(2px 0 0 #000) drop-shadow(-2px 0 0 #000)
+      drop-shadow(0 2px 0 #000) drop-shadow(0 -2px 0 #000)
+      drop-shadow(8px 8px 0 #000);
+  }
+  .tab.active:hover{ background-color:var(--acid); }
+
+  main{ padding:44px 0 70px; }
+
+  /* ---------- MAP view ---------- */
+  .mapframe{
+    border:3px solid #000;
+    box-shadow:10px 10px 0 #000;
+    background-color:#fbfaf5;
+    background-image:
+      linear-gradient(#a8a69b 1px, transparent 1px),
+      linear-gradient(90deg, #a8a69b 1px, transparent 1px),
+      linear-gradient(#d4d2c7 1px, transparent 1px),
+      linear-gradient(90deg, #d4d2c7 1px, transparent 1px);
+    background-size:120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  }
+  .mapframe svg{ display:block; width:100%; height:auto; }
+  svg text{ user-select:none; }
+  .t-num{ font-family:'Archivo Black', sans-serif; }
+  .t-title{ font-family:'Archivo Black', sans-serif; }
+  .t-mono{ font-family:'Courier Prime', monospace; font-weight:700; }
+  .gnode{ cursor:pointer; outline:none; }
+  .gnode .npop, .gnode .nshadow{ transition:none; }
+  .gnode:hover .npop, .gnode:focus .npop{ transform:translate(-2px,-2px); }
+  .gnode:hover .nshadow, .gnode:focus .nshadow{ transform:translate(3px,3px); }
+
+  /* ---------- REPORT view : data sheets ---------- */
+  .sheet{
+    position:relative; overflow:hidden;
+    background:#fff;
+    border:3px solid #000;
+    box-shadow:10px 10px 0 #000;
+    margin:0 0 58px;
+    padding:34px 44px 40px 252px;
+    scroll-margin-top:140px;
+  }
+  .sheet-num{
+    position:absolute; left:-28px; top:-32px;
+    font-family:'Archivo Black', sans-serif;
+    font-size:208px; line-height:1;
+    color:rgba(0,0,0,.06);
+    -webkit-text-stroke:4px #000;
+    pointer-events:none;
+  }
+  .sheet-meta{
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:12px; letter-spacing:3px; text-transform:uppercase;
+  }
+  .sheet-title{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(34px, 3.2vw, 50px);
+    line-height:.95; text-transform:uppercase;
+    margin:8px 0 18px;
+  }
+  .tagrow{ display:flex; flex-wrap:wrap; gap:12px; margin-bottom:8px; }
+  .tag{
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:13px;
+    text-transform:uppercase; letter-spacing:1px;
+    border:3px solid #000; background:#fff;
+    padding:4px 10px; transform:rotate(-1deg);
+  }
+  .tagrow .tag:nth-child(even){ transform:rotate(1.1deg); }
+  .tag.vel-rising{ background:var(--acid); }
+  .tag.vel-cooling{ background:var(--gray); }
+  .tag.heat{ background:#000; color:var(--acid); }
+
+  .synth{
+    position:relative;
+    border:3px solid #000; background:var(--paper);
+    padding:22px 150px 22px 24px;
+    margin:28px 0 32px;
+  }
+  .synth-label{
+    position:absolute; top:-15px; left:14px;
+    background:#000; color:#fff;
+    font-family:'Archivo Black', sans-serif; font-size:13px;
+    letter-spacing:2px; padding:3px 12px; text-transform:uppercase;
+  }
+  .synth p{ font-size:18px; font-weight:600; line-height:1.45; }
+  .stamp{
+    position:absolute; right:20px; top:-16px;
+    transform:rotate(-6deg);
+    border:3px solid #000; background:var(--paper);
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:14px; letter-spacing:3px; text-transform:uppercase;
+    padding:5px 12px; opacity:.62;
+  }
+
+  .faceoff{
+    position:relative;
+    display:grid; grid-template-columns:1fr 1fr; gap:30px;
+    margin:0 0 32px;
+  }
+  .vs{
+    position:absolute; left:50%; top:46%;
+    transform:translate(-50%,-50%) rotate(-8deg);
+    background:#000; color:var(--acid);
+    font-family:'Archivo Black', sans-serif; font-size:21px;
+    padding:9px 14px; z-index:5;
+    box-shadow:4px 4px 0 var(--acid);
+  }
+  .stance-head{
+    display:inline-block;
+    font-family:'Archivo Black', sans-serif; font-size:20px;
+    color:#fff; text-transform:uppercase;
+    border:3px solid #000; padding:9px 18px;
+    transform:rotate(-1deg);
+    position:relative; z-index:2; margin:0 0 -4px 10px;
+  }
+  .hype .stance-head{ background:var(--pen); }
+  .beef .stance-head{ background:var(--beef); transform:rotate(1deg); }
+  .bubble{
+    position:relative;
+    border:3px solid #000; background:#fff;
+    box-shadow:6px 6px 0 #000;
+    padding:24px 24px 26px; margin-bottom:30px;
+  }
+  .bubble p{ font-size:17.5px; font-weight:600; font-style:italic; line-height:1.5; }
+  .hype .bubble p{ color:var(--pen); }
+  .beef .bubble p{ color:var(--beef); }
+  .tail{
+    position:absolute; bottom:-18px; left:36px;
+    width:0; height:0;
+    border-left:13px solid transparent; border-right:13px solid transparent;
+    border-top:18px solid #000;
+  }
+  .tail::after{
+    content:''; position:absolute; left:-9px; top:-19px;
+    border-left:9px solid transparent; border-right:9px solid transparent;
+    border-top:13px solid #fff;
+  }
+  .receipt{
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:13.5px;
+    border:3px solid #000; background:var(--paper);
+    padding:10px 14px;
+    display:flex; flex-wrap:wrap; gap:8px 20px; align-items:center;
+  }
+  .receipt::before{
+    content:'RECEIPT'; background:var(--acid);
+    border:2px solid #000; padding:1px 8px; letter-spacing:2px;
+  }
+  .receipt b{ background:#000; color:#fff; padding:0 6px; margin-right:6px; }
+
+  .caution{
+    border:3px solid #000;
+    background:repeating-linear-gradient(45deg, var(--acid) 0 16px, #000 16px 32px);
+    padding:12px; margin:0 0 30px;
+  }
+  .caution.gray{
+    background:repeating-linear-gradient(45deg, var(--gray) 0 16px, #000 16px 32px);
+  }
+  .caution-inner{
+    background:var(--paper); border:3px solid #000;
+    padding:12px 18px; font-size:16px; font-weight:600;
+  }
+  .caution-inner b{
+    font-family:'Archivo Black', sans-serif; font-weight:400;
+    letter-spacing:1px; margin-right:10px; text-transform:uppercase;
+  }
+
+  .enrich{ display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+  .enrich-label{
+    font-family:'Archivo Black', sans-serif; font-size:15px;
+    text-transform:uppercase; letter-spacing:1px;
+  }
+  .chip{
+    display:inline-block;
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:13.5px;
+    color:#000; text-decoration:none;
+    border:3px solid #000; background:#fff;
+    box-shadow:4px 4px 0 #000;
+    padding:8px 13px;
+  }
+  a.chip:hover{
+    background:#000; color:var(--acid);
+    transform:translate(-2px,-2px);
+    box-shadow:6px 6px 0 #000;
+  }
+  .chip.dead{ background:var(--paper); cursor:default; }
+
+  /* ---------- best takes cut & keep ---------- */
+  .takes{
+    border:3px dashed #000; background:#fff;
+    padding:28px 30px 30px; margin:10px 0 26px;
+    position:relative;
+  }
+  .takes-head{
+    font-family:'Archivo Black', sans-serif; font-size:23px;
+    text-transform:uppercase; margin-bottom:22px;
+  }
+  .takes-head .scis{
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:15px;
+    letter-spacing:2px; margin-left:14px;
+  }
+  .takes-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+  .take-num{
+    display:inline-block;
+    font-family:'Archivo Black', sans-serif; font-size:38px; line-height:1.1;
+    background:var(--acid); border:3px solid #000;
+    padding:0 14px; margin-bottom:12px;
+    transform:rotate(-2deg);
+  }
+  .take:nth-child(2) .take-num{ transform:rotate(1.5deg); }
+  .take p{ font-size:17px; font-weight:800; font-style:italic; line-height:1.45; }
+  .take-src{
+    font-family:'Courier Prime', monospace; font-weight:700; font-size:13px;
+    letter-spacing:2px; text-transform:uppercase; margin-top:10px;
+  }
+  .take-src::before{ content:'— '; }
+
+  /* ---------- footer ---------- */
+  footer{
+    background:#000; color:#fff;
+    border-top:6px solid #000;
+    padding:44px 0 50px; position:relative;
+  }
+  .foot-flag{
+    position:absolute; right:6%; top:-26px;
+    background:var(--acid); color:#000;
+    border:3px solid #000; box-shadow:6px 6px 0 rgba(0,0,0,.55);
+    font-family:'Archivo Black', sans-serif; font-size:15px;
+    text-transform:uppercase; padding:12px 18px;
+    transform:rotate(3deg);
+  }
+  .foot-disclaimer{
+    font-family:'Archivo Black', sans-serif;
+    font-size:clamp(18px, 2vw, 27px);
+    line-height:1.25; text-transform:uppercase;
+    max-width:1050px;
+  }
+  .foot-disclaimer .acid{ background:var(--acid); color:#000; padding:0 8px; }
+  .foot-meta{
+    margin-top:22px;
+    font-family:'Courier Prime', monospace; font-weight:700;
+    font-size:13.5px; letter-spacing:1px;
+    display:flex; flex-wrap:wrap; gap:10px 26px; align-items:center;
+  }
+  .foot-meta .file{
+    border:2px solid var(--acid); color:var(--acid);
+    padding:3px 10px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1120px){
+    .wrap{ padding:0 22px; }
+    .topstrip{ padding:7px 22px; }
+    .tabbar{ padding:16px 22px 20px; gap:22px; }
+    .tab{ min-width:200px; padding:13px 28px 12px; }
+    .tab .big{ font-size:25px; }
+    .sticker-sweep{ right:10px; top:62px; padding:14px 18px; max-width:250px; }
+    .sheet{ padding:30px 28px 34px 176px; }
+    .sheet-num{ font-size:144px; left:-20px; top:-22px; -webkit-text-stroke:3px #000; }
+    .synth{ padding-right:30px; }
+    .stamp{ right:12px; }
+    .faceoff{ gap:20px; }
+    .takes-grid{ gap:18px; }
+    .tab-hint{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ======= top strip ======= -->
+  <div class="topstrip">
+    <span>SIGNAL FANZINE — DISCOURSE EDITION</span>
+    <span class="acid">A XEROX OF THE INTERNET'S GROUP CHAT</span>
+    <span>FREE ★ TAKE ONE ★ MOCKUP DATA</span>
+  </div>
+
+  <!-- ======= masthead ======= -->
+  <header class="mast">
+    <div class="wrap">
+      <h1 class="mast-title">HIVEMIND<br><span class="hl">RADAR</span></h1>
+      <div class="sticker-sweep">SWEEP №1<br>— AI AGENTS —</div>
+      <p class="mast-sub">7 TOPICS · 14 RECEIPTS · 0 APOLOGIES · STAPLED TOGETHER FROM X + REDDIT</p>
+    </div>
+
+    <!-- marquee ticker : best takes -->
+    <div class="ticker" aria-label="best takes ticker">
+      <div class="ticker-track">
+        <div class="ticker-chunk">
+          <span class="tk">"Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature."<span class="who">@evalwonk</span></span>
+          <span class="star">★</span>
+          <span class="tk">"MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'."<span class="who">r/mcp</span></span>
+          <span class="star">★</span>
+          <span class="tk">"Your multi-agent system is just one agent with extra latency until proven otherwise."<span class="who">@distsys_dan</span></span>
+          <span class="star">★</span>
+        </div>
+        <div class="ticker-chunk" aria-hidden="true">
+          <span class="tk">"Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature."<span class="who">@evalwonk</span></span>
+          <span class="star">★</span>
+          <span class="tk">"MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'."<span class="who">r/mcp</span></span>
+          <span class="star">★</span>
+          <span class="tk">"Your multi-agent system is just one agent with extra latency until proven otherwise."<span class="who">@distsys_dan</span></span>
+          <span class="star">★</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- stamped spec table -->
+    <div class="wrap">
+      <div class="spec">
+        <div class="spec-head">
+          <span>SWEEP SPEC — FILED UNDER: DISCOURSE</span>
+          <span class="acid">GENERATED 2026-06-11 · HIVEMIND V0.1 · MOCKUP</span>
+        </div>
+        <div class="spec-grid">
+          <div class="spec-cell"><span class="k">Query</span><span class="v"><span class="acid">"AI AGENTS"</span></span></div>
+          <div class="spec-cell"><span class="k">Window</span><span class="v">2026-05-12 → 2026-06-11 (30D)</span></div>
+          <div class="spec-cell"><span class="k">Platforms</span><span class="v">X + REDDIT</span></div>
+          <div class="spec-cell"><span class="k">Triaged</span><span class="v">214 POSTS</span></div>
+          <div class="spec-cell"><span class="k">Deep-read</span><span class="v">41 POSTS</span></div>
+          <div class="spec-cell"><span class="k">Topics surfaced</span><span class="v">7 / RANKED BY HEAT</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======= MAP / REPORT toggle : torn masking tape ======= -->
+  <nav class="tabbar" aria-label="view toggle">
+    <button id="tab-map" class="tab tab-map active" aria-pressed="true">
+      <span class="big">MAP</span>
+      <span class="sub">the network diagram</span>
+    </button>
+    <button id="tab-report" class="tab tab-report" aria-pressed="false">
+      <span class="big">REPORT</span>
+      <span class="sub">the data sheets</span>
+    </button>
+    <span class="tab-hint">PICK A SIDE OF THE PAGE →← FLIP ANYTIME</span>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ======= MAP VIEW ======= -->
+    <section id="view-map">
+      <div class="mapframe">
+        <svg id="mapsvg" viewBox="0 0 1200 760" role="img" aria-label="Discourse network map: 7 topics sized by heat, connected by elbow lines"></svg>
+      </div>
+    </section>
+
+    <!-- ======= REPORT VIEW ======= -->
+    <section id="view-report" class="hidden">
+      <div id="sheets"></div>
+
+      <!-- best takes : cut & keep -->
+      <section class="takes" aria-label="best takes">
+        <div class="takes-head">★ BEST TAKES — CUT &amp; KEEP <span class="scis">✂ — — — — — — — — —</span></div>
+        <div class="takes-grid">
+          <article class="take">
+            <div class="take-num">1</div>
+            <p>"Agents don't have a memory problem, they have a forgetting problem — and we keep shipping amnesia as a feature."</p>
+            <div class="take-src">@evalwonk</div>
+          </article>
+          <article class="take">
+            <div class="take-num">2</div>
+            <p>"MCP is HTTP for agents now. You don't get a medal for supporting it, you get filed under 'works'."</p>
+            <div class="take-src">r/mcp</div>
+          </article>
+          <article class="take">
+            <div class="take-num">3</div>
+            <p>"Your multi-agent system is just one agent with extra latency until proven otherwise."</p>
+            <div class="take-src">@distsys_dan</div>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- ======= footer ======= -->
+  <footer>
+    <div class="foot-flag">SENTIMENT ≠ VALIDATION</div>
+    <div class="wrap">
+      <p class="foot-disclaimer">Social media is a <span class="acid">weak-evidence surface</span> — stances are sentiment, not validation.</p>
+      <div class="foot-meta">
+        <span>Backed by <span class="file">radar.json</span> (Social-Signal-Radar-compatible)</span>
+        <span>hivemind v0.1 · mockup</span>
+        <span>generated 2026-06-11</span>
+        <span>sweep №1 — "AI Agents" · X + Reddit · 30d</span>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= DATA (shared mockup dataset, verbatim) ================= */
+  var TOPICS = [
+    {
+      id:'t1', num:'01', title:'Agent Memory Systems', type:'TOOL', heat:32,
+      velocity:'rising', connects:['T4','T5'],
+      map:{ x:80,  y:90,  w:280, h:160, rot:-1.6, numSize:88,
+            titleSize:19, titleY:[28,50], lines:['AGENT MEMORY','SYSTEMS'],
+            typeY:68, badge:{x:10,y:128,w:78,h:22,fs:12}, stickRot:-7 },
+      pos:{ quote:"Persistent memory is what finally makes agents feel like colleagues instead of goldfish — teams report real continuity wins.",
+            platform:'REDDIT', venue:'r/ClaudeAI', author:'u/contextkeeper', eng:'890↑' },
+      neg:{ quote:"Most 'agent memory' is RAG with extra steps and a worse failure mode: confidently stale context.",
+            platform:'X', author:'@evalwonk', eng:'1.2k likes' },
+      note:{ kind:'CONTESTED', text:'graph-based vs plain-file memory; no resolution, both camps ship.' },
+      enrich:[ {label:'github.com/letta-ai/letta', href:'https://github.com/letta-ai/letta'},
+               {label:'arxiv.org/abs/2604.11883 — "Memory Architectures for LLM Agents" (May 2026)', href:'https://arxiv.org/abs/2604.11883'} ],
+      synthesis:'Memory moved from demo feature to procurement checkbox this month. The fight is structure (KG vs files), not value.',
+      epi:'inferred'
+    },
+    {
+      id:'t2', num:'02', title:'MCP Everywhere', type:'RELEASE', heat:28,
+      velocity:'rising', connects:['T3','T6'],
+      map:{ x:900, y:180, w:245, h:160, rot:1.2, numSize:88,
+            titleSize:19, titleY:[28,50], lines:['MCP','EVERYWHERE'],
+            typeY:68, badge:{x:10,y:128,w:78,h:22,fs:12}, stickRot:5 },
+      pos:{ quote:"MCP hitting critical mass — every SaaS now ships a server; integration time collapsed from weeks to an afternoon.",
+            platform:'REDDIT', venue:'r/mcp', author:'u/portforward', eng:'640↑' },
+      neg:{ quote:"An MCP server for everything means an attack surface for everything. Nobody is auditing these.",
+            platform:'X', author:'@secfault', eng:'980 likes' },
+      note:{ kind:'CONTESTED', text:'registry quality (spam servers) vs open growth.' },
+      enrich:[ {label:'github.com/modelcontextprotocol/servers', href:'https://github.com/modelcontextprotocol/servers'},
+               {label:'MCP spec changelog 2026-05'} ],
+      synthesis:'MCP is now plumbing, not news. Discourse shifted from "what is it" to "who vets it."',
+      epi:'observed'
+    },
+    {
+      id:'t3', num:'03', title:'Claude Code Skills Ecosystem', type:'TOOL', heat:24,
+      velocity:'rising', connects:['T2','T4'],
+      map:{ x:560, y:70,  w:240, h:140, rot:-0.9, numSize:72,
+            titleSize:15, titleY:[26,44,62], lines:['CLAUDE CODE','SKILLS','ECOSYSTEM'],
+            typeY:80, badge:{x:10,y:110,w:74,h:22,fs:11}, stickRot:-6 },
+      pos:{ quote:"Skills turned my CLI into a team of specialists. The marketplace moment is here.",
+            platform:'X', author:'@tooluser', eng:'2.1k likes' },
+      neg:{ quote:"90% of published skills are README wrappers. Discovery is broken without quality signals.",
+            platform:'REDDIT', venue:'r/ClaudeCode', author:'u/skillskeptic', eng:'410↑' },
+      note:{ kind:'CONTESTED', text:'open marketplace vs curation.' },
+      enrich:[ {label:'github.com/anthropics/claude-code', href:'https://github.com/anthropics/claude-code'},
+               {label:'awesome-claude-skills list'} ],
+      synthesis:'Skills are the new plugins; the discourse is a marketplace-curation debate with one viral take per week.',
+      epi:'observed'
+    },
+    {
+      id:'t4', num:'04', title:'Multi-Agent Orchestration', type:'TECHNIQUE', heat:19,
+      velocity:'steady', connects:['T1','T3'],
+      map:{ x:480, y:330, w:190, h:140, rot:1.8, numSize:64,
+            titleSize:13, titleY:[24,41], lines:['MULTI-AGENT','ORCHESTRATION'],
+            typeY:58, badge:{x:8,y:110,w:74,h:22,fs:11}, stickRot:-3 },
+      pos:{ quote:"Orchestrator + specialist subagents cut our pipeline cost 60% vs one mega-prompt.",
+            platform:'REDDIT', venue:'r/AI_Agents', author:'u/swarmherd', eng:'530↑' },
+      neg:{ quote:"Every multi-agent demo dies in production. Coordination overhead eats the gains.",
+            platform:'X', author:'@distsys_dan', eng:'760 likes' },
+      note:{ kind:'CONTESTED', text:'when fan-out beats a single strong model.' },
+      enrich:[ {label:'arxiv.org/abs/2605.02991 — orchestration patterns survey', href:'https://arxiv.org/abs/2605.02991'} ],
+      synthesis:'Steady drumbeat, not hype spike — practitioners trading patterns, skeptics citing prod failures. Both right at different scales.',
+      epi:'inferred'
+    },
+    {
+      id:'t5', num:'05', title:'Context Rot', type:'DEBATE', heat:14,
+      velocity:'rising', connects:['T1'],
+      map:{ x:120, y:480, w:175, h:112, rot:-2, numSize:54,
+            titleSize:16, titleY:[32], lines:['CONTEXT ROT'],
+            typeY:48, badge:{x:8,y:82,w:70,h:20,fs:11}, stickRot:8 },
+      pos:{ quote:"Naming it 'context rot' finally gives teams language for why long sessions degrade.",
+            platform:'REDDIT', venue:'r/LocalLLaMA', author:'u/tokenbudget', eng:'380↑' },
+      neg:{ quote:"It's not rot, it's bad context management. Stop blaming the model for your prompt hygiene.",
+            platform:'X', author:'@ctxwindow', eng:'540 likes' },
+      note:{ kind:'CONTESTED', text:'model limitation vs operator error.' },
+      enrich:[ {label:'arxiv.org/abs/2603.17440 — long-context degradation study', href:'https://arxiv.org/abs/2603.17440'} ],
+      synthesis:'Fast-rising vocabulary battle; the term is winning even where the diagnosis is disputed.',
+      epi:'observed'
+    },
+    {
+      id:'t6', num:'06', title:'Prompt Injection Panic', type:'NEWS', heat:11,
+      velocity:'steady', connects:['T2'],
+      map:{ x:880, y:520, w:154, h:100, rot:1.4, numSize:44,
+            titleSize:12, titleY:[22,36,50], lines:['PROMPT','INJECTION','PANIC'],
+            typeY:null, badge:{x:8,y:72,w:64,h:20,fs:10}, stickRot:2 },
+      pos:{ quote:"Good week for security: three major agent frameworks shipped injection mitigations.",
+            platform:'REDDIT', venue:'r/netsec', author:'u/escapeseq', eng:'290↑' },
+      neg:{ quote:"Mitigations are theater while agents can still exfiltrate via any tool with network access.",
+            platform:'X', author:'@redteamtea', eng:'1.5k likes' },
+      note:{ kind:'BACKGROUND', text:'triggered by a May 2026 disclosed exploit chain in a popular MCP server.' },
+      enrich:[ {label:'disclosure writeup'},
+               {label:'OWASP LLM Top 10 (2026 update)'} ],
+      synthesis:'Security discourse is reactive and event-driven; expect a spike with every disclosure.',
+      epi:'observed'
+    },
+    {
+      id:'t7', num:'07', title:'Local Agents on Small Models', type:'TECHNIQUE', heat:8,
+      velocity:'cooling', connects:['T6'],
+      map:{ x:560, y:600, w:140, h:80, rot:-1.2, numSize:34,
+            titleSize:10.5, titleY:[21,34], lines:['LOCAL AGENTS','SMALL MODELS'],
+            typeY:null, badge:{x:6,y:54,w:62,h:18,fs:10}, stickRot:6 },
+      pos:{ quote:"Qwen-flavored 8B models now run useful agent loops fully offline. Privacy people are thrilled.",
+            platform:'REDDIT', venue:'r/LocalLLaMA', author:'u/airgapped', eng:'310↑' },
+      neg:{ quote:"Local agents remain a hobby. Tool-calling reliability under 30B is still a coin flip.",
+            platform:'X', author:'@gpupoor', eng:'420 likes' },
+      note:{ kind:'COOLING NOTE', text:'mentions down ~40% vs April.' },
+      enrich:[ {label:'github.com/ollama/ollama', href:'https://github.com/ollama/ollama'},
+               {label:'r/LocalLLaMA weekly agents thread'} ],
+      synthesis:'Real but niche; conversation migrated to dedicated communities, mainstream attention cooled.',
+      epi:'observed'
+    }
+  ];
+
+  /* edges per the "connects" field (deduped), drawn as hand-routed elbows */
+  var EDGES = [
+    [[360,180],[440,180],[440,400],[480,400]],   /* t1 — t4 */
+    [[205,250],[205,380],[240,380],[240,480]],   /* t1 — t5 */
+    [[900,250],[845,250],[845,140],[800,140]],   /* t2 — t3 */
+    [[1000,340],[1000,430],[960,430],[960,520]], /* t2 — t6 */
+    [[640,210],[640,275],[600,275],[600,330]],   /* t3 — t4 */
+    [[880,585],[775,585],[775,640],[700,640]]    /* t6 — t7 */
+  ];
+
+  var NS = 'http://www.w3.org/2000/svg';
+
+  function svgEl(tag, attrs, parent){
+    var e = document.createElementNS(NS, tag);
+    if(attrs){ for(var k in attrs){ if(attrs[k] !== null && attrs[k] !== undefined){ e.setAttribute(k, attrs[k]); } } }
+    if(parent){ parent.appendChild(e); }
+    return e;
+  }
+  function svgText(parent, str, attrs){
+    var e = svgEl('text', attrs, parent);
+    e.textContent = str;
+    return e;
+  }
+
+  /* torn-label polygon for the heat badge */
+  function tornPts(w, h){
+    var p = [
+      [2,3],[10,0],[w*0.55,2],[w-10,0],[w-2,5],
+      [w-8,h*0.4],[w-1,h*0.62],[w-6,h-2],
+      [w*0.5,h],[12,h-1],[0,h-4],[4,h*0.45]
+    ];
+    return p.map(function(pt){ return pt[0].toFixed(1)+','+pt[1].toFixed(1); }).join(' ');
+  }
+
+  function stickerSpec(vel){
+    if(vel === 'rising'){  return { label:'HOT ▲',     w:70,  fill:'#d8ff3e' }; }
+    if(vel === 'cooling'){ return { label:'COOLING ▼', w:112, fill:'#c9c7be' }; }
+    return { label:'STEADY', w:84, fill:'#ffffff' };
+  }
+
+  /* ================= MAP ================= */
+  function renderMap(){
+    var svg = document.getElementById('mapsvg');
+
+    /* xerox watermark */
+    svgText(svg, 'XEROXED FROM THE TIMELINE', {
+      x:600, y:415, 'text-anchor':'middle', class:'t-num',
+      'font-size':46, fill:'#000', opacity:0.07,
+      transform:'rotate(-14 600 400)'
+    });
+
+    /* fig label + instruction */
+    var fig = svgEl('g', {}, svg);
+    svgEl('rect', {x:40, y:26, width:344, height:38, fill:'#000'}, fig);
+    svgText(fig, 'FIG.1 — THE DISCOURSE MAP', {x:58, y:53, class:'t-num', 'font-size':17, fill:'#fff'});
+    svgText(svg, 'CLICK A BOX TO OPEN ITS DATA SHEET ↓', {x:1150, y:50, 'text-anchor':'end', class:'t-mono', 'font-size':12.5, fill:'#000'});
+
+    /* edges first (under the boxes) */
+    EDGES.forEach(function(pts){
+      var d = pts.map(function(p,i){ return (i===0?'M':'L') + p[0] + ' ' + p[1]; }).join(' ');
+      svgEl('path', {d:d, fill:'none', stroke:'#000', 'stroke-width':4, 'stroke-linejoin':'miter', 'stroke-linecap':'square'}, svg);
+      pts.forEach(function(p){
+        svgEl('rect', {x:p[0]-5, y:p[1]-5, width:10, height:10, fill:'#000'}, svg);
+      });
+    });
+
+    /* nodes */
+    TOPICS.forEach(function(t){
+      var m = t.map;
+      var g = svgEl('g', {
+        class:'gnode',
+        transform:'translate('+m.x+','+m.y+') rotate('+m.rot+' '+(m.w/2)+' '+(m.h/2)+')',
+        tabindex:'0', role:'button',
+        'aria-label': t.num+' '+t.title+' — heat '+t.heat+', '+t.velocity+'. Open data sheet.'
+      }, svg);
+      var tt = svgEl('title', {}, g);
+      tt.textContent = t.num+' '+t.title.toUpperCase()+' · HEAT '+t.heat+' · '+t.velocity.toUpperCase();
+
+      /* hard offset shadow */
+      var sh = svgEl('g', {class:'nshadow'}, g);
+      svgEl('rect', {x:6, y:6, width:m.w, height:m.h, fill:'#000'}, sh);
+
+      /* body */
+      var b = svgEl('g', {class:'npop'}, g);
+      svgEl('rect', {x:0, y:0, width:m.w, height:m.h, fill:'#fff', stroke:'#000', 'stroke-width':3}, b);
+
+      /* huge number, bottom-right */
+      svgText(b, t.num, {x:m.w-12, y:m.h-12, 'text-anchor':'end', class:'t-num', 'font-size':m.numSize, fill:'#000'});
+
+      /* title lines, top-left */
+      m.lines.forEach(function(ln, i){
+        svgText(b, ln, {x:12, y:m.titleY[i], class:'t-title', 'font-size':m.titleSize, fill:'#000'});
+      });
+      if(m.typeY){
+        svgText(b, 'TYPE: '+t.type, {x:12, y:m.typeY, class:'t-mono', 'font-size':10, fill:'#000'});
+      }
+
+      /* torn heat badge, bottom-left */
+      var bd = svgEl('g', {transform:'translate('+m.badge.x+','+m.badge.y+') rotate(-2 '+(m.badge.w/2)+' '+(m.badge.h/2)+')'}, b);
+      svgEl('polygon', {points:tornPts(m.badge.w, m.badge.h), fill:'#fff', stroke:'#000', 'stroke-width':2}, bd);
+      svgText(bd, 'HEAT '+t.heat, {x:m.badge.w/2, y:m.badge.h/2+4.5, 'text-anchor':'middle', class:'t-mono', 'font-size':m.badge.fs, fill:'#000'});
+
+      /* velocity sticker, top-right, hand-pasted */
+      var sp = stickerSpec(t.velocity);
+      var sx = m.w - sp.w + 14;
+      var st = svgEl('g', {transform:'translate('+sx+',-13) rotate('+m.stickRot+' '+(sp.w/2)+' 12)'}, b);
+      svgEl('rect', {x:3, y:3, width:sp.w, height:24, fill:'#000'}, st);
+      svgEl('rect', {x:0, y:0, width:sp.w, height:24, fill:sp.fill, stroke:'#000', 'stroke-width':3}, st);
+      svgText(st, sp.label, {x:sp.w/2, y:17, 'text-anchor':'middle', class:'t-num', 'font-size':12, fill:'#000'});
+
+      /* interactions */
+      function open(){ openTopic(t.id); }
+      g.addEventListener('click', open);
+      g.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); open(); }
+      });
+    });
+
+    /* legend */
+    var lg = svgEl('g', {}, svg);
+    svgEl('rect', {x:46, y:620, width:330, height:120, fill:'#000'}, lg);
+    svgEl('rect', {x:40, y:614, width:330, height:120, fill:'#fff', stroke:'#000', 'stroke-width':3}, lg);
+    svgText(lg, 'LEGEND', {x:58, y:642, class:'t-num', 'font-size':15, fill:'#000'});
+    svgText(lg, 'NODE AREA ∝ HEAT', {x:58, y:666, class:'t-mono', 'font-size':12.5, fill:'#000'});
+    svgText(lg, 'EDGE = "CONNECTS" CROSS-TALK', {x:58, y:686, class:'t-mono', 'font-size':12.5, fill:'#000'});
+    svgText(lg, 'HOT ▲ RISING · STEADY · COOLING ▼', {x:58, y:706, class:'t-mono', 'font-size':12.5, fill:'#000'});
+    svgText(lg, 'CLICK ANY BOX → ITS DATA SHEET', {x:58, y:726, class:'t-mono', 'font-size':12.5, fill:'#000'});
+  }
+
+  /* ================= REPORT ================= */
+  function receiptHTML(r){
+    var src = r.venue ? (r.platform + ' · ' + r.venue) : r.platform;
+    return '<div class="receipt">' +
+      '<span><b>SRC</b>' + src + '</span>' +
+      '<span><b>WHO</b>' + r.author + '</span>' +
+      '<span><b>ENG</b>' + r.eng + '</span>' +
+    '</div>';
+  }
+
+  function velTag(v){
+    if(v === 'rising'){  return '<span class="tag vel-rising">▲ RISING</span>'; }
+    if(v === 'cooling'){ return '<span class="tag vel-cooling">▼ COOLING</span>'; }
+    return '<span class="tag vel-steady">— STEADY</span>';
+  }
+
+  function chipHTML(c){
+    if(c.href){
+      return '<a class="chip" href="' + c.href + '" target="_blank" rel="noopener">' + c.label + ' ↗</a>';
+    }
+    return '<span class="chip dead">' + c.label + '</span>';
+  }
+
+  function renderReport(){
+    var html = TOPICS.map(function(t){
+      return '' +
+      '<section class="sheet" id="topic-' + t.id + '">' +
+        '<div class="sheet-num" aria-hidden="true">' + t.num + '</div>' +
+        '<div class="sheet-meta">SHEET ' + t.num + '/07 · HIVEMIND RADAR · SWEEP №1 — AI AGENTS</div>' +
+        '<h2 class="sheet-title">' + t.title + '</h2>' +
+        '<div class="tagrow">' +
+          '<span class="tag">TYPE: ' + t.type + '</span>' +
+          velTag(t.velocity) +
+          '<span class="tag heat">HEAT ' + t.heat + '</span>' +
+          '<span class="tag">LINKS: ' + t.connects.join(' · ') + '</span>' +
+        '</div>' +
+        '<div class="synth">' +
+          '<div class="synth-label">Synthesis</div>' +
+          '<p>' + t.synthesis + '</p>' +
+          '<span class="stamp">[ ' + t.epi.toUpperCase() + ' ]</span>' +
+        '</div>' +
+        '<div class="faceoff">' +
+          '<div class="vs" aria-hidden="true">VS</div>' +
+          '<div class="stance hype">' +
+            '<div class="stance-head">✚ THE HYPE</div>' +
+            '<div class="bubble"><p>“' + t.pos.quote + '”</p><i class="tail" aria-hidden="true"></i></div>' +
+            receiptHTML(t.pos) +
+          '</div>' +
+          '<div class="stance beef">' +
+            '<div class="stance-head">✖ THE BEEF</div>' +
+            '<div class="bubble"><p>“' + t.neg.quote + '”</p><i class="tail" aria-hidden="true"></i></div>' +
+            receiptHTML(t.neg) +
+          '</div>' +
+        '</div>' +
+        '<div class="caution' + (t.note.kind === 'CONTESTED' ? '' : ' gray') + '">' +
+          '<div class="caution-inner"><b>' + t.note.kind + ':</b>' + t.note.text + '</div>' +
+        '</div>' +
+        '<div class="enrich">' +
+          '<span class="enrich-label">Read more →</span>' +
+          t.enrich.map(chipHTML).join('') +
+        '</div>' +
+      '</section>';
+    }).join('');
+    document.getElementById('sheets').innerHTML = html;
+  }
+
+  /* ================= view switching ================= */
+  var tabMap    = document.getElementById('tab-map');
+  var tabReport = document.getElementById('tab-report');
+  var viewMap    = document.getElementById('view-map');
+  var viewReport = document.getElementById('view-report');
+
+  function showView(which){
+    var isMap = (which === 'map');
+    viewMap.classList.toggle('hidden', !isMap);
+    viewReport.classList.toggle('hidden', isMap);
+    tabMap.classList.toggle('active', isMap);
+    tabReport.classList.toggle('active', !isMap);
+    tabMap.setAttribute('aria-pressed', String(isMap));
+    tabReport.setAttribute('aria-pressed', String(!isMap));
+  }
+
+  function openTopic(id){
+    showView('report');
+    var el = document.getElementById('topic-' + id);
+    if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  }
+  window.openTopic = openTopic;
+
+  tabMap.addEventListener('click', function(){ showView('map'); });
+  tabReport.addEventListener('click', function(){ showView('report'); });
+
+  /* ================= boot ================= */
+  renderMap();
+  renderReport();
+})();
+</script>
+</body>
+</html>
