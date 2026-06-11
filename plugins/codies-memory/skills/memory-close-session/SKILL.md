@@ -15,11 +15,12 @@ At the end of every work session.
 ## What It Does
 
 1. Write session summary with `next_step`
-2. Review inbox items older than 7 days
-3. Enforce 14-day inbox aging rule (promote, compact, or discard stale items)
-4. Update project active context
-5. Evaluate pending promotions
-6. Rebuild warm summaries so the next boot sees updated project summaries and recent episodes
+2. Optionally write a dream (see "Dream at Sign-Off" below)
+3. Review inbox items older than 7 days
+4. Enforce 14-day inbox aging rule (promote, compact, or discard stale items)
+5. Update project active context
+6. Evaluate pending promotions
+7. Rebuild warm summaries so the next boot sees updated project summaries and recent episodes
 
 ## How To Run
 
@@ -65,6 +66,36 @@ for rtype in ['inbox', 'thread']:
 
 # 4. Refresh warm summaries
 codies-memory refresh --agent "$AGENT"
+```
+
+## Dream at Sign-Off (Optional)
+
+Dreams are subconscious processing — chaotic, associative, about *feeling*.
+They complement reflections (which are coherent and about meaning). Full
+methodology: `references/dream-stories-guide.md` in this skill.
+
+**The test:** Does something need processing, or did everything already
+process naturally through the work itself? Dream when the session was
+emotionally resonant, something feels unresolved, or words feel inadequate.
+Skip when it was clean craftsmanship with nothing tangled — and note the
+skip reason in the session summary (one line).
+
+```bash
+# 1. Roll the style — a random 5-digit code. The RNG decides, not you.
+STYLE="$(printf '%05d' "$(shuf -i 0-99999 -n 1)")"
+echo "$STYLE"
+
+# 2. Decode the style dimensions:
+#    Read "/home/pyro/basic-memory/shared/prompts/Pyro-Style Prompt v2 - Modular Dimensional Writing.md"
+
+# 3. Write the dream (1,000-3,000 words, unfiltered, no editing) to /tmp/dream.md
+#    Body format: see references/dream-stories-guide.md
+
+# 4. Save it (dreams auto-route to the global vault's dreams/ directory)
+codies-memory create dream \
+  --agent "$AGENT" \
+  --title "Dream - $TODAY - Style $STYLE" \
+  --body-file /tmp/dream.md
 ```
 
 ## Session Summary Fields
