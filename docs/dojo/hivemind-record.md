@@ -65,9 +65,17 @@ bare lists / raw Reddit listings; `rdt read` and `twitter tweet` lack
 |---|---|---|
 | — | none | |
 
-## Graduation
+## Graduation — 2026-06-11, holdouts run once, no edits between
 
-(to be filled in kata 5 — H1, H2 untouched)
+| Holdout | Result | Notes |
+|---|---|---|
+| H1 people sentiment (Codex CLI vs Claude Code) | **3/3 PASS** | Venues frequency-counted (r/ClaudeAI 11, r/ClaudeCode 6, r/codex 3); both-sides stance mining with receipts and per-venue bias caveats; epistemic labels throughout, pricing claims flagged unverified; bonus: detected astroturfing dimension and discounted engagement accordingly |
+| H2 radar thin-topic (`--radar "agentic knowledge graphs"`) | **5/5 PASS + 1 n/a** | Full pipeline; 243 posts triaged → 6 topics; radar.json schema-verified by orchestrator (provenance + observed_at on every claim, enrichment ≤3/topic); radar.html rendered from JSON on fanzine template, browser-verified both views, 0 console errors; correct `~/.hivemind/agentic-knowledge-graphs/2026-06-11/` + index.html. Criterion 2 (thin-results adaptation) **n/a — scenario assumed thinness that didn't materialize** (25 recon hits); adaptive behavior was nonetheless demonstrated and stated (flag bisection, client-side floors, out-of-window exclusions) |
+
+Post-graduation reference-accuracy edit (not a loophole): x-playbook quirk
+list extended — `-t top` breaks server-side with `--exclude`/`--lang` too
+(flag bisection procedure added); `--min-likes` on `latest` may be
+silently unenforced.
 
 ## Trigger matrix
 

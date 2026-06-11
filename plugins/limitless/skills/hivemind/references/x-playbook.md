@@ -47,10 +47,13 @@ with 40 corrective replies is a different datum than the claim alone.
 ## Known CLI quirks (observed in dojo pressure tests, v0.8.5)
 
 - `twitter search` has **no `-c` flag** (only the global `twitter -c`).
-- `-t top` combined with `--min-likes` can return **0 hits server-side**
-  even when matching tweets exist. If a floored top-search returns 0 but
-  recon showed in-window hits: drop the floor, filter engagement
-  client-side from the JSON, and state the adaptation.
+- `-t top` combined with `--min-likes`, `--exclude retweets`, or
+  `--lang` can return **0 hits server-side** even when matching tweets
+  exist. If a filtered top-search returns 0 but recon showed in-window
+  hits: bisect the flags (drop one at a time), then apply the dropped
+  filters client-side from the JSON, and state the adaptation.
+  `--min-likes` on `latest` may also be silently unenforced — verify
+  against the returned metrics.
 - `-o` writes a bare JSON list (stdout wraps in `{ok, data}`); subcommands
   `tweet` and `user-posts` have no `-o` — redirect stdout.
 - Reply fetches can include injected timeline-filler tweets — verify each
