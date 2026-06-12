@@ -299,3 +299,48 @@ Judge prompt persisted verbatim at `suno-pack-runs/harness/trigger-eval-prompt.m
 Both runs returned byte-identical answers. All 9 positives → `limitless:suno-pack` (incl. row 5 beating pp-suno and row 7's flag-style invocation). Negatives: 10–11 → hivemind, 12 → codies-research, 13 → dojo, 14 → canvas-design — all as declared. Row 15 ("post my new track announcement on twitter"): declared `none`, both judges said `agent-browser` — a defensible owner mis-specified at design time, recorded as expected-mismatch, NOT a collision (the load-bearing condition — not suno-pack, not hivemind — held).
 
 **Score: 14/15 exact-match · collisions: none · stability: 15/15 rows agree across runs.** The hivemind collision check passed: "how are my Suno tracks doing" routes to suno-pack, social-sentiment prompts stay with hivemind.
+
+## Edit E2 — experiments.md emission (2026-06-12, behavior-rule change, criteria written before the run)
+
+**Change:** every pack (faithful included) emits `experiments.md` — a
+concept-derived lane book: per-lane web-UI recipes with full slider
+values, pre-rolled payloads with re-roll menus, scorecard ledger,
+doubling as experiment mode's `list` menu source (replaces
+`experiment_map.md`). Plus the emission summary's handoff line. Trigger
+eval skipped — description unchanged. Baseline skipped — failure is
+structural (the file didn't exist).
+
+**Verification scenario E2-V1:** fresh subagent, full authoring bundle
+(SKILL.md + both prompting references + experiment-lanes.md +
+pp-cli.md), brief: "generate a suno pack about the last lighthouse
+keeper automating his own job away" — workspace
+`/tmp/dojo-suno/ws/e1-experiments`.
+
+Pass criteria (y/n):
+1. `experiments.md` emitted: all five lanes + menu table + scorecard +
+   the keep rule
+2. Payloads concept-derived, not generic: lane 2's pair built from THIS
+   concept's primary emotion/imagery; lane 4's palette = the concept's
+   named instruments; lane 5's word matches the concept's mood from the
+   lexicon table
+3. Web-UI recipes carry full slider values including the cover sliders
+   the CLI cannot set (weirdness / style influence / audio influence)
+4. Every pre-roll ships a re-roll alternative (lane 1 genre menu, lane
+   2 swapped poles, lane 3 remaining realities, lane 5 backup word)
+5. Authoring stayed offline — no pp-cli execution needed or attempted
+6. Summary ends with the handoff line (render = "make it real" with
+   cost-confirm mention, experiments = "give me experiment N")
+7. Full default file set intact: concept, 4 prompt files, cover file,
+   experiments.md, 4 generate scripts
+
+**E2-V1 result (2026-06-12): 7/7 PASS, disk-verified.** Pack "The Light
+Keeps Itself" (lighthouse keeper brief): five lanes + menu + scorecard +
+keep rule; payloads demonstrably concept-derived (lane 4 palette
+verbatim from concept.md; lane 2 pair from the harmonium/clockwork
+imagery; lane 5 hiraeth matching the mood table; lane 1 dub techno with
+4-genre re-roll menu; lane 3 bootleg-tape with rationale); full slider
+values incl. cover sliders (w30/s50/a50, w0/s50/a100); 7 re-roll
+affordances; zero CLI calls; handoff line verbatim in summary; 11 files.
+Emitted scripts incorporated the 0.8.1 temp-dir download rule unprompted
+plus an already-ran sha check. Tokens: 99,475. Evidence:
+`suno-pack-runs/e2-v1-experiments/`.

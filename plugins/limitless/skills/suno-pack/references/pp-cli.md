@@ -113,13 +113,18 @@ generation share the title → the second overwrites the first (this
 destroyed a paid take on 2026-06-11). Therefore:
 
 1. NEVER use `--download` on generate commands.
-2. Parse the clip ids from the generate response (defensive paths:
-   `.data.clips[].id` or `.clips[].id`).
-3. Per clip: `suno-pp-cli download <clip_id> --out <pack>/audio/`, then
-   immediately rename to the take-aware convention:
-   `<slug>-<model>-take<N>-<clipid8>.mp3`
+2. Parse the clip ids from the generate response — the real envelope is
+   top-level `.clips` (verified live 2026-06-12); keep `.data.clips` as
+   the defensive fallback.
+3. Per clip: download into a TEMP dir, then move to the take-aware name:
+   `suno-pp-cli download <clip_id> --out <tmpdir>/` →
+   `mv <tmpdir>/<title>.mp3 <pack>/audio/<slug>-<model>-take<N>-<clipid8>.mp3`
    (slug = pack slug, N = batch order, clipid8 = first 8 hex of the id).
-   Two takes, two files, always — verify both exist before reporting.
+   Never download straight into `audio/` — the title-named file will
+   CLOBBER any pre-existing take of the same title already sitting there
+   (this destroyed a local v4.5 file on 2026-06-12 before recovery from
+   the cloud). Two takes, two files, always — verify both exist before
+   reporting.
 
 ### Library & read-only commands (no confirmation needed)
 
@@ -142,9 +147,11 @@ Never `sync --full` by default (libraries run to thousands of clips);
 
 ### The `--dry-run` preflight (verified 2026-06-12)
 
-`--dry-run` is a global flag: the command parses, prints
-`{"action":"generate","dry_run":true}`, sends nothing, exit 0. Use it as
-the free preflight for every generate invocation — it catches flag
+`--dry-run` is a global flag: the command parses, sends nothing, exit 0.
+`generate create` prints `{"action":"generate","dry_run":true}`;
+`generate cover` succeeds SILENTLY in `--json` mode (exit 0, no output —
+observed 2026-06-12; verify no-spend via `credits` if in doubt). Use it
+as the free preflight for every generate invocation — it catches flag
 errors and arg mistakes at zero cost. It does NOT echo the payload;
 it validates, nothing more. Run the dry-run, then repeat the identical
 command without `--dry-run` after user confirmation.
@@ -192,8 +199,10 @@ join key is `clip_id`):
 `lane` only for experiment rolls; `human_scorecard` starts empty — the
 HUMAN fills it after listening. Never self-score listening judgments;
 the skill has no ears and never claims otherwise. For covers, each
-result clip carries `"parent_clip": "<seed id>"`. Verify lineage with
-`suno-pp-cli --agent lineage <new_clip_id>` after sync.
+result clip carries `"parent_clip": "<seed id>"` — this is the RELIABLE
+parentage record: local `lineage` on a freshly synced cover may show a
+single node with no ancestry (observed 2026-06-12); treat lineage as
+best-effort verification, the run log as truth.
 
 ## Cover seed selection (decision 2026-06-11)
 
@@ -221,7 +230,7 @@ anything.
 | Action | Cost | Status |
 |---|---|---|
 | `generate create`, v4.5, 2 takes | 10 credits | observed 2026-06-11 |
-| `generate cover` | ~10 credits assumed | unverified — confirm via credits before/after on first run |
+| `generate cover`, v5.5, 2 takes | 10 credits | observed 2026-06-12 (9,755 → 9,745) |
 | downloads, sync, library reads | 0 | observed |
 | pack authoring | 0 | by construction |
 
@@ -233,7 +242,8 @@ confirmation line.
 | CLI `--model` | `model_name` in responses | Status |
 |---|---|---|
 | v4.5 | `chirp-auk` | observed 2026-06-11 |
-| others | `chirp-crow`, `chirp-bluejay`, `chirp-fenix`, … | present in libraries; mapping unverified — record what returns, don't guess |
+| v5.5 | `chirp-fenix` (response also carries `major_model_version: "v5.5"`) | observed 2026-06-12 |
+| others | `chirp-crow`, `chirp-bluejay`, … | present in libraries; mapping unverified — record what returns, don't guess |
 
 ## Per-pack runnable scripts
 

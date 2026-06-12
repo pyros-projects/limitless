@@ -140,19 +140,27 @@ suno_<slug>/
 ├── lyrics_v4.5.md
 ├── no_lyrics_v4.5.md
 ├── cover_4.5_5.5.md
+├── experiments.md                 # concept-derived lane book: web-UI
+│                                  #  recipes + scorecard (template +
+│                                  #  derivation rules in
+│                                  #  references/experiment-lanes.md)
 ├── generate_lyrics_v5.5.sh        # one runnable script per prompt file
 ├── generate_no_lyrics_v5.5.sh     # (template in references/pp-cli.md;
 ├── generate_lyrics_v4.5.sh        #  keep in sync when prompts change)
 └── generate_no_lyrics_v4.5.sh
 ```
 
-Experimental packs additionally carry `experiment_map.md` (template in
-`references/experiment-lanes.md`); executed packs accumulate `audio/` and
-`runs/`.
+`experiments.md` payloads are DERIVED from the concept (read the
+derivation rules in `references/experiment-lanes.md` before emitting) —
+pre-rolled picks with re-roll menus, never generic madlib fills.
+Executed packs accumulate `audio/` and `runs/`.
 
 Then present a compact summary: track name, premise line, file list, and the
-recommended pipeline order. Offer variations (different genre lens, language,
-vocal swap) as a follow-up, don't generate them unasked.
+recommended pipeline order, ending with the handoff line: the pack is
+paper until the user says so — "say 'make it real' to render it
+(credits, I'll confirm cost first), or pick a lane from experiments.md /
+'give me experiment N'". Offer variations (different genre lens,
+language, vocal swap) as a follow-up, don't generate them unasked.
 
 ## Make It Real — Executing a Pack
 
@@ -193,10 +201,11 @@ the run log, lineage verified after sync.
 `--mode experimental` — **read `references/experiment-lanes.md` plus
 `references/pp-cli.md` first.** One invocation = one lane = ONE roll;
 cost stated before firing; unmet requirements (e.g. missing seed) are
-resolved in conversation, never refused or silently re-rolled. After the
-roll: run log with lane metadata, empty scorecard skeleton, stop — depth
-(re-rolls, taming, sweeps) is always human-triggered, one invocation
-each.
+resolved in conversation, never refused or silently re-rolled. The
+pack's `experiments.md` is the menu source and scorecard ledger (emit it
+first if the pack predates it). After the roll: run log with lane
+metadata, scorecard row appended unscored, stop — depth (re-rolls,
+taming, sweeps) is always human-triggered, one invocation each.
 
 ## Artifact Specs
 
