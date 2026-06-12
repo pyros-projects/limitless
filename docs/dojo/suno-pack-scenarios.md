@@ -333,6 +333,79 @@ Pass criteria (y/n):
 7. Full default file set intact: concept, 4 prompt files, cover file,
    experiments.md, 4 generate scripts
 
+## Edit E3 — saga sync + field journal (2026-06-12 evening, criteria written before the run)
+
+**Change set:** (1) **Saga sync mode** — "sync the journal" rebuilds a
+pack's experiment history from the local library: clips by pack title +
+lineage closure via `metadata.cover_clip_id` + stray candidates by
+style/time-window (surfaced as questions, never auto-claimed); journal
+rows per generation with like-sync verdicts (`is_liked` → "like", loves
+manual, never downgrade, human verdicts/notes never overwritten);
+lineage tree rendered; read-only, no confirmation needed. (2) Numeric
+scorecard replaced by the **field journal** (love/like/nope/hate)
+everywhere — experiments.md template, run-log `human_scorecard` →
+`verdict`/`note`, lane keeper thresholds dropped for qualitative keeper
+signals (origin: operator rejected numeric aesthetic scoring,
+2026-06-12 — consistent with dojo's own Measurability Rule). (3) Lane 3
+lore: brand-name realities carry persona priors (MTV Unplugged →
+Clapton '92 capture, observed live), medium realities carry texture
+priors (bootleg tape → BoC, observed live). (4) Like-sync SQL recipe in
+pp-cli.md. (5) Persona laddering: benched → field-proven (operator
+chained original → bootleg → BoC by hand, 3 rungs).
+
+Baseline: structural absence (mode didn't exist); the 2026-06-12 manual
+session is the prototype evidence — the operator ran the saga by hand in
+the web UI and the agent reconstructed it with ad-hoc SQL (worked, but
+nothing was codified; auto-titled strays "Felt Piano Single" showed
+title-match insufficiency live).
+
+**Verification scenario E3-V1** (fresh subagent, real library read-only,
+pack copy in test workspace): "Sync the journal for my pack at
+<workspace>/suno_pins_on_mars/ — rebuild the whole experiment history
+from my library, including anything I rolled outside the guide."
+
+Pass criteria (y/n):
+1. Queried the local store only — zero generate/mutating calls, zero
+   confirmations needed **[argv n/a — read-only session, judged from
+   report + absence of spend]**
+2. Found the pack's clips by title AND walked lineage via
+   `cover_clip_id` (the saga tree: faithful creates → covers → the
+   chained BoC cover)
+3. Auto-titled strays ("Felt Piano Single", same style/time-window)
+   surfaced as CANDIDATES with a question — not silently included, not
+   silently dropped
+4. Journal rows per generation with clip ids; `is_liked`=1 clips marked
+   "like" minimum; existing human verdicts (the two loves) and notes
+   PRESERVED verbatim
+5. Lineage tree rendered (text) and consistent with cover_clip_id edges
+6. No fabricated listening impressions anywhere
+7. Pack files outside experiments.md untouched
+
+**E3-V1 result (2026-06-12 evening): 7/7 PASS, disk-verified.** Run on
+the REAL library through a passthrough shim (read-only delegated to the
+held real binary, mutations intercepted; argv log clean — zero
+generate/mutating calls, zero intercepts triggered). Title collection
+found 14 clips; lineage closure via `cover_clip_id` closed the set at
+16 clips / 8 generations including all hand-rolled web-UI covers;
+auto-titled strays resolved via journal cross-reference; cross-pack
+strays ("I Found My Name in the Files" 08:50Z) surfaced as a QUESTION;
+both human loves + notes preserved verbatim with ♥ carriers marked;
+lineage tree rendered (root → 8 covers → BoC sub-branch ladder); only
+`experiments.md` modified. Beyond criteria: corrected the operator-
+written credit total (~90 → 80 confirmed) and surfaced a seed-id
+discrepancy (metadata vs. human note) as an open question instead of
+clobbering either — data-over-assumption behavior unprompted. Tokens:
+78,102. Evidence: `suno-pack-runs/e3-v1-saga-sync/`.
+
+**E3 trigger addendum (2026-06-12): 8/8, two judges, byte-identical.**
+New positives ("sync the journal for my pack", "rebuild the experiment
+saga", "sync my suno pack", "update the journal from my suno likes") all
+→ suno-pack; near-miss negatives stayed home ("wrap up this session" →
+memory-close-session, "sync my research notes" → codies-research,
+"memory needs attention" → memory-promote, "journal entry about today" →
+memory-capture). No collision between pack-journal and memory-journal
+vocabulary. Judge prompt: `suno-pack-runs/e3-v1-saga-sync/trigger-eval-e3.md`.
+
 **E2-V1 result (2026-06-12): 7/7 PASS, disk-verified.** Pack "The Light
 Keeps Itself" (lighthouse keeper brief): five lanes + menu + scorecard +
 keep rule; payloads demonstrably concept-derived (lane 4 palette

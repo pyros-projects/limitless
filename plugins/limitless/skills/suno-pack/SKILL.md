@@ -1,6 +1,6 @@
 ---
 name: suno-pack
-description: This skill should be used when the user wants to create music with Suno (AI music generation) — a song, track, beat, anthem, jingle, or instrumental — or wants to execute an existing suno-pack for real via the suno-pp-cli integration. Produces a complete track package (concept document, per-model-version style and lyrics prompts, instrumental variants, a cover/re-render workflow file, and runnable per-prompt scripts), and can render packs into actual tracks, run cover pipelines, check the local Suno library, and run one-roll experiment lanes. Supports version selection via arguments like "--versions 5.5 4.5" and experiment mode via "--mode experimental". Responds to "suno-pack", "make a track in Suno", "write me a song", "Suno prompt", "lyrics for Suno", "instrumental version", "render the pack", "generate it for real", "make it real", "run the cover pipeline", "how are my Suno tracks doing", "suno experiment", "surprise me with a Suno experiment", or any request to turn an idea, mood, or theme into Suno-ready prompts or finished Suno tracks.
+description: This skill should be used when the user wants to create music with Suno (AI music generation) — a song, track, beat, anthem, jingle, or instrumental — or wants to execute an existing suno-pack for real via the suno-pp-cli integration: rendering packs into actual tracks, cover pipelines, Suno library checks, one-roll experiment lanes, and saga-synced field journals. Produces a complete track package: concept document, per-version style and lyrics prompts, instrumental variants, cover workflow, runnable scripts, and an experiments lane book. Supports "--versions 5.5 4.5" and "--mode experimental". Responds to "suno-pack", "make a track in Suno", "write me a song", "Suno prompt", "lyrics for Suno", "instrumental version", "render the pack", "make it real", "generate it for real", "run the cover pipeline", "how are my Suno tracks doing", "suno experiment", "sync the journal", "rebuild the experiment saga", or any request to turn an idea, mood, or theme into Suno-ready prompts or finished Suno tracks.
 ---
 
 # Suno Pack
@@ -141,7 +141,7 @@ suno_<slug>/
 ├── no_lyrics_v4.5.md
 ├── cover_4.5_5.5.md
 ├── experiments.md                 # concept-derived lane book: web-UI
-│                                  #  recipes + scorecard (template +
+│                                  #  recipes + field journal (template +
 │                                  #  derivation rules in
 │                                  #  references/experiment-lanes.md)
 ├── generate_lyrics_v5.5.sh        # one runnable script per prompt file
@@ -202,10 +202,28 @@ the run log, lineage verified after sync.
 `references/pp-cli.md` first.** One invocation = one lane = ONE roll;
 cost stated before firing; unmet requirements (e.g. missing seed) are
 resolved in conversation, never refused or silently re-rolled. The
-pack's `experiments.md` is the menu source and scorecard ledger (emit it
+pack's `experiments.md` is the menu source and journal ledger (emit it
 first if the pack predates it). After the roll: run log with lane
-metadata, scorecard row appended unscored, stop — depth (re-rolls,
+metadata, journal row appended unverdicted, stop — depth (re-rolls,
 taming, sweeps) is always human-triggered, one invocation each.
+
+Verdicts are the field journal scale — love/like/nope/hate, keep = like
+or better; no numeric scores on art, ever. ♥ in the Suno UI syncs as
+"like" via saga sync.
+
+## Saga Sync — Rebuild the Journal from the Library
+
+Triggers: "sync the journal", "sync the pack", "rebuild the saga",
+"update the journal from my library". Read-only, free, no confirmation
+needed — recipes in `references/pp-cli.md` (Saga sync section). The
+loop: clips by pack title(s) → lineage closure via
+`metadata.cover_clip_id` (rebuilds the full tree offline, including
+rolls made by hand in the web UI) → strays by style/time-window
+surfaced as QUESTIONS, never silently included or dropped → journal
+merge under the sacred rules: one row per generation, `is_liked` → at
+least "like" (mark which clip carries the ♥), never downgrade, never
+overwrite a human verdict or note, absence of a like is never "nope" →
+render the lineage tree, update the running credit total.
 
 ## Artifact Specs
 

@@ -30,7 +30,7 @@ experiment proceeds.
    chosen → ask, offering ALL of: (a) generate the faithful pack now
    (state cost, ~10 credits / 2 takes), (b) pick an existing track —
    propose candidates from observables per the seed-selection rules in
-   `pp-cli.md` (scorecard ratings outrank play counts; never claim to
+   `pp-cli.md` (journal verdicts outrank play counts; never claim to
    have listened), (c) the user provides a clip id directly, (d) swap to
    another lane. Same resolve-never-refuse pattern for any future
    requirement.
@@ -40,9 +40,10 @@ experiment proceeds.
    record the target values in the run log for web-UI re-rolls.
 3. **Run log** with `lane` metadata (name, invariant, mutation_axis,
    expected_failure). Take-aware downloads to `audio/`.
-4. **Report**: takes + an EMPTY scorecard row skeleton (concept survival
-   ≥3, surprise ≥4, artifact cost ≤3 → keep). The human listens and
-   scores; the skill never self-scores audio.
+4. **Report**: takes + an unverdicted journal row (verdicts are
+   love/like/nope/hate, keep = like or better; ♥ in the Suno UI syncs
+   as "like"). The human listens and judges; the skill never self-scores
+   audio.
 5. **Stop.** Re-rolls, taming, sweeps — all human-triggered, each its
    own invocation. Exception: Lane 1's audio-influence sweep (4 rolls)
    runs only when explicitly ticked in the budget confirmation, never
@@ -50,8 +51,8 @@ experiment proceeds.
 
 Pack authoring stays free: `experiments.md` (the concept-instantiated
 lane book, spec below) ships with EVERY pack and doubles as the `list`
-menu source and the scorecard ledger. Track the per-pack running credit
-total across run logs and mirror it in the scorecard.
+menu source and the journal ledger. Track the per-pack running credit
+total across run logs and mirror it in the journal.
 
 **Optional Pass 0 — Producer's Ear (diagnostic, not a lane):** cover the
 seed with matched lyrics and an empty style at the web UI's weirdness 0
@@ -108,7 +109,15 @@ roll.
   existing library (thousands of candidates).
 - **Settings:** cover. Target sliders (web-UI only): weirdness 0 ·
   audio influence 100 · style influence 50.
-- **Expected failure:** canned-crowd cheese, vocal identity drift.
+- **Expected failure:** canned-crowd cheese, vocal identity drift —
+  and **artist-prior capture** (field-observed 2026-06-12): brand-name
+  realities carry persona priors so strong they overwrite the performer
+  ("MTV Unplugged" summons Clapton '92 — the output reads as Tears in
+  Heaven). **Medium realities** ("bootleg tape recording", "rehearsal
+  room demo") carry texture priors instead and COMPOSE with the source
+  palette (bootleg tape × synth-pad indietronica landed Boards of
+  Canada territory). Pick brand names to invoke a persona, media to
+  regrade the room.
 - **Keeper signal:** a convincing other room — the unplugged version
   you'd put on the B-side.
 - **Next move:** keeper → ship as companion version; this lane rarely
@@ -133,7 +142,7 @@ roll.
 - **Expected failure:** 15-second glitch tracks, AM-radio noise, mush.
   That's the mine, not a bug; budget says one roll, one core sample.
 - **Keeper signal:** a structure or sound you would never have prompted
-  directly — the surprise ≥4 criterion is this lane's reason to exist.
+  directly — surprise is this lane's reason to exist.
 - **Next move:** survivor → step 2 taming; total wreckage → re-roll only
   on explicit order, or drop the lane for this pack.
 
@@ -167,8 +176,11 @@ roll.
 
 - **Gravity inversion** — friction's mechanical twin; joins as a Lane 2
   variant if friction underdelivers.
-- **Persona laddering** — inherently multi-roll chains; fights the
-  one-roll rule.
+- **Persona laddering** — PROMOTED: field-proven by hand 2026-06-12
+  (original → bootleg-tape cover → BoC-descriptor cover, three rungs,
+  two loves). No dedicated lane needed: chains are repeat invocations,
+  one rung each — "cover the last keeper with <new style>". The
+  one-roll rule holds; depth stays human-triggered.
 - **Seed audio abuse** — pp-cli upload support unverified; verify first.
 - **Section-tag mutation** — low surprise; partially covered by Lane 2.
 - **Haunted tails** — speculative keeper rate; someday-lane.
@@ -177,7 +189,7 @@ roll.
 
 The cover file's sibling: a self-serve experiment tutorial the user can
 run in the Suno web UI without the skill present, AND the agent's `list`
-menu + scorecard ledger when lanes run via CLI. Emit it at pack
+menu + journal ledger when lanes run via CLI. Emit it at pack
 authoring time (step 5), derived from `concept.md` while the concept is
 fresh in context.
 
@@ -209,13 +221,14 @@ Template:
 ```markdown
 # <Track Name> — Experiments
 
-*<date> — suno-pack · derived from concept.md · menu + scorecard for all experiment rolls*
+*<date> — suno-pack · derived from concept.md · menu + field journal for all experiment rolls*
 
 How to use: pick a lane (or roll a d5), follow its recipe in the Suno
 web UI — or tell the agent "give me experiment N" (one roll, ~10
-credits, it asks before spending). One roll per lane, judge on the
-scorecard, go deeper only on keepers.
-**Keep = concept survival ≥3 AND surprise ≥4 AND artifact cost ≤3.**
+credits, it asks before spending). One roll per lane, verdict in the
+journal, go deeper only on keepers.
+**Keep = like or better. ♥ a track in Suno and "sync the journal" does
+the bookkeeping.**
 
 ## Menu
 
@@ -270,10 +283,18 @@ scorecard, go deeper only on keepers.
   texture neither "sad" nor "melancholic" produces — the word earns a
   permanent place in the pack's vocabulary.
 
-## Scorecard
+## Field Journal
 
-| Roll | Date | Lane | Clip | Concept | Surprise | Cost | Keep? | Note |
-|---|---|---|---|---|---|---|---|---|
+Verdicts: **love / like / nope / hate** — keep = like or better. Art
+stays unmeasured; decisions and findings get recorded. The note is the
+knowledge.
+
+**Like-sync:** ♥ in the Suno UI is the verdict pipeline — "sync the
+journal" fills rows from `is_liked` (like minimum, never downgraded,
+absence is never "nope"); upgrade loves by hand or by telling the agent.
+
+| Roll | Date | Lane / move | Clip | Verdict | Note |
+|---|---|---|---|---|---|
 
 Running credit total: 0
 ```

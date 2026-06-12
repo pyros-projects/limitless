@@ -192,23 +192,70 @@ join key is `clip_id`):
     "captcha": "open | tripped | solved | manual"
   },
   "lane": {"name": "…", "invariant": "…", "mutation_axis": "…", "expected_failure": "…"},
-  "human_scorecard": {}
+  "verdicts": {}
 }
 ```
 
-`lane` only for experiment rolls; `human_scorecard` starts empty — the
-HUMAN fills it after listening. Never self-score listening judgments;
-the skill has no ears and never claims otherwise. For covers, each
+`lane` only for experiment rolls; `verdicts` starts empty and fills via
+saga sync (`{"<clip_id>": {"verdict": "like", "note": "…"}}`) or the
+human. Never self-score listening judgments; the skill has no ears and
+never claims otherwise. For covers, each
 result clip carries `"parent_clip": "<seed id>"` — this is the RELIABLE
 parentage record: local `lineage` on a freshly synced cover may show a
 single node with no ancestry (observed 2026-06-12); treat lineage as
 best-effort verification, the run log as truth.
 
+## Saga sync — rebuild the journal from the library (read-only, free)
+
+Trigger: "sync the journal" / "sync the pack" / "rebuild the saga".
+Reconstructs a pack's whole experiment history — including rolls the
+user made by hand in the web UI — and updates `experiments.md`'s field
+journal. No confirmation needed: library reads only.
+
+1. `sync --latest-only`, then collect clips by the pack's title(s)
+   (every `## Title` block in the pack):
+   ```
+   suno-pp-cli --agent sql "select id, title, model_name, created_at,
+     json_extract(data,'$.is_liked') liked,
+     json_extract(data,'$.metadata.cover_clip_id') parent,
+     json_extract(data,'$.metadata.tags') tags,
+     json_extract(data,'$.reaction.play_count') my_plays,
+     json_extract(data,'$.reaction.skip_count') my_skips,
+     duration from clips where title in (…)"
+   ```
+2. **Lineage closure:** `metadata.cover_clip_id` is the parent edge —
+   walk it both ways until the set is closed (covers of covers, renamed
+   children). The tree rebuilds fully offline; `lineage`/`tree` API
+   calls are optional verification, not the source.
+3. **Stray detection:** clips in the same time window whose tags match
+   the pack's style vocabulary but whose titles don't (Suno auto-titles
+   non-custom rolls from the style prompt, e.g. "Felt Piano Single") are
+   CANDIDATES — list them and ask the user; never silently include or
+   drop.
+4. **Journal merge (sacred rules):** one row per generation
+   (`created_at` groups the takes). `is_liked = 1` → verdict at least
+   "like" (mark which clip carries the ♥). Never downgrade, never
+   overwrite a human verdict or note; absence of a like is NOT "nope".
+   Lane attribution from tags is best-effort — mark inferred lanes
+   with "?". Render the lineage tree as text in the journal. Update the
+   running credit total from generation counts.
+
+## Verdicts — the field journal scale
+
+No numeric scores on art, ever (operator rule + dojo's Measurability
+Rule): verdicts are **love / like / nope / hate**, keep = like or
+better. The note column is the knowledge — findings, not numbers.
+Objective facts (glitches, dead air, wrong duration) are facts, not
+verdicts; record them in notes or leave them to tooling. Run logs carry
+`"verdict"` and `"note"` per clip (filled by sync or the human),
+replacing the former numeric `human_scorecard`.
+
 ## Cover seed selection (decision 2026-06-11)
 
 The human picks the seed; the skill proposes. Proposals cite observables
-only: human scorecard ratings from prior run logs (these OUTRANK play
-counts), play_count, upvote_count, prior lineage, ship history. Fresh
+only: journal verdicts from prior run logs (love > like — these OUTRANK
+play counts), is_liked, play_count, upvote_count, prior lineage, ship
+history. Fresh
 takes with zero signal → ask, no default. Never claim to have heard
 anything.
 

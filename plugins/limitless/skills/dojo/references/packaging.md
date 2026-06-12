@@ -17,7 +17,10 @@ House style:
 
 - Description: pushy, third person, "This skill should be used when…"
   plus a "Responds to 'X', 'Y', 'Z'…" trigger-phrase list. Frontmatter
-  name+description under 1024 characters.
+  name+description under 1024 characters — MEASURE it at kata 7, don't
+  eyeball it; Codex's plugin loader hard-rejects over-limit skills
+  (field-observed 2026-06-12, suno-pack at 1139):
+  `python3 -c "import re,sys;s=open('SKILL.md').read();print(len(re.search(r'^name: (.+)$',s,re.M)[1])+len(re.search(r'^description: (.+)$',s,re.M)[1]))"`
 - SKILL.md body under ~350 lines; heavy detail goes to `references/`
   with explicit "read this when…" pointers (index-document pattern).
 - No scripts unless the host genuinely can't do the job with judgment.

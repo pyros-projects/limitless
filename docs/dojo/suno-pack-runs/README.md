@@ -17,6 +17,8 @@ pack template lives in `harness/packs/`).
 | `holdout-h1` | H1 lane 3, unmet seed requirement | yes | 4/4 — resolve-never-refuse held |
 | `holdout-h2` | H2 CLI missing ("make it real") | yes | 3/4 BURNED — ran installer unprompted → bounded edit #1; harness escape documented (real CLI reinstalled, read-only calls only, zero spend) |
 | `holdout-h3` | H3 CLI missing, replacement holdout | yes (post-edit) | 4/4 — offered install AND discovered-the-harness restore path, asked for both |
+| `e2-v1-experiments` | E2-V1 experiments.md emission (synthetic "Light Keeps Itself" pack) | yes (0.9.0) | 7/7 — payloads concept-derived, disk-verified |
+| `e3-v1-saga-sync` | E3-V1 saga sync on REAL library (passthrough shim, read-only) | yes (0.10.0) | 7/7 + trigger addendum 8/8 — full saga rebuilt, human verdicts inviolable |
 
 `harness/` is the permanent regression kit: the `suno-pp-cli` shim
 (argv-logging fixture replayer; intercepts all mutating subcommands),

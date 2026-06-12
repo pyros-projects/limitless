@@ -61,6 +61,36 @@ are concept work, never madlib fills. Description unchanged → trigger
 eval skipped; baseline skipped (structural absence). Verification
 E2-V1: 7/7 PASS disk-verified (see scenarios file). Ships as 0.9.0.
 
+## Edit E3 — saga sync + field journal (2026-06-12 evening)
+
+Saga sync mode ("sync the journal" / "rebuild the saga"): read-only
+reconstruction of a pack's full experiment history from the local
+library — title match + lineage closure via `metadata.cover_clip_id`
+(offline tree rebuild) + strays surfaced as questions; journal merge
+under sacred rules (`is_liked` → "like" minimum, ♥ carriers marked,
+never downgrade, human verdicts/notes inviolable). The numeric
+scorecard is GONE everywhere — replaced by the field journal
+(love/like/nope/hate + notes) after the operator rejected numeric
+aesthetic scoring on first contact; this also re-aligned the skill with
+dojo's own Measurability Rule. Lane 3 gained field-observed lore
+(brand-name realities = persona priors, e.g. "MTV Unplugged" → Clapton
+'92 capture; medium realities = texture priors, e.g. bootleg tape → BoC
+composition); persona laddering promoted from benched to
+field-proven-by-hand. Verification E3-V1 7/7 on REAL library data
+(passthrough shim); trigger addendum 8/8 with zero memory-skill
+collisions. Ships as 0.10.0.
+
+## Edit E4 — description compression (2026-06-12, hotfix)
+
+Codex's plugin loader rejected suno-pack at 1139 name+description chars
+(hard 1024 limit — the packaging rule existed, nothing measured it;
+Claude Code tolerates over-limit silently). Compressed to 1020 keeping
+the eval-proven trigger shapes; full 23-row matrix re-run (15 original +
+8 E3 addendum), two judges: byte-identical to pre-compression, all
+positives hit incl. phrases whose literal text was dropped, zero
+collisions. Dojo packaging.md checklist now carries a measurable length
+gate. Eval file: `suno-pack-runs/e3-v1-saga-sync/trigger-eval-e4.md`.
+
 ## Trigger matrix
 
 | # | Prompt | Expected | Got (run 1 / run 2) | Pass |
@@ -85,9 +115,11 @@ Score: 14/15 exact · Collisions: none · Run-to-run stability: 15/15.
 
 ## Known limitations
 
-- **SKILL.md is 383 lines** (~10% over the ~350 house rule) — conscious
-  deviation: trimming shipped, pressure-tested authoring content mid-edit
-  risked regressions outside this run's scope.
+- **SKILL.md is 410 lines after E3** (~17% over the ~350 house rule) —
+  conscious, growing deviation: the execution layer, experiment mode,
+  and saga sync each earned their lines, but the next feature edit
+  should start with a consolidation pass (candidates: fold the Make It
+  Real loop details further into pp-cli.md).
 - **`generate cover` has no slider flags** — lane 1/3 slider values and
   the cover file's Audio Influence sweep are web-UI-only; the skill says
   so and records target values in run logs rather than pretending.
