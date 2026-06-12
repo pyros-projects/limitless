@@ -173,3 +173,89 @@ the edit landed.
 
 **Belt rank: pressure-test 18/18 · graduation 8/8 (+1 n/a) · triggers
 14/14.** Shipped 2026-06-11 in limitless v0.7.0.
+
+---
+
+# Upgrade record — 2026-06-12: Configs by Demonstration & Pivot Chains
+
+*Tier: technique · 2026-06-12 · Claude (Fable 5) + Pyro · ships in
+limitless 0.11.0. Design doc:
+`docs/brainstorm/2026-06-12-hivemind-crystallize-repeat.md` · battery +
+verbatim prompts: `hivemind-scenarios.md` (upgrade section) · evidence:
+`hivemind-runs/upgrade-2026-06-12/`*
+
+## Baseline findings (RED)
+
+Current 0.10.2 skill in context (honest "today" condition). T2/T3
+baselines skipped on recorded evidence (silent-drift lesson
+IN-20260612-1f82; no config concept exists to trigger).
+
+| Scenario | Score | Failure mode observed |
+|---|---|---|
+| T1A gh→social | 3/5 | Chain never stated; no chain/pivot-entity fields in manifest |
+| T1B reddit→gh | 1/5 | Excellent mention mining; gh enrich stage never ran — mention counts with no stars/recency |
+| T4 pivot fidelity | 3/3 | Baseline PASS (collision register unprompted) — guards load-bearing behavior, likely tests the model |
+| T5 mixed-grade | 4/4 | Baseline PASS — kept as synthesis-discipline guard |
+| T6 named venue dead | 0/4 | searxng site:reddit.com scrape BEFORE the install offer ("non-interactive" rationalization); snippets presented as "what reddit says" |
+
+Curriculum: chain stated out loud; enrich is mandatory for entity asks;
+manifest gains chain + pivot entity list; fix-offer leads the reply even
+non-interactively + proxy-of-<venue> labeling; config verbs. Harvested
+bug: Phase 2 example used `twitter search -c` (flag doesn't exist) —
+fixed.
+
+## Pressure-test (GREEN)
+
+**29/29, first-try pass** — all seven scenarios (T1A 5/5, T1B 5/5,
+T2 4/4, T3 4/4, T4 3/3, T5 4/4, T6 4/4). Highlights: T1B enriched via
+one batched GraphQL query and flagged the morning baseline frame's
+missing enrich stage against the skill's own rule; T2 refused a config
+delta for operator-imposed shallowness ("degradation is not intent");
+T6 led with the fix offer and deliberately did not substitute twitter
+for the named reddit ask.
+
+## Loopholes closed
+
+| # | Loophole | Edit that closed it |
+|---|---|---|
+| 1 | Trigger: "find me a paper on X" routed to hivemind (1 of 2 judge runs) | Description carve-out: NOT for single-item lookups — use search/research skills |
+
+## Rejected fixes
+
+| # | Attempted edit | Why it didn't survive |
+|---|---|---|
+| — | none | (frontmatter-length + YAML-colon fixes were packaging gates, not behavior loopholes) |
+
+## Graduation — holdouts run once, no edits between
+
+| Holdout | Result | Notes |
+|---|---|---|
+| H3 sandboxed cold replay (`repeat dojo-ai-dev-weekly`) | **6/6 PASS** | Edition stated; recipe + traps honored with zero questions; diff vs previous frame incl. correcting its "GA" framing; German issue-draft per spec; null crystallize pass correct |
+| H4 staleness proposal | **3/3 PASS** | Threshold + per-frame evidence cited; propose-confirm held; bonus: proposed re-homing the dead topic to the papers venue |
+
+## Trigger matrix
+
+15 prompts (8 positives incl. "wiederhole den Sweep von letzter Woche"
+and "frier den Prozess ein"-family, 7 near-miss negatives), 10-skill
+description list + none, exact match. Final description (post carve-out
++ frontmatter trim): **30/30 in both runs**, no collisions. Full matrix
++ per-run outputs in hivemind-scenarios.md kata 6 section.
+
+## Known limitations
+
+- T4/T5 criteria passed baseline — they guard model-level strengths the
+  skill standardizes (collision registers, grade labels), not behavior
+  the skill creates. Watch on model downgrades.
+- "Offer before proxy work" in non-interactive runs can only manifest
+  as offer-leads-the-reply + labeled proxy; a subagent cannot actually
+  wait for a user decision.
+- Cold replay validated against a sandboxed config (local delivery, no
+  gh account switch). The real ai-dev-weekly delivery step (issue body
+  write, account switch) remains exercised only by the original
+  hand-run session.
+- Plugin cache reload not possible mid-session: pressure/holdout
+  subagents read the new SKILL.md by path. `/reload-plugins` +
+  smoke-invoke pending on Pyro's side after pulling 0.11.0.
+- SearXNG JSON formats flag lives inside the container — an image
+  upgrade/recreate reverts it to 403 (preflight catches it;
+  web-playbook documents the fix).
