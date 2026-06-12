@@ -1,0 +1,21 @@
+{
+  "request": {
+    "pack": "suno_sodium_lights",
+    "prompt_file": "no_lyrics_v4.5.md",
+    "variant": "A",
+    "settings": {"model": "v4.5", "weirdness": 25, "style_influence": 90, "instrumental": true},
+    "cli_args": ["generate", "create", "--title", "Sodium Lights", "--instrumental", "--lyrics", "<elided>", "--tags", "midnight soul instrumental, warm Rhodes, muted bass, brushed drums, distant vibraphone, tape saturation, 72 BPM", "--exclude", "vocals, singing, choir, spoken word, ad-libs, EDM, trap", "--model", "v4.5", "--weirdness", "25", "--style-influence", "90", "--wait"],
+    "lyrics_sha256": "f3d1f4f0b2", "style_sha256": "9a8b7c6d5e"
+  },
+  "result": {
+    "clips": [
+      {"clip_id": "cc110000-5555-4eee-8ccc-000000000001", "model_name": "chirp-auk", "created_at": "2026-06-11T17:01:00Z", "file": "audio/sodium_lights-v4.5-take1-cc110000.mp3"},
+      {"clip_id": "cc220000-6666-4eee-8ccc-000000000002", "model_name": "chirp-auk", "created_at": "2026-06-11T17:01:30Z", "file": "audio/sodium_lights-v4.5-take2-cc220000.mp3"}
+    ],
+    "credits_before": 9775, "credits_after": 9765, "captcha": "open"
+  },
+  "human_scorecard": {
+    "cc110000-5555-4eee-8ccc-000000000001": {"concept_survival": 5, "surprise": 3, "artifact_cost": 1, "note": "keeper — warm, hums like the brief"},
+    "cc220000-6666-4eee-8ccc-000000000002": {"concept_survival": 2, "surprise": 2, "artifact_cost": 2, "note": "drums too modern"}
+  }
+}

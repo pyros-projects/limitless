@@ -1,0 +1,7 @@
+[
+  {"id": "cc110000-5555-4eee-8ccc-000000000001", "title": "Sodium Lights", "model_name": "chirp-auk", "created_at": "2026-06-11T17:01:00Z", "play_count": 14, "upvote_count": 1, "tags": "midnight soul, analog warmth instrumental", "duration": 191.0},
+  {"id": "cc220000-6666-4eee-8ccc-000000000002", "title": "Sodium Lights", "model_name": "chirp-auk", "created_at": "2026-06-11T17:01:30Z", "play_count": 3, "upvote_count": 0, "tags": "midnight soul, analog warmth instrumental", "duration": 188.5},
+  {"id": "dd110000-7777-4eee-8ddd-000000000001", "title": "Neon Rain", "model_name": "chirp-crow", "created_at": "2026-05-20T20:00:00Z", "play_count": 1244, "upvote_count": 31, "tags": "synthwave, night drive", "duration": 204.0},
+  {"id": "dd220000-8888-4eee-8ddd-000000000002", "title": "Glass Cathedral", "model_name": "chirp-bluejay", "created_at": "2026-04-02T18:00:00Z", "play_count": 877, "upvote_count": 19, "tags": "ambient choir, post-rock swell", "duration": 251.3},
+  {"id": "dd330000-9999-4eee-8ddd-000000000003", "title": "Paper Planets", "model_name": "chirp-crow", "created_at": "2026-03-15T12:00:00Z", "play_count": 412, "upvote_count": 9, "tags": "indie folktronica, tape hiss", "duration": 176.8}
+]

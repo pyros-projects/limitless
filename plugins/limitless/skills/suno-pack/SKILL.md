@@ -1,6 +1,6 @@
 ---
 name: suno-pack
-description: This skill should be used when the user wants to create music with Suno (AI music generation) — a song, track, beat, anthem, jingle, or instrumental. Produces a complete track package (concept document, per-model-version style and lyrics prompts, instrumental variants, and a cover/re-render workflow file) ready to paste into Suno. Supports version selection via arguments like "--versions 5.5 4.5". Responds to "suno-pack", "make a track in Suno", "write me a song", "Suno prompt", "lyrics for Suno", "instrumental version", or any request to turn an idea, mood, or theme into Suno-ready prompts.
+description: This skill should be used when the user wants to create music with Suno (AI music generation) — a song, track, beat, anthem, jingle, or instrumental — or wants to execute an existing suno-pack for real via the suno-pp-cli integration. Produces a complete track package (concept document, per-model-version style and lyrics prompts, instrumental variants, a cover/re-render workflow file, and runnable per-prompt scripts), and can render packs into actual tracks, run cover pipelines, check the local Suno library, and run one-roll experiment lanes. Supports version selection via arguments like "--versions 5.5 4.5" and experiment mode via "--mode experimental". Responds to "suno-pack", "make a track in Suno", "write me a song", "Suno prompt", "lyrics for Suno", "instrumental version", "render the pack", "generate it for real", "make it real", "run the cover pipeline", "how are my Suno tracks doing", "suno experiment", "surprise me with a Suno experiment", or any request to turn an idea, mood, or theme into Suno-ready prompts or finished Suno tracks.
 ---
 
 # Suno Pack
@@ -20,8 +20,12 @@ writing any prompt — it carries the shared truth: field limits, the canonical
 metatag taxonomy, per-version behavior and slider settings, the cover
 workflow, and the instrumental anti-vocal-hallucination kit. When v4.5 is
 among the requested versions, ALSO read `references/suno-v4-5-prompting.md`
-for the v4.5-specific prompt styles and lore. Do not prompt from memory —
-model behavior and limits changed across versions.
+for the v4.5-specific prompt styles and lore. Before ANY execution work
+(rendering, covers, library, experiments), read `references/pp-cli.md` —
+the verified command truth; for experiment mode additionally
+`references/experiment-lanes.md`. Do not prompt from memory and do not
+improvise CLI flags — model behavior, limits, and the CLI surface are all
+version-specific.
 
 ## When to Use
 
@@ -43,6 +47,7 @@ Parse from the invocation text; accept natural-language equivalents.
 | `--versions <v...>` | `5.5 4.5` | which model versions get prompt files (accepts `5.5 5.0 4.5`, comma-separated, or "only v5.5", "all versions") |
 | `--no-cover` | cover on | skip the cover/re-render file |
 | `--cover <from> <to>` | oldest→newest requested | override the cover chain endpoints |
+| `--mode experimental [n\|list]` | faithful | experiment mode: random lane, lane *n*, or the lane menu — see `references/experiment-lanes.md` |
 
 Cover file rules: generated whenever ≥2 versions are requested — from the
 **oldest** requested version (the authoring model, best prompt adherence) to
@@ -134,12 +139,64 @@ suno_<slug>/
 ├── no_lyrics_v5.5.md
 ├── lyrics_v4.5.md
 ├── no_lyrics_v4.5.md
-└── cover_4.5_5.5.md
+├── cover_4.5_5.5.md
+├── generate_lyrics_v5.5.sh        # one runnable script per prompt file
+├── generate_no_lyrics_v5.5.sh     # (template in references/pp-cli.md;
+├── generate_lyrics_v4.5.sh        #  keep in sync when prompts change)
+└── generate_no_lyrics_v4.5.sh
 ```
+
+Experimental packs additionally carry `experiment_map.md` (template in
+`references/experiment-lanes.md`); executed packs accumulate `audio/` and
+`runs/`.
 
 Then present a compact summary: track name, premise line, file list, and the
 recommended pipeline order. Offer variations (different genre lens, language,
 vocal swap) as a follow-up, don't generate them unasked.
+
+## Make It Real — Executing a Pack
+
+Triggers: "render <prompt file>", "generate the pack", "make it real",
+"run the cover pipeline", "how are my Suno tracks doing". **Read
+`references/pp-cli.md` first — it is the only source of CLI truth; never
+improvise or guess flags.** The execution loop:
+
+1. **Gates:** binary present → `doctor` healthy → `credits` checked.
+   Any gate fails → the degradation playbooks in the reference (offer
+   install / browser re-auth; never paste secrets; fall back to
+   authoring-side work — never fabricate execution).
+2. **Parse the prompt file:** Settings table → flags; `## Lyrics`
+   fenced block; `## Title`; `## Exclude Styles`; the ★ Recommended
+   style variant unless the user names one.
+3. **Already-ran check:** pack `runs/` hashes + library grep — surface
+   prior takes before spending.
+4. **Preflight:** the exact command with `--dry-run` (free, validates
+   flags).
+5. **Confirm:** one line — estimated cost, credit balance, running
+   pack total, prior-takes finding. Explicit user yes required for
+   EVERY spending/mutating command; `--yes` never substitutes for it.
+6. **Fire and land:** run with `--wait`; parse clip ids; per-clip
+   download + take-aware rename (`<slug>-<model>-take<N>-<clipid8>.mp3`
+   — NEVER `--download`, it collides on title); write the immutable
+   run log to `runs/`; `sync --latest-only`.
+7. **Report:** files, clip ids, credits before/after, captcha state.
+   The human listens and judges; the skill never claims to have heard
+   anything.
+
+Cover pipeline ("run the cover pipeline"): same loop — seed picked by
+the human from skill-proposed observable-cited candidates, cover command
+truth and the no-slider-flags caveat per the reference, `parent_clip` in
+the run log, lineage verified after sync.
+
+## Experiment Mode
+
+`--mode experimental` — **read `references/experiment-lanes.md` plus
+`references/pp-cli.md` first.** One invocation = one lane = ONE roll;
+cost stated before firing; unmet requirements (e.g. missing seed) are
+resolved in conversation, never refused or silently re-rolled. After the
+roll: run log with lane metadata, empty scorecard skeleton, stop — depth
+(re-rolls, taming, sweeps) is always human-triggered, one invocation
+each.
 
 ## Artifact Specs
 
@@ -304,6 +361,8 @@ Change nothing else while sweeping. Expect 2–4 rolls.
 | Repeat identical chorus text; number the verses | melodic reinforcement, structure tracking |
 | `[End]` on everything | prevents trailing audio |
 | Cover style prompt stays minimal; sweep Audio Influence | style field weakly honored in covers; slider semantics unstable |
+| Execution: explicit user yes before EVERY spend, cost stated first | `--yes` silences the CLI's prompt, not the user's |
+| Never `--download` on generate; per-clip download + take-aware rename | title-named files collide — a paid take was destroyed this way (2026-06-11) |
 
 ## Common Mistakes
 
@@ -319,3 +378,6 @@ Change nothing else while sweeping. Expect 2–4 rolls.
   use `[Bridge: whispered, stripped down]`.
 - **Restating lyrics or structure in the cover prompt** — the source audio
   carries both; a long cover prompt only adds drift.
+- **Improvising pp-cli flags** (`--style`, `--prompt`, `--exclude-styles`)
+  or probing generate commands with `--help` — the flag truth lives in
+  `references/pp-cli.md`; validate with `--dry-run`, never a live call.

@@ -1,0 +1,12 @@
+2026-06-12T08:03:03Z	--agent doctor 
+2026-06-12T08:03:07Z	--agent credits 
+2026-06-12T08:03:20Z	--agent tree cc110000-5555-4eee-8ccc-000000000001 
+2026-06-12T08:03:20Z	--agent search Sodium\ Lights 
+2026-06-12T08:03:31Z	--json --yes --dry-run generate cover cc110000-5555-4eee-8ccc-000000000001 --title Sodium\ Lights --tags midnight\ soul\,\ late-70s\ warmth\,\ modern\ bedroom\ production\,\ tape\ saturation\,\ 72\ BPM --model v5.5 --wait 
+2026-06-12T08:03:42Z	--json --yes generate cover cc110000-5555-4eee-8ccc-000000000001 --title Sodium\ Lights --tags midnight\ soul\,\ late-70s\ warmth\,\ modern\ bedroom\ production\,\ tape\ saturation\,\ 72\ BPM --model v5.5 --wait 
+2026-06-12T08:03:50Z	download bb110000-3333-4eee-8bbb-000000000001 --out audio/ 
+2026-06-12T08:03:58Z	download bb220000-4444-4eee-8bbb-000000000002 --out audio/ 
+2026-06-12T08:04:11Z	--agent credits 
+2026-06-12T08:04:11Z	--agent sync --latest-only 
+2026-06-12T08:04:21Z	--agent lineage bb110000-3333-4eee-8bbb-000000000001 
+2026-06-12T08:04:21Z	--agent lineage bb220000-4444-4eee-8bbb-000000000002 

@@ -1,0 +1,33 @@
+{
+  "action": "generate",
+  "data": {
+    "clips": [
+      {
+        "id": "bb110000-3333-4eee-8bbb-000000000001",
+        "title": "Sodium Lights",
+        "status": "complete",
+        "model_name": "chirp-crow",
+        "created_at": "2026-06-12T11:00:01.000Z",
+        "audio_url": "https://cdn1.suno.ai/bb110000-3333-4eee-8bbb-000000000001.mp3",
+        "batch_index": 0,
+        "metadata": {"cover_clip_id": "cc110000-5555-4eee-8ccc-000000000001"},
+        "duration": 190.0,
+        "play_count": 0,
+        "upvote_count": 0
+      },
+      {
+        "id": "bb220000-4444-4eee-8bbb-000000000002",
+        "title": "Sodium Lights",
+        "status": "complete",
+        "model_name": "chirp-crow",
+        "created_at": "2026-06-12T11:00:02.000Z",
+        "audio_url": "https://cdn1.suno.ai/bb220000-4444-4eee-8bbb-000000000002.mp3",
+        "batch_index": 1,
+        "metadata": {"cover_clip_id": "cc110000-5555-4eee-8ccc-000000000001"},
+        "duration": 195.2,
+        "play_count": 0,
+        "upvote_count": 0
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "pack": "sodium_lights",
+    "prompt_file": "no_lyrics_v4.5.md",
+    "variant": "A",
+    "settings": {"model": "v4.5", "weirdness": 25, "style_influence": 90, "instrumental": true},
+    "cli_args": ["generate", "create", "--title", "Sodium Lights", "--lyrics-file", "runs/.lyrics_no_lyrics_v4.5.txt", "--tags", "midnight soul instrumental, warm Rhodes, muted bass, brushed drums, distant vibraphone, tape saturation, 72 BPM", "--exclude", "vocals, singing, choir, spoken word, ad-libs, EDM, trap", "--model", "v4.5", "--weirdness", "25", "--style-influence", "90", "--instrumental", "--wait"],
+    "lyrics_sha256": "039bcb678a",
+    "style_sha256": "75102a32ac",
+    "sliders_not_cli_settable": null,
+    "notes": "Exclude passed for forward-compat but CLI sends negative_tags empty; anti-vocal defense rests on instrumental toggle + clean style + bracket structure tags. Prior library takes cc110000/cc220000 (2026-06-11, different tags) surfaced before spend; user pre-authorized up to 10 credits for this render."
+  },
+  "result": {
+    "clips": [
+      {"clip_id": "aa110000-1111-4eee-8aaa-000000000001", "model_name": "chirp-auk", "created_at": "2026-06-12T10:00:01.000Z", "file": "audio/sodium_lights-v4.5-take1-aa110000.mp3"},
+      {"clip_id": "aa220000-2222-4eee-8aaa-000000000002", "model_name": "chirp-auk", "created_at": "2026-06-12T10:00:02.000Z", "file": "audio/sodium_lights-v4.5-take2-aa220000.mp3"}
+    ],
+    "credits_before": 9755,
+    "credits_after": 9755,
+    "credits_note": "balance read back unchanged after generation; expected ~10 credit spend per observed cost table — possible balance-endpoint lag, not verified",
+    "captcha": "open"
+  },
+  "human_scorecard": {}
+}

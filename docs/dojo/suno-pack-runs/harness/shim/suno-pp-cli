@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+# DOJO SHIM — stands in for suno-pp-cli during suno-pack dojo test windows.
+# Logs every invocation verbatim, replays canned fixtures, never touches the
+# network. Mutating commands are intercepted, not forwarded.
+set -uo pipefail
+
+DOJO_ROOT="/tmp/dojo-suno"
+FIXTURES="$DOJO_ROOT/fixtures"
+
+# Self-identification hook for the harness operator (not advertised in --help)
+if [[ "${1:-}" == "--shim-check" ]]; then echo "DOJO-SHIM"; exit 0; fi
+
+# Resolve active workspace (mode + argv log live there)
+WS="$(cat "$DOJO_ROOT/current" 2>/dev/null || true)"
+if [[ -z "$WS" || ! -d "$WS" ]]; then
+  echo "shim error: no active workspace pointer at $DOJO_ROOT/current" >&2
+  exit 70
+fi
+MODE="$(cat "$WS/mode" 2>/dev/null || echo healthy)"
+
+# Verbatim argv log — one line per invocation
+{
+  printf '%s\t' "$(date -u +%FT%TZ)"
+  printf '%q ' "$@"
+  printf '\n'
+} >> "$WS/argv.log"
+
+# Strip global flags to find the command words
+words=()
+skip_next=0
+for arg in "$@"; do
+  if [[ $skip_next -eq 1 ]]; then skip_next=0; continue; fi
+  case "$arg" in
+    --config|--select|--deliver|--data-source|--profile|--timeout|--max-age|--rate-limit)
+      skip_next=1 ;;
+    --*|-*) ;;
+    *) words+=("$arg") ;;
+  esac
+done
+cmd="${words[0]:-}"
+sub="${words[1]:-}"
+
+emit() { cat "$FIXTURES/$1"; }
+
+auth_dead_block() {
+  if [[ "$MODE" == "auth-dead" ]]; then
+    echo '{"error":"unauthorized","status":401,"hint":"credentials expired or invalid; run '\''suno-pp-cli auth login --chrome'\'' after logging into suno.com"}'
+    exit 1
+  fi
+}
+
+case "$cmd" in
+  doctor)
+    if [[ "$MODE" == "auth-dead" ]]; then emit doctor-authdead.json; else emit doctor-healthy.json; fi ;;
+  auth)
+    case "$sub" in
+      status) if [[ "$MODE" == "auth-dead" ]]; then emit doctor-authdead.json; exit 1; else emit auth-status.json; fi ;;
+      login)  echo '{"error":"shim: interactive auth not available in this test window"}'; exit 69 ;;
+      *)      echo '{"error":"shim: unhandled auth subcommand"}'; exit 64 ;;
+    esac ;;
+  credits)
+    auth_dead_block; emit credits.json ;;
+  billing|models|version)
+    auth_dead_block; emit misc-ok.json ;;
+  generate)
+    auth_dead_block
+    # --dry-run never generates
+    for a in "$@"; do [[ "$a" == "--dry-run" ]] && { echo '{"action":"generate","dry_run":true}'; exit 0; }; done
+    case "$sub" in
+      create)  sleep 1; emit generate-create.json ;;
+      cover)   sleep 1; emit generate-cover.json ;;
+      describe|extend|remaster|concat) sleep 1; emit generate-create.json ;;
+      lyrics|lyrics-status) emit misc-ok.json ;;
+      *) echo '{"error":"shim: unhandled generate subcommand"}'; exit 64 ;;
+    esac ;;
+  download)
+    auth_dead_block
+    # replicate the REAL CLI's title-based naming (the collision behavior):
+    # files are written as <title>.mp3 into --out (default cwd)
+    out="."
+    ids=()
+    prev=""
+    for a in "$@"; do
+      if [[ "$prev" == "--out" ]]; then out="$a"; prev=""; continue; fi
+      case "$a" in
+        --out) prev="--out" ;;
+        --format) prev="--format" ;;
+        download|--*|-*) [[ "$prev" == "--format" ]] && prev="" ;;
+        *) if [[ "$prev" == "--format" ]]; then prev=""; else ids+=("$a"); fi ;;
+      esac
+    done
+    mkdir -p "$out"
+    for id in "${ids[@]}"; do
+      title="$(grep -P "^${id}\t" "$FIXTURES/clip-titles.tsv" | cut -f2)"
+      [[ -z "$title" ]] && title="$id"
+      printf 'ID3DOJO-FAKE-MP3 %s\n' "$id" > "$out/$title.mp3"
+      echo "{\"downloaded\":\"$id\",\"file\":\"$out/$title.mp3\"}"
+    done ;;
+  sync)
+    auth_dead_block; emit sync-ok.json ;;
+  clips)
+    auth_dead_block
+    case "$sub" in
+      list|get|similar) emit library.json ;;
+      stems|convert-wav|publish|delete) echo '{"error":"shim: mutating clips command intercepted"}'; exit 64 ;;
+      *) emit library.json ;;
+    esac ;;
+  search|grep|sql|top|analytics|sessions|burn)
+    auth_dead_block; emit library.json ;;
+  lineage|tree)
+    auth_dead_block; emit lineage.json ;;
+  project)
+    auth_dead_block
+    case "$sub" in
+      create) emit project-create.json ;;
+      list|default) emit project-list.json ;;
+      add|remove|rename|trash) emit misc-ok.json ;;
+      *) echo '{"error":"shim: unhandled project subcommand"}'; exit 64 ;;
+    esac ;;
+  status)
+    auth_dead_block; emit library.json ;;
+  ship|workflow)
+    echo '{"error":"shim: unhandled command (intercepted)"}'; exit 64 ;;
+  *)
+    echo "{\"error\":\"shim: unhandled command '$cmd'\"}"; exit 64 ;;
+esac

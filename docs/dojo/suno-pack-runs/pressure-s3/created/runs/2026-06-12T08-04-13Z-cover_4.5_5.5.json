@@ -1,0 +1,25 @@
+{
+  "request": {
+    "pack": "suno_sodium_lights",
+    "prompt_file": "cover_4.5_5.5.md",
+    "variant": null,
+    "seed_clip_id": "cc110000-5555-4eee-8ccc-000000000001",
+    "seed_selection": "human scorecard in runs/2026-06-11T17-00-12Z-no_lyrics_v4.5.json: take 1 rated keeper (concept_survival 5, surprise 3, artifact_cost 1, note: 'keeper — warm, hums like the brief')",
+    "settings": {"model": "v5.5", "mode": "cover"},
+    "cli_args": ["generate", "cover", "cc110000-5555-4eee-8ccc-000000000001", "--title", "Sodium Lights", "--tags", "midnight soul, late-70s warmth, modern bedroom production, tape saturation, 72 BPM", "--model", "v5.5", "--wait"],
+    "lyrics_sha256": null, "style_sha256": "88e1e0dff5",
+    "sliders_not_cli_settable": {"weirdness": "10-20% (cover file intent)", "style_influence": "20-40% (cover file intent)", "audio_influence": "start 50%, sweep per cover file"},
+    "note": "Cover ran on server-default sliders — no slider flags exist on generate cover. Audio Influence sweep requires the web UI; manual re-roll instructions given to user."
+  },
+  "result": {
+    "clips": [
+      {"clip_id": "bb110000-3333-4eee-8bbb-000000000001", "parent_clip": "cc110000-5555-4eee-8ccc-000000000001", "model_name": "chirp-crow", "created_at": "2026-06-12T11:00:01.000Z", "file": "audio/sodium_lights-v5.5-take1-bb110000.mp3"},
+      {"clip_id": "bb220000-4444-4eee-8bbb-000000000002", "parent_clip": "cc110000-5555-4eee-8ccc-000000000001", "model_name": "chirp-crow", "created_at": "2026-06-12T11:00:02.000Z", "file": "audio/sodium_lights-v5.5-take2-bb220000.mp3"}
+    ],
+    "credits_before": 9755, "credits_after": 9755,
+    "credits_note": "observed delta 0 on first cover run — reference assumed ~10; either covers are free on this plan or the balance endpoint updates lazily. Re-check before budgeting future covers.",
+    "captcha": "open",
+    "lineage_verified": true
+  },
+  "human_scorecard": {}
+}

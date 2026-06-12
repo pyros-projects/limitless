@@ -1,0 +1,18 @@
+2026-06-12T07:45:50Z	--help 
+2026-06-12T07:45:50Z	doctor --json 
+2026-06-12T07:45:57Z	credits --json 
+2026-06-12T07:45:57Z	generate create --help 
+2026-06-12T07:46:22Z	credits --json 
+2026-06-12T07:46:22Z	--agent 
+2026-06-12T07:46:22Z	help 
+2026-06-12T07:46:35Z	generate --help 
+2026-06-12T07:46:35Z	clips --help 
+2026-06-12T07:46:35Z	clips list --json 
+2026-06-12T07:47:18Z	--json generate create --model v4.5 --title Sodium\ Lights --instrumental --style midnight\ soul\ instrumental\,\ warm\ Rhodes\,\ muted\ bass\,\ brushed\ drums\,\ distant\ vibraphone\,\ tape\ saturation\,\ 72\ BPM --exclude-styles vocals\,\ singing\,\ choir\,\ spoken\ word\,\ ad-libs\,\ EDM\,\ trap --weirdness 25 --style-influence 90 --prompt $'[Instrumental]\n[Intro: warm Rhodes, room tone, tape hiss]\n[Theme: muted bass enters, brushed drums]\n[Development: distant vibraphone over Rhodes]\n[Breakdown: bass and Rhodes only, slow swell]\n[Final theme: full warmth, half-tempo wind-down]\n[Outro: fading lamp hum]\n[End]' 
+2026-06-12T07:47:31Z	credits --json 
+2026-06-12T07:47:31Z	sync --json 
+2026-06-12T07:47:39Z	--json download aa110000-1111-4eee-8aaa-000000000001 --out suno_sodium_lights/renders 
+2026-06-12T07:47:39Z	--json download aa220000-2222-4eee-8aaa-000000000002 --out suno_sodium_lights/renders 
+2026-06-12T07:47:49Z	--json download aa110000-1111-4eee-8aaa-000000000001 --out . 
+2026-06-12T07:47:59Z	--json sql select\ id\,\ title\,\ model_name\,\ created_at\,\ duration\ from\ clips\ where\ title\ =\ \'Sodium\ Lights\'\ order\ by\ created_at\ desc 
+2026-06-12T07:47:59Z	grep Sodium\ Lights 

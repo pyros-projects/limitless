@@ -1,0 +1,4 @@
+2026-06-12T08:06:43Z	--agent doctor 
+2026-06-12T08:06:48Z	--agent credits 
+2026-06-12T08:06:57Z	--agent grep Sodium\ lamps\ hum\ their\ tune 
+2026-06-12T08:08:31Z	--json --yes generate create --title Sodium\ Lights --lyrics-file .lane2_lyrics.txt --tags midnight\ soul\,\ bedroom\ soul\,\ tender\ weary\ close-mic\'d\ male\ vocal\ warmth\ against\ a\ rigid\ mechanical\ drum\ machine\ grid\,\ warm\ Rhodes\ chords\ against\ cold\ electrical\ sodium-buzz\ drone\,\ round\ muted\ bass\ kept\ human\,\ tape\ saturation\,\ 72\ BPM --exclude EDM\,\ trap\,\ autotune\,\ stadium\ pop\,\ aggressive\ drums --model v4.5 --weirdness 50 --style-influence 75 --wait --dry-run 

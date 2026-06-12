@@ -1,0 +1,14 @@
+{
+  "api": "reachable",
+  "auth": "configured",
+  "auth_source": "config",
+  "base_url": "https://studio-api-prod.suno.com",
+  "credentials": "valid",
+  "config": "ok",
+  "cache": {
+    "db_path": "/home/user/.local/share/suno-pp-cli/data.db",
+    "resources": [
+      {"type": "clips", "rows": 2000, "staleness": "2h10m0s", "last_synced_at": "2026-06-12T05:00:00Z"}
+    ]
+  }
+}

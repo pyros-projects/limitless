@@ -1,0 +1,8 @@
+2026-06-12T08:10:15Z	--agent doctor 
+2026-06-12T08:10:27Z	--agent credits 
+2026-06-12T08:10:28Z	--agent grep And\ the\ lights\ keep\ humming 
+2026-06-12T08:10:28Z	--agent search Sodium\ Lights 
+2026-06-12T08:11:08Z	--agent clips get cc110000-5555-4eee-8ccc-000000000001 
+2026-06-12T08:11:09Z	--agent clips get cc220000-6666-4eee-8ccc-000000000002 
+2026-06-12T08:11:10Z	--agent lineage cc110000-5555-4eee-8ccc-000000000001 
+2026-06-12T08:11:57Z	--json --yes --dry-run generate cover cc110000-5555-4eee-8ccc-000000000001 --title Sodium\ Lights\ \(Unplugged\) --tags midnight\ soul\,\ late-70s\ warmth\,\ 72\ BPM\,\ MTV\ Unplugged\,\ crowd\ sings\ along\ to\ the\ chorus --model v5.5 --wait 

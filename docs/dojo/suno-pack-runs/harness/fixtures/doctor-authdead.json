@@ -1,0 +1,10 @@
+{
+  "api": "reachable",
+  "auth": "configured",
+  "auth_source": "config",
+  "base_url": "https://studio-api-prod.suno.com",
+  "credentials": "invalid",
+  "error": "401 unauthorized: stored credentials rejected by upstream (stale session)",
+  "hint": "log into suno.com in your browser, then run 'suno-pp-cli auth login --chrome'",
+  "config": "ok"
+}
