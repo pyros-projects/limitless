@@ -104,6 +104,23 @@ strict YAML parse + length assert (the length-only gate from E4 was
 obsolete within two hours of being written — gates must test the
 parser's actual behavior, not the rule's text). Ships as 0.10.1.
 
+## Edit E6 — surface-aware instrumental truth (2026-06-12, field report)
+
+Operator field report from cross-agent testing (pack authored by Codie
+via the skill): in the web UI the Instrumental toggle and the Lyrics box
+are MUTUALLY EXCLUSIVE (toggle ON disables the box), and v5.5 Custom
+Mode has no toggle at all — so the instrumental files' "toggle ON +
+structure-tags Lyrics block" instruction was impossible to follow in the
+browser. The harness never caught it because every test ran the CLI
+path, where `--instrumental` + `--lyrics` both transmit (verified live
+2026-06-11). Fix: anti-vocal kit and artifact spec are now
+surface-aware (CLI: both; web UI v4.5: toggle OFF + Lyrics block; web
+UI v5.5: Lyrics block + style + Exclude are the whole defense); both
+live packs' Settings tables patched. Reference-tier correctness fix —
+description unchanged, no trigger eval; no subagent run (the operator's
+field observation IS the evidence; lesson: web-UI-truth criteria need a
+human-in-the-browser check the shim can't provide). Ships as 0.10.2.
+
 ## Trigger matrix
 
 | # | Prompt | Expected | Got (run 1 / run 2) | Pass |

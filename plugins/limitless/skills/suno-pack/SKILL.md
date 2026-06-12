@@ -330,7 +330,11 @@ users who don't want to experiment paste that one and ignore the rest.
 Same layout and field order, with the full anti-vocal-hallucination kit from
 the reference:
 
-- Settings block states: **Instrumental toggle ON**.
+- Settings block is SURFACE-AWARE (web UI toggle and Lyrics box are
+  mutually exclusive; v5.5 UI has no toggle — see the anti-vocal kit in
+  the v5.5 reference): two rows —
+  `Instrumental — web UI | v4.5: toggle OFF, paste the Lyrics block (ON disables the box) · v5.5: no toggle, the Lyrics block is the defense`
+  and `Instrumental — CLI | --instrumental flag + Lyrics block (both transmit)`.
 - Lyrics block contains structure tags only — canonical instrumental and
   dynamics tags, opening with `[Instrumental]`, closing with `[End]`.
 - Style block rewritten with zero vocal-adjacent words; the concept's melody

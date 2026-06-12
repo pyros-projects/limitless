@@ -117,8 +117,21 @@ v5.5 has a **known community-confirmed bug**: it adds vocals/ad-libs/nonsense
 lyrics to instrumental requests far more than v5 did (multiple r/SunoAI
 threads, March–June 2026). Layer ALL of these:
 
-1. **Instrumental toggle ON** (Custom Mode switch — primary mechanism).
-2. Lyrics field: either empty or **structure tags only**, starting with
+1. **Surface truth first (operator-observed 2026-06-12):** in the web
+   UI the Instrumental toggle and the Lyrics box are MUTUALLY
+   EXCLUSIVE — toggle ON disables/clears the Lyrics box — and v5.5
+   Custom Mode shows NO instrumental toggle at all. Via CLI/API both
+   transmit together (`--instrumental` + `--lyrics`, verified live
+   2026-06-11). So:
+   - **CLI render:** `--instrumental` flag + the structure-tags Lyrics
+     block — use both, full kit.
+   - **Web UI, v4.5:** leave the toggle OFF and paste the
+     structure-tags Lyrics block (arrangement control matters and
+     v4.5's hallucination risk is low). Toggle ON only if you accept
+     losing the Lyrics block — then style + Exclude carry everything.
+   - **Web UI, v5.5:** no toggle exists — the structure-tags Lyrics
+     block, clean style, and Exclude ARE the whole defense.
+2. Lyrics block: **structure tags only**, starting with
    `[Instrumental]` and using only instrumental/dynamics tags.
 3. Style field: purely instrumental language. **Remove every vocal-adjacent
    word** — "vocal-like lead", "choir pads", "wordless vocals", "humming"
