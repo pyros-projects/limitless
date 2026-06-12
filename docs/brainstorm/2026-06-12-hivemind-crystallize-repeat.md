@@ -125,12 +125,18 @@ line naming what changed and why.
      this run becomes a proposed config delta.
 
 3. **Lookup.** At the start of any *ad-hoc* sweep request: if the ask
-   plausibly matches an existing config slug, say so and apply that
-   config's constraints (especially exclusions) before sweeping. The
-   counterpart of crystallize — demonstration captures what the user
-   *says*; lookup replays what they *already said*. Without it,
-   standing preferences silently fail to reach ad-hoc sessions (the
-   2026-06-12 silent-drift lesson, captured as IN-20260612-1f82).
+   **names** an existing config — slug, title, or a close expression
+   of either ("ai-dev-weekly", "ai dev weekly") — say so and apply
+   that config's constraints (especially exclusions) before sweeping.
+   The counterpart of crystallize — demonstration captures what the
+   user *says*; lookup replays what they *already said*.
+   **Name-gating (operator decision 2026-06-13):** topic/domain
+   overlap alone never binds — an unnamed overlap earns a one-line
+   non-binding notice ("`<slug>` covers this — say so if its rules
+   should apply") and the sweep proceeds unbound. This deliberately
+   trades part of the original silent-drift fix (IN-20260612-1f82)
+   for predictability: drift stays *visible* via the notice, binding
+   becomes explicit opt-in.
 
 ### Config chains are free-form
 

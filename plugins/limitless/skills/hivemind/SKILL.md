@@ -70,13 +70,20 @@ orthogonal: a chained sweep still has a mode per stage venue.
 
 ## Phase 1 — Scope (and config lookup)
 
-**Config lookup comes first.** If the ask plausibly matches an existing
-config (`ls ~/.hivemind/*/config.md`, match slug/intent), say so —
-state the slug and edition — and apply that config's constraints
-(especially exclusions) to this sweep. The live ask wins over the
-config for this run; any deviation becomes a proposed config delta at
-the end, never an auto-edit. Standing preferences that silently fail to
-reach ad-hoc sessions are the failure this step exists to prevent.
+**Config lookup comes first — and binding is name-gated.** Check
+`ls ~/.hivemind/*/config.md`:
+
+- The ask **names** a config — slug, title, or a close expression of
+  either ("ai-dev-weekly", "ai dev weekly", "my dev-weekly config") →
+  load it, state the slug and edition, and apply its constraints
+  (especially exclusions) to this sweep. The live ask wins over the
+  config for this run; deviations become proposed deltas at the end,
+  never auto-edits.
+- The ask merely **overlaps a config's domain or topics** — that is
+  NOT naming. Do not apply the config. Mention it in one line
+  ("`ai-dev-weekly` covers this — say so if its rules should apply")
+  and proceed unbound. Topic overlap never binds; only the user's own
+  words do.
 
 Then: topic terms + jargon variants, window (mode default unless
 `--window`), depth (`--quick` ≈ 2 queries/platform, default ≈ 3–4,
@@ -284,7 +291,9 @@ confirms.
 
 **Lookup** is Phase 1's config check — the counterpart of crystallize:
 demonstration captures what the user says; lookup replays what they
-already said.
+already said. Binding is name-gated (see Phase 1): a config applies
+only when the user names it; domain overlap earns a one-line notice,
+never silent application.
 
 Precedence: **live ask > config > recon classification.**
 

@@ -259,3 +259,15 @@ description list + none, exact match. Final description (post carve-out
 - SearXNG JSON formats flag lives inside the container — an image
   upgrade/recreate reverts it to 403 (preflight catches it;
   web-playbook documents the fix).
+
+## Post-ship edit 1 — name-gated lookup (2026-06-13)
+
+Operator correction after first live contact (the sibling engine
+auto-bound a config on topic overlap; same rule existed here): lookup
+binding is now **name-gated** — slug/title/close-expression only;
+domain overlap yields a one-line non-binding notice instead of silent
+application. SKILL.md Phase 1 + Configs section updated; design doc
+records the trade-off (part of the silent-drift fix exchanged for
+predictability — drift stays visible, binding becomes explicit).
+Targeted re-verification 7/7 across unnamed/named variants (see
+scenarios Edit 1). Ships as 0.11.1.

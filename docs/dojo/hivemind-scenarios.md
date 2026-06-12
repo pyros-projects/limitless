@@ -391,3 +391,25 @@ hivemind-runs/upgrade-2026-06-12/trigger-eval-prompt*.md (v1, v2, final).
   — both known Codex-loader failure modes from suno-pack). Trimmed to
   1014 + colon→dash. Final runs 5–6 with shipped description: **30/30**
   (prompt 10 split searxng/codies-research across runs — both legal).
+
+### Edit 1 — name-gated lookup (2026-06-13, behavior-rule change)
+
+**Operator decision:** configs bind ONLY when the user names them
+(slug, title, or close expression — "ai-dev-weekly", "ai dev weekly");
+topic/domain overlap never binds and instead earns a one-line
+non-binding notice. Deliberately trades part of the silent-drift fix
+for predictability; drift stays visible via the notice. Trigger eval
+not re-run — description unchanged.
+
+Targeted re-verification (T2-NG, two fresh subagents, shallow live):
+
+- **Unnamed variant** (original T2 prompt, "what does reddit think
+  about rust async runtimes these days?"): config identified but NOT
+  applied — async-std mute deliberately unenforced (the one async-std
+  item rejected on its own staleness grounds, explicitly not via the
+  config), one-line notice + `repeat dojo-rust-async` pointer given,
+  config untouched. **3/3 PASS.**
+- **Named variant** ("quick reddit check on rust async — use my rust
+  async config"): close-expression naming bound dojo-rust-async,
+  edition stated, exclusion checked, live ask won (X stage skipped),
+  operator constraints correctly NOT proposed as deltas. **4/4 PASS.**
