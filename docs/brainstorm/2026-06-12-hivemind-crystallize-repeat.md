@@ -52,6 +52,15 @@ known CLI quirks and keyword traps discovered in past runs), output
 format + delivery target, persistence rules, dated changelog with
 edition numbers.
 
+**The canonical worked example already exists:**
+`~/.hivemind/ai-dev-weekly/config.md` (edition 1, hand-crystallized
+2026-06-12 from a real session). The `references/` template is
+*distilled from that file*, not invented — an implementer should read
+it first; every section named above is present there with real values,
+including the recorded CLI trap (`--exclude retweets` + min-likes
+combination returns empty) and the keyword traps (unscoped "RAG"/
+"agentic" collide with non-tech usage).
+
 Hard rule: **propose-confirm only.** The skill never silently rewrites
 user intent. Every accepted change = edition bump + dated changelog
 line naming what changed and why.
