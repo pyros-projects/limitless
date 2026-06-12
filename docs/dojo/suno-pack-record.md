@@ -91,6 +91,19 @@ positives hit incl. phrases whose literal text was dropped, zero
 collisions. Dojo packaging.md checklist now carries a measurable length
 gate. Eval file: `suno-pack-runs/e3-v1-saga-sync/trigger-eval-e4.md`.
 
+## Edit E5 — YAML-safe description (2026-06-12, hotfix #2)
+
+Two hours after E4, Codex's loader rejected 0.10.0 for a different
+frontmatter sin: unquoted `: ` (colon+space) inside the description
+value is invalid strict YAML ("mapping values are not allowed").
+Claude Code tolerates it silently — same pattern as the length limit.
+Both colons swapped for em-dashes (1,022 chars, strict-parse verified);
+repo-wide scan found no other affected skill; full 23-row matrix re-run
+twice, byte-identical, zero collisions. The dojo packaging gate is now a
+strict YAML parse + length assert (the length-only gate from E4 was
+obsolete within two hours of being written — gates must test the
+parser's actual behavior, not the rule's text). Ships as 0.10.1.
+
 ## Trigger matrix
 
 | # | Prompt | Expected | Got (run 1 / run 2) | Pass |
