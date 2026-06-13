@@ -1,6 +1,6 @@
 ---
 name: james
-description: "This skill should be used after the agent writes or materially edits a concept, PRD, plan, spec, design document, strategy document, or similar planning artifact, and whenever the user says invoke James, run James, James this, or James-review. It reviews whether the document is self-contained inside project-owned scope, fixes what can be fixed, then resumes James for re-review until pass. Not for code review, article editing, or writing the initial document."
+description: "This skill should be used after the agent writes or materially edits a concept, PRD, plan, spec, design document, strategy document, or similar planning artifact, and whenever the user says invoke James, run James, James this, or James-review. It reviews whether the document is self-contained inside project-owned scope, persists recipes and review chains under ~/.limitless/james, fixes what can be fixed, then resumes James for re-review until pass. Not for code review, article editing, or writing the initial document."
 ---
 
 # James — Fresh Eyes For Documents
@@ -62,37 +62,90 @@ Rules:
 If the target document is ambiguous, select the only plausible recently changed
 planning document. If multiple plausible targets exist, ask the user.
 
+## Output Root, Recipes, And Review Chain
+
+James-owned output lives outside the project by default:
+
+```text
+~/.limitless/james/<repo-slug>/<target-slug>/
+  recipe.md
+  chain.md
+  reviews/
+    001-initial.md
+    002-after-fixes.md
+```
+
+- `repo-slug` is the project root basename, slugged to lowercase ASCII.
+- `target-slug` is the target document path relative to the project root,
+  slugged by replacing path separators with `--` and dropping a common
+  markdown/text extension. If two targets collide, append a short hash.
+- Use a custom output path only when the user explicitly provides one.
+- Never write James review logs into the target project's docs folder by
+  implication. The reviewed document stays in the project; James's operational
+  output stays in `~/.limitless/james/...`.
+
+Before the first review, create `recipe.md`. Before later reviews, load it.
+The recipe is process memory, not evidence. It may store:
+
+- project root
+- target document
+- document intent
+- allowed context envelope
+- James output root
+- current James subagent/thread id, if available
+- next review number
+- changelog entries for scope/process changes
+
+Update the recipe when scope, target, intent, or reviewer thread changes. Do
+not use the recipe to supply missing product facts to James.
+
+Save every raw James review as an immutable file under `reviews/`. Also update
+`chain.md` as an index with review number, review file, score, pass/fail,
+fixes recorded, and next action. Do not overwrite older reviews.
+
 ## Review Loop
 
-1. **Resume James, or spawn him once.** If a James subagent/thread already
+1. **Load or create the recipe.** Derive the default output root, create the
+   folder if needed, load any existing `recipe.md`, and determine the next
+   review number. State the output root in your working notes or final report.
+2. **Resume James, or spawn him once.** If a James subagent/thread already
    exists for the current session, project, or document, resume it. Spawn a new
    James only when no resumable James exists. Subsequent James calls should keep
    using that James thread.
-2. **Reset the evidence boundary every call.** Resumed James may remember his
+3. **Reset the evidence boundary every call.** Resumed James may remember his
    prior issue list and review calibration, but previous document facts are not
    admissible evidence unless they are inside the current allowed scope. Send the
    target document, allowed scope, and the prompt template in
-   `references/review-prompt.md` every time.
-3. **James returns a simple review.** Required format:
+   `references/review-prompt.md` every time. For review 2+, also send the
+   previous saved review and a concise list of fixes the main agent attempted,
+   so James can verify what actually changed.
+4. **James returns a simple review.** Required format:
    - `Score: X/10`
    - `Passed: yes/no`
+   - for review 2+: `Fixed since previous review:` with numbered fixes James
+     can verify from the current document and previous review
    - numbered issue list only, with no high/medium/low buckets
    - each issue says whether it is fixable now or needs the human
-4. **Fix what can be fixed.** Safe fixes include adding definitions, replacing
+5. **Persist the review before editing.** Save James's raw review to
+   `reviews/001-initial.md` for the first pass, then
+   `reviews/<NNN>-after-fixes.md` for later passes. Update `chain.md` after
+   every saved review.
+6. **Fix what can be fixed.** Safe fixes include adding definitions, replacing
    private names with public/project-local terms, removing local absolute
    paths, declaring dependencies, adding examples, and making acceptance checks
    testable. Do not invent missing product decisions, facts, pricing, launch
    policy, target users, or commitments.
-5. **Resume James for the re-review.** Send the updated document and allowed
-   scope back to the same James thread. Do not spawn a different reviewer just
-   because this is the next pass.
-6. **Stop only when passed.** Done means James says `Passed: yes` or scores
+7. **Resume James for the re-review.** Send the updated document, allowed
+   scope, previous saved review, and attempted fix summary back to the same
+   James thread. Do not spawn a different reviewer just because this is the next
+   pass. James's next review must include the fixed section.
+8. **Stop only when passed.** Done means James says `Passed: yes` or scores
    9/10 to 10/10.
-7. **Respect the hard loop cap.** After the first review, you get at most three
+9. **Respect the hard loop cap.** After the first review, you get at most three
    fix passes. Count every edit pass after a James review. If the third
    re-review still scores below 9/10, do not make a fourth edit to chase the
    score. Escalate the remaining issues.
-8. **Escalate when needed.** If the remaining issues cannot be improved without
+10. **Escalate when needed.** If the remaining issues cannot be improved without
    human information, stop and show the unresolved questions.
 
 If subagents are unavailable, run the same loop yourself as a degraded James
@@ -120,6 +173,7 @@ scope is explicit and future action can proceed from the allowed context.
 After the loop, tell the user:
 
 - target document
+- James output root
 - final score
 - number of review passes
 - changes made

@@ -1,7 +1,7 @@
 {
   "name": "limitless",
-  "version": "0.12.1",
-  "description": "Pyro's curated Claude Code skill pack: article-pack, Codies Research, Surface-First Development, SearXNG, Suno Pack (authoring, real rendering via suno-pp-cli, experiment lanes, saga-synced field journals), Hivemind (collective-brain search: social + GitHub + web + papers, pivot chains, saved sweep configs), Dojo, and James (persistent constrained document review for self-contained plans/specs). A small set of high-leverage skills for research, prototyping, publishing, web search, AI music, verified skill authoring, and restartable planning docs.",
+  "version": "0.12.2",
+  "description": "Pyro's curated Claude Code skill pack: article-pack, Codies Research, Surface-First Development, SearXNG, Suno Pack (authoring, real rendering via suno-pp-cli, experiment lanes, saga-synced field journals), Hivemind (collective-brain search: social + GitHub + web + papers, pivot chains, saved sweep configs), Dojo, and James (persistent constrained document review with recipes and review chains for self-contained plans/specs). A small set of high-leverage skills for research, prototyping, publishing, web search, AI music, verified skill authoring, and restartable planning docs.",
   "author": {
     "name": "Pyro"
   },
