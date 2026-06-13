@@ -36,9 +36,13 @@ PY
 codies-memory create session \
   --agent "$AGENT" \
   --title "Session Summary - $TODAY" \
+  --short "one-line summary of the session" \
   --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Next Step\n- [what the next session should pick up]" \
   --field mode=implement \
   --field next_step="[what to do next]"
+
+# This automatically appends to the global daily log. If no named project vault
+# resolves, the session lands in the reserved _general project vault.
 
 # 2. Check inbox aging and status
 codies-memory status --agent "$AGENT"
@@ -54,14 +58,15 @@ agent = 'your-agent-name'
 global_vault = resolve_global_vault(agent)
 project_vault = resolve_project_vault(global_vault, Path.cwd())
 if project_vault is None:
-    raise SystemExit(f'No project vault found for {Path.cwd()}')
+    print(f'No named project vault found for {Path.cwd()}; skipping project promotion evaluation.')
+else:
+    for rtype in ['inbox', 'thread']:
+        items = list_records(project_vault, rtype, scope='project', status='active')
+        for item in items:
+            result = evaluate_for_promotion(item, context={'session_count': 1})
+            if result['eligible']:
+                print(f'  Promote {rtype}: {item[\"frontmatter\"][\"title\"][:60]}')
 
-for rtype in ['inbox', 'thread']:
-    items = list_records(project_vault, rtype, scope='project', status='active')
-    for item in items:
-        result = evaluate_for_promotion(item, context={'session_count': 1})
-        if result['eligible']:
-            print(f'  Promote {rtype}: {item[\"frontmatter\"][\"title\"][:60]}')
 "
 
 # 4. Refresh warm summaries
@@ -105,6 +110,9 @@ Every session record should include:
 - `next_step` — what the next session should pick up
 - `artifacts` — files created or modified
 - `write_gate_summary` — what was allowed, held, discarded
+
+Use `--short` for the one-line daily-log entry. If omitted, the session title is
+used. Do not write the daily log manually; `create session` does it.
 
 ## Recent Episode Constraint
 

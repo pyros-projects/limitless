@@ -9,9 +9,12 @@ import yaml
 
 from codies_memory.vault import (
     GLOBAL_DIRS,
+    GENERAL_PROJECT_SLUG,
+    LAZY_GLOBAL_DIRS,
     GLOBAL_REQUIRED_FILES,
     PROJECT_DIRS,
     PROJECT_REQUIRED_FILES,
+    ensure_general_project_vault,
     find_vaults,
     init_global_vault,
     init_project_vault,
@@ -73,6 +76,9 @@ class TestInitGlobalVault:
         root = tmp_path / ".memory"
         init_global_vault(root)
         for d in GLOBAL_DIRS:
+            if d in LAZY_GLOBAL_DIRS:
+                assert not (root / d).exists(), f"Lazy global dir should not be eagerly created: {d}"
+                continue
             assert (root / d).is_dir(), f"Missing global dir: {d}"
 
     def test_default_profile(self, tmp_path: Path) -> None:
@@ -90,7 +96,10 @@ class TestInitGlobalVault:
         registry_path = root / "registry" / "projects.yaml"
         assert registry_path.exists()
         data = yaml.safe_load(registry_path.read_text())
-        assert data == {"projects": []}
+        assert [p["slug"] for p in data["projects"]] == [GENERAL_PROJECT_SLUG]
+        general = data["projects"][0]
+        assert "working_dir" not in general
+        assert "git_remote" not in general
 
     def test_seed_identity_files(self, tmp_path: Path) -> None:
         root = tmp_path / ".memory"
@@ -117,7 +126,25 @@ class TestInitGlobalVault:
         assert profile_data["boot_mode"] == "custom", "profile.yaml must not be overwritten"
 
         registry_data = yaml.safe_load(registry_path.read_text())
-        assert len(registry_data["projects"]) == 1, "registry must not be reset"
+        slugs = {p["slug"] for p in registry_data["projects"]}
+        assert "existing" in slugs, "registry must not be reset"
+        assert GENERAL_PROJECT_SLUG in slugs, "_general should be repaired idempotently"
+        assert len(registry_data["projects"]) == 2
+
+    def test_creates_general_project(self, tmp_path: Path) -> None:
+        root = tmp_path / ".memory"
+        init_global_vault(root)
+
+        general = root / "projects" / GENERAL_PROJECT_SLUG
+        for d in PROJECT_DIRS:
+            assert (general / d).is_dir(), f"Missing _general dir: {d}"
+
+        registry = yaml.safe_load((root / "registry" / "projects.yaml").read_text())
+        entry = next(p for p in registry["projects"] if p["slug"] == GENERAL_PROJECT_SLUG)
+        assert entry["status"] == "active"
+        assert entry["metadata"] == {}
+        assert "working_dir" not in entry
+        assert "git_remote" not in entry
 
 
 # ---------------------------------------------------------------------------
@@ -171,7 +198,34 @@ class TestInitProjectVault:
 
         registry_path = global_vault / "registry" / "projects.yaml"
         data = yaml.safe_load(registry_path.read_text())
-        assert data["projects"] == []
+        slugs = [p["slug"] for p in data["projects"]]
+        assert "myproject" not in slugs
+        assert GENERAL_PROJECT_SLUG in slugs
+
+    def test_user_cannot_init_reserved_general_slug(self, tmp_path: Path) -> None:
+        global_vault = tmp_path / "global"
+        init_global_vault(global_vault)
+        working_dir = tmp_path / "myproject"
+        working_dir.mkdir()
+
+        with pytest.raises(ValueError, match="reserved"):
+            init_project_vault(
+                global_vault=global_vault,
+                slug=GENERAL_PROJECT_SLUG,
+                working_dir=working_dir,
+            )
+
+        assert not (working_dir / ".codies-memory").exists()
+
+    def test_ensure_general_repairs_existing_global_vault(self, tmp_global_vault: Path) -> None:
+        general = ensure_general_project_vault(tmp_global_vault)
+
+        assert general == tmp_global_vault / "projects" / GENERAL_PROJECT_SLUG
+        assert (general / "sessions").is_dir()
+        registry = yaml.safe_load((tmp_global_vault / "registry" / "projects.yaml").read_text())
+        entry = next(p for p in registry["projects"] if p["slug"] == GENERAL_PROJECT_SLUG)
+        assert "working_dir" not in entry
+        assert "git_remote" not in entry
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +332,45 @@ class TestValidateVault:
     def test_valid_global_no_missing_files(self, tmp_global_vault: Path) -> None:
         result = validate_vault(tmp_global_vault, vault_type="global")
         assert result.missing_files == []
+
+    def test_valid_global_allows_absent_lazy_sessions(self, tmp_global_vault: Path) -> None:
+        assert not (tmp_global_vault / "sessions").exists()
+        result = validate_vault(tmp_global_vault, vault_type="global")
+        assert result.is_valid
+
+    def test_valid_global_allows_empty_sessions_dir(self, tmp_global_vault: Path) -> None:
+        (tmp_global_vault / "sessions").mkdir()
+        result = validate_vault(tmp_global_vault, vault_type="global")
+        assert result.is_valid
+
+    def test_global_sessions_must_be_directory(self, tmp_global_vault: Path) -> None:
+        (tmp_global_vault / "sessions").write_text("not a dir")
+        result = validate_vault(tmp_global_vault, vault_type="global")
+        assert not result.is_valid
+        assert "sessions" in result.missing
+
+    def test_daily_log_records_are_validated(self, tmp_global_vault: Path) -> None:
+        sessions = tmp_global_vault / "sessions"
+        sessions.mkdir()
+        (sessions / "2026-04-03.md").write_text(
+            "---\n"
+            "id: DL-20260403\n"
+            "title: '2026-04-03'\n"
+            "type: daily-log\n"
+            "status: active\n"
+            "trust: canonical\n"
+            "scope: global\n"
+            "created: '2026-04-03T16:41:00+02:00'\n"
+            "updated: '2026-04-03T16:41:00+02:00'\n"
+            "---\n\n"
+            "- [[SS-20260403-abcd]] Closed a session (_general)\n"
+        )
+        assert validate_vault(tmp_global_vault, vault_type="global").is_valid
+
+        (sessions / "broken.md").write_text("no frontmatter")
+        result = validate_vault(tmp_global_vault, vault_type="global")
+        assert not result.is_valid
+        assert result.extra
 
     def test_valid_project_passes(self, tmp_project_vault: Path) -> None:
         result = validate_vault(tmp_project_vault, vault_type="project")
@@ -437,7 +530,7 @@ class TestInitProjectVaultV2:
         )
         slugs = [p["slug"] for p in registry["projects"]]
         assert "my-project" in slugs
-        entry = registry["projects"][0]
+        entry = next(p for p in registry["projects"] if p["slug"] == "my-project")
         assert entry["working_dir"] == str(working_dir)
 
     def test_init_project_vault_v2_default_slug(self, tmp_path: Path) -> None:
@@ -557,7 +650,7 @@ class TestResolveProjectVault:
         registry = yaml.safe_load(
             (global_vault / "registry" / "projects.yaml").read_text()
         )
-        entry = registry["projects"][0]
+        entry = next(p for p in registry["projects"] if p["slug"] == "remote-proj")
         # Manually set a git_remote so we can test tier 3
         entry["git_remote"] = "git@github.com:user/remote-proj.git"
         (global_vault / "registry" / "projects.yaml").write_text(

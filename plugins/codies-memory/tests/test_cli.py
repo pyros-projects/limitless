@@ -14,7 +14,7 @@ from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
     cmd_promote, cmd_refresh, cmd_validate, _resolve_agent,
 )
-from codies_memory.vault import GLOBAL_DIRS, PROJECT_DIRS, resolve_global_vault
+from codies_memory.vault import GLOBAL_DIRS, LAZY_GLOBAL_DIRS, PROJECT_DIRS, resolve_global_vault
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +52,9 @@ class TestCmdInitGlobal:
         global_vault = fake_home / ".memory" / "claude"
         assert global_vault.is_dir()
         for d in GLOBAL_DIRS:
+            if d in LAZY_GLOBAL_DIRS:
+                assert not (global_vault / d).exists()
+                continue
             assert (global_vault / d).is_dir(), f"missing dir: {d}"
         # Seed files
         assert (global_vault / "profile.yaml").is_file()
@@ -426,6 +429,39 @@ class TestCmdCapture:
         content = files[0].read_text()
         assert "gate: hold" in content
 
+    def test_capture_without_project_routes_to_general(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_capture(argparse.Namespace(
+            agent="claude",
+            content="Remember this outside any project",
+            source="session",
+            gate="allow",
+            short="Outside project capture",
+            working_dir=None,
+        ))
+
+        out = capsys.readouterr().out.strip()
+        assert out.startswith("IN-")
+
+        global_vault = fake_home / ".memory" / "claude"
+        general = global_vault / "projects" / "_general"
+        files = list((general / "inbox").glob("*.md"))
+        assert len(files) == 1
+        assert "short: Outside project capture" in files[0].read_text()
+
+        logs = list((global_vault / "sessions").glob("*.md"))
+        assert len(logs) == 1
+        assert f"- [[{out}]] Outside project capture (_general)" in logs[0].read_text()
+
 
 # ---------------------------------------------------------------------------
 # cmd_create
@@ -564,6 +600,76 @@ class TestCmdCreate:
         content = files[0].read_text()
         assert "On persistence" in content
 
+        logs = list((global_vault / "sessions").glob("*.md"))
+        assert len(logs) == 1
+        assert "(global)" in logs[0].read_text()
+        assert "(_general)" not in logs[0].read_text()
+
+    def test_create_without_project_routes_to_general(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="session",
+            title="No project closeout",
+            body="Closed the floating session.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short="Floating session closed",
+            working_dir=None,
+        ))
+
+        out = capsys.readouterr().out.strip()
+        assert out.startswith("SS-")
+
+        global_vault = fake_home / ".memory" / "claude"
+        general = global_vault / "projects" / "_general"
+        files = list((general / "sessions").glob("*.md"))
+        assert len(files) == 1
+        assert "short: Floating session closed" in files[0].read_text()
+
+        logs = list((global_vault / "sessions").glob("*.md"))
+        assert len(logs) == 1
+        assert f"- [[{out}]] Floating session closed (_general)" in logs[0].read_text()
+
+    def test_short_sanitization_and_storage(self, tmp_path, monkeypatch, capsys):
+        project_vault = _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+        raw_short = "  " + ("x" * 60) + "\n" + ("y" * 80) + "  "
+        expected_short = (("x" * 60) + " " + ("y" * 80))[:120]
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="lesson",
+            title="Sanitize short",
+            body="Body.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short=raw_short,
+            working_dir=None,
+        ))
+
+        out = capsys.readouterr().out.strip()
+        record_file = next((project_vault / "lessons").glob("*.md"))
+        text = record_file.read_text()
+        assert f"short: {expected_short}" in text
+
+        global_vault = tmp_path / "home" / ".memory" / "claude"
+        log = next((global_vault / "sessions").glob("*.md")).read_text()
+        assert f"- [[{out}]] {expected_short} (myapp)" in log
+
 
 # ---------------------------------------------------------------------------
 # cmd_refresh
@@ -645,6 +751,23 @@ class TestCmdValidate:
 
         out = capsys.readouterr().out
         assert "is valid" in out
+
+    def test_validate_project_does_not_fallback_to_general(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        with pytest.raises(SystemExit):
+            cmd_validate(argparse.Namespace(agent="claude", type="project", working_dir=None))
+
+        err = capsys.readouterr().err
+        assert "no project vault found" in err
 
 
 # ---------------------------------------------------------------------------
@@ -752,6 +875,52 @@ class TestCmdList:
 
         out = capsys.readouterr().out
         assert "No records found." in out
+
+    def test_cmd_list_project_does_not_fallback_to_general(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        with pytest.raises(SystemExit):
+            cmd_list(argparse.Namespace(
+                agent="claude", type="sessions", scope="project",
+                status=None, trust=None, format="table", working_dir=None,
+            ))
+
+        err = capsys.readouterr().err
+        assert "no project vault found" in err
+
+    def test_cmd_list_daily_log_global(self, tmp_path, monkeypatch, capsys):
+        _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="lesson",
+            title="Listed daily",
+            body="Body.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short="Listed daily",
+            working_dir=None,
+        ))
+        capsys.readouterr()
+
+        cmd_list(argparse.Namespace(
+            agent="claude", type="daily-log", scope="global",
+            status=None, trust=None, format="table", working_dir=None,
+        ))
+
+        out = capsys.readouterr().out
+        assert "DL-" in out
 
 
 # ---------------------------------------------------------------------------

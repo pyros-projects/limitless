@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from codies_memory.boot import (
+    DAILY_LOG_TAIL_LINES,
     assemble_boot,
     build_cache_key,
     cache_boot_packet,
@@ -164,6 +165,40 @@ class TestAssembleBoot:
         assert "Warm global map." in result["global_packet"]
         assert "Warm project map." in result["project_packet"]
         assert "Warm recent map." in result["project_packet"]
+
+    def test_boot_includes_latest_daily_log_tail(
+        self, tmp_global_vault: Path, tmp_project_vault: Path
+    ) -> None:
+        (tmp_project_vault / "sessions" / "SS-20260613-current.md").write_text(
+            "---\ntitle: Current Session\n---\nLatest project session stays first."
+        )
+        sessions = tmp_global_vault / "sessions"
+        sessions.mkdir()
+        lines = [
+            f"- [[SS-20260613-{i:04d}]] Daily item {i:02d} (project-{i:02d})"
+            for i in range(1, DAILY_LOG_TAIL_LINES + 6)
+        ]
+        (sessions / "2026-06-13.md").write_text(
+            "---\n"
+            "id: DL-20260613\n"
+            "title: '2026-06-13'\n"
+            "type: daily-log\n"
+            "status: active\n"
+            "trust: canonical\n"
+            "scope: global\n"
+            "created: '2026-06-13T12:00:00+02:00'\n"
+            "updated: '2026-06-13T12:00:00+02:00'\n"
+            "---\n\n"
+            + "\n".join(lines)
+            + "\n"
+        )
+
+        result = assemble_boot(tmp_global_vault, tmp_project_vault)
+
+        assert "Latest project session stays first." in result["project_packet"]
+        assert "## Global Daily Log" in result["project_packet"]
+        assert "Daily item 01" not in result["project_packet"]
+        assert f"Daily item {DAILY_LOG_TAIL_LINES + 5:02d}" in result["project_packet"]
 
 
 # ---------------------------------------------------------------------------

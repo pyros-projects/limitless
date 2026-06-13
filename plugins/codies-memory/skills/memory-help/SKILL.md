@@ -38,7 +38,8 @@ Read this section carefully. These terms have specific meanings in this system.
 | **thread** | An ongoing investigation or topic you're tracking across sessions. | project or global | When an inbox item keeps coming up, or you're tracking something over time. Promote from inbox. |
 | **lesson** | A reusable pattern or rule you've learned. "When X, do Y." | project or global | When you've learned something actionable that applies beyond the current moment. Promote from inbox or thread. |
 | **decision** | A choice that was made with rationale. | project or global | When a significant decision happens and you want to remember why. |
-| **session** | A summary of one work session. | project | At the end of every session. Captures what happened, what was decided, what's next. |
+| **session** | A summary of one work session. | project or `_general` | At the end of every session. If no project vault resolves, it lands in `_general`. |
+| **daily-log** | Auto-generated append-only cross-project activity index. | global only | Do not create or edit manually. `create` and `capture` append entries automatically. |
 | **reflection** | Philosophical or meta-level thinking. | global only | When you want to process what something meant, not just what happened. |
 | **dream** | Emotional/subconscious processing. | global only | Optional. For agents that use creative processing. |
 
@@ -99,6 +100,20 @@ When capturing to inbox, a gate controls visibility:
 | `open` | Same as allow |
 | `closed` | Same as hold |
 
+### Daily Log
+
+Every user-initiated `create` and `capture` operation appends one line to the
+global daily log at `~/.memory/<agent>/sessions/YYYY-MM-DD.md`:
+
+```markdown
+- [[RECORD-ID]] <short-text> (project-slug-or-global)
+```
+
+The daily log is a cross-project index for "what happened today". It is
+append-only, human-readable, and shown as a recent-activity tail during project
+boot. Promotion, supersession, `user`, and `feedback` do not create daily-log
+entries.
+
 ### Identity Files
 
 Your identity lives at `~/.memory/<name>/identity/`:
@@ -122,7 +137,9 @@ When you run a command with `--working-dir`, the system finds the project vault 
 2. **Registry** — matches the working directory path against known projects
 3. **Git remote** — matches the git remote URL
 
-If none match, there's no project vault for that directory.
+For `create` and `capture`, if no project vault resolves, the command falls back
+to `_general`. Other commands (`status`, `boot`, `validate`, `list`) report
+which vault resolved, or None, without fallback.
 
 ### Recall Workflow
 
@@ -173,20 +190,23 @@ Appends a bullet point to `user.md`. Use this whenever you learn something about
 
 ```bash
 codies-memory capture "what you noticed" --source "where" --agent <name>
+codies-memory capture "what you noticed" --source "where" --short "one-line summary" --agent <name>
 ```
 
 ### Create (write a specific record)
 
 ```bash
 codies-memory create <type> --title "Title" --body "Content" --agent <name>
+codies-memory create <type> --title "Title" --short "one-line summary" --body "Content" --agent <name>
 ```
 
-Types: `lesson`, `session`, `thread`, `decision`, `reflection`, `dream`. Global-only types auto-route.
+Types: `lesson`, `session`, `thread`, `decision`, `reflection`, `dream`, `skill`, `playbook`, `identity`. Global-only types auto-route.
 
 For longer or structured multiline content, prefer:
 
 ```bash
 codies-memory create <type> --title "Title" --body-file /path/to/body.md --agent <name>
+codies-memory create <type> --title "Title" --short "one-line summary" --body-file /path/to/body.md --agent <name>
 ```
 
 Inline `--body` normalizes literal `\n` sequences to real newlines, but `--body-file`
@@ -197,6 +217,7 @@ is still the safer operator path when shell quoting would be fragile.
 ```bash
 codies-memory list <type> --agent <name>
 codies-memory list lessons --scope global --agent <name> --format json
+codies-memory list daily-log --scope global --agent <name>
 ```
 
 ### Status
@@ -257,10 +278,12 @@ codies-memory feedback "what happened" --agent <name>
   decisions/           — global decisions
   reflections/         — philosophical processing
   dreams/              — emotional processing
+  sessions/            — global daily logs, created lazily on first write
   registry/
     projects.yaml      — map of known projects
   feedback/            — bug reports and observations about the system itself
   projects/
+    _general/          — default catch-all project for create/capture without a resolved project
     <slug>/
       inbox/           — raw captures
       threads/         — project threads

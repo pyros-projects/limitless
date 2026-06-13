@@ -35,6 +35,7 @@ If you don't specify a type, the system infers from content:
 
 - **Global types** (reflection, dream, skill, playbook) -> global vault (resolved via `--agent` flag)
 - **Project types** (thread, decision, lesson, session, inbox) -> project vault (auto-resolved from cwd)
+- If no project vault resolves, `capture` and project-scoped `create` fall back to the reserved `_general` project vault. Other commands do not silently fall back.
 
 ## Trust Assignment
 
@@ -48,11 +49,13 @@ If you don't specify a type, the system infers from content:
 # Capture an inbox observation
 codies-memory capture "The API returns 404 for /v2/status" \
   --source "session observation" \
+  --short "404 from /v2/status" \
   --gate allow
 
 # Capture a lesson directly
 codies-memory create lesson \
   --title "Check YAML tabs vs spaces" \
+  --short "YAML tabs break parsing" \
   --body "PyYAML silently misparses tabs. Always use spaces." \
   --trust confirmed \
   --field trigger="YAML parsing produces unexpected results" \
@@ -78,6 +81,10 @@ create_record(
 )
 "
 ```
+
+`--short` is the one-line summary used in the global daily log. It is stored on
+the record and truncated to 120 characters. If omitted, `create` uses the title
+and `capture` uses the auto-generated capture title.
 
 ## Write Gates
 

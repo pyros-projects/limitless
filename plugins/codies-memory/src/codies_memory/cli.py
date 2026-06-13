@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from codies_memory.vault import (
+    ensure_general_project_vault,
     init_global_vault,
     init_project_vault,
     validate_vault,
@@ -16,7 +17,14 @@ from codies_memory.vault import (
 )
 from codies_memory.boot import assemble_boot
 from codies_memory.inbox import capture, pending_review
-from codies_memory.records import create_record, read_record, list_records
+from codies_memory.records import (
+    append_daily_log,
+    create_record,
+    list_records,
+    read_record,
+    sanitize_short_text,
+    update_record,
+)
 from codies_memory.promotion import promote_within_project, promote_to_global
 from codies_memory.profile import load_profile, get_write_gate_bias
 from codies_memory.warm import write_warm_artifacts
@@ -35,17 +43,25 @@ def _resolve_agent(args: argparse.Namespace) -> str:
     return agent
 
 
-def _resolve_project_vault(args: argparse.Namespace) -> tuple[Path, Path]:
+def _resolve_project_vault(
+    args: argparse.Namespace,
+    *,
+    fallback_to_general: bool = False,
+) -> tuple[Path, Path]:
     """Resolve global and project vault paths from args.
 
     Returns (global_vault, project_vault).
-    Exits with error if no project vault is found.
+    Exits with error if no project vault is found unless *fallback_to_general*
+    is true, in which case the reserved ``_general`` project vault is created
+    if needed and returned.
     """
     agent = _resolve_agent(args)
     global_vault = resolve_global_vault(agent)
     working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
     project_vault = resolve_project_vault(global_vault, working_dir)
     if project_vault is None:
+        if fallback_to_general:
+            return global_vault, ensure_general_project_vault(global_vault)
         print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
         sys.exit(1)
     return global_vault, project_vault
@@ -121,6 +137,10 @@ def cmd_validate(args: argparse.Namespace) -> None:
             print("Missing files:")
             for f in result.missing_files:
                 print(f"  {f}")
+        if result.extra:
+            print("Invalid files:")
+            for f in result.extra:
+                print(f"  {f}")
         sys.exit(1)
 
 
@@ -159,21 +179,24 @@ def cmd_boot(args: argparse.Namespace) -> None:
 
 
 def cmd_capture(args: argparse.Namespace) -> None:
-    global_vault, project_vault = _resolve_project_vault(args)
+    global_vault, project_vault = _resolve_project_vault(args, fallback_to_general=True)
 
     gate = args.gate
     if gate is None:
         profile = load_profile(global_vault, project_vault)
         gate = get_write_gate_bias(profile)
 
+    short = sanitize_short_text(getattr(args, "short", None) or args.content[:80])
     record_path = capture(
         vault=project_vault,
         content=args.content,
         source=args.source,
         gate=gate,
     )
+    update_record(record_path, short=short)
 
     record = read_record(record_path)
+    append_daily_log(global_vault, record["frontmatter"]["id"], short, project_vault.name)
     print(record["frontmatter"]["id"])
 
 
@@ -208,16 +231,19 @@ def cmd_create(args: argparse.Namespace) -> None:
             sys.exit(1)
         key, value = field_str.split("=", 1)
         extra[key] = value
+    short = sanitize_short_text(getattr(args, "short", None) or args.title)
+    extra["short"] = short
 
     # Resolve vault
     if scope == "global":
         vault = global_vault
+        project_slug = "global"
     else:
         working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
         vault = resolve_project_vault(global_vault, working_dir)
         if vault is None:
-            print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
-            sys.exit(1)
+            vault = ensure_general_project_vault(global_vault)
+        project_slug = vault.name
 
     record_path = create_record(
         vault=vault,
@@ -230,6 +256,7 @@ def cmd_create(args: argparse.Namespace) -> None:
     )
 
     record = read_record(record_path)
+    append_daily_log(global_vault, record["frontmatter"]["id"], short, project_slug)
     print(record["frontmatter"]["id"])
 
 
@@ -291,6 +318,8 @@ def cmd_list(args: argparse.Namespace) -> None:
         "decision": "decision",
         "sessions": "session",
         "session": "session",
+        "daily-logs": "daily-log",
+        "daily-log": "daily-log",
         "reflections": "reflection",
         "reflection": "reflection",
         "dreams": "dream",
@@ -579,6 +608,11 @@ def main() -> None:
         help="Gate value (default: profile's write_gate_bias).",
     )
     capture_parser.add_argument(
+        "--short",
+        default=None,
+        help="One-line summary for the global daily log.",
+    )
+    capture_parser.add_argument(
         "--agent",
         default=None,
         help="Agent name (required).",
@@ -595,7 +629,17 @@ def main() -> None:
     create_parser = subparsers.add_parser("create", help="Create a new record.")
     create_parser.add_argument(
         "type",
-        choices=["thread", "lesson", "decision", "session", "reflection", "dream"],
+        choices=[
+            "thread",
+            "lesson",
+            "decision",
+            "session",
+            "reflection",
+            "dream",
+            "skill",
+            "playbook",
+            "identity",
+        ],
         help="Record type.",
     )
     create_parser.add_argument(
@@ -634,6 +678,11 @@ def main() -> None:
         help="Extra frontmatter field as key=value (repeatable).",
     )
     create_parser.add_argument(
+        "--short",
+        default=None,
+        help="One-line summary for the global daily log.",
+    )
+    create_parser.add_argument(
         "--agent",
         default=None,
         help="Agent name (required).",
@@ -650,7 +699,7 @@ def main() -> None:
     list_parser = subparsers.add_parser("list", help="List records.")
     list_parser.add_argument(
         "type",
-        help="Record type (inbox, threads, lessons, decisions, sessions, reflections, dreams).",
+        help="Record type (inbox, threads, lessons, decisions, sessions, daily-log, reflections, dreams).",
     )
     list_parser.add_argument(
         "--scope",

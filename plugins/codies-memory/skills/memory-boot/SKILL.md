@@ -116,9 +116,16 @@ This assembles your boot packet from:
 2. Global procedural records (lessons, skills)
 3. Project context (auto-resolved from cwd)
 4. Active threads and recent decisions
-5. Branch overlay and last session summary
+5. Branch overlay, last session summary, and the latest global daily-log tail
 
 Read the output — it contains your identity, project context, and recent state.
+
+Boot does not fall back to `_general`. If no project vault resolves, it reports a
+global-only boot. When a project vault does resolve, the recent activity layer
+also includes `Global Daily Log`, a cross-project tail from
+`~/.memory/<agent>/sessions/YYYY-MM-DD.md`. If the resolved project vault is
+`_general`, tell the user records are landing in the default catch-all project,
+not a named project.
 
 The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
 
@@ -151,7 +158,7 @@ Check `qmd status` and the collection timestamps / last updated values before tr
 codies-memory status --agent <name>
 ```
 
-Handle any aging or stale items before starting work. If no project vault exists yet, this will say so — that's fine for global-only boot.
+Handle any aging or stale items before starting work. If no project vault exists yet, this will say so — that's fine for global-only boot. `status` also does not fall back to `_general`.
 
 ## Available Commands
 
@@ -162,10 +169,10 @@ All commands require `--agent <name>`. Use `--working-dir` to target a project w
 codies-memory init --type project --agent <name> --working-dir /path/to/project
 
 # Capture an observation to a project's inbox
-codies-memory capture "what you noticed" --source "session" --agent <name>
+codies-memory capture "what you noticed" --source "session" --short "one-line summary" --agent <name>
 
 # Create a record (lesson, session, thread, decision, reflection, dream)
-codies-memory create lesson --title "Title" --body "Content" --agent <name>
+codies-memory create lesson --title "Title" --short "one-line summary" --body "Content" --agent <name>
 
 # List records
 codies-memory list inbox --agent <name>

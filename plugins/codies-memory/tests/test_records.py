@@ -7,10 +7,12 @@ from pathlib import Path
 import pytest
 
 from codies_memory.records import (
+    append_daily_log,
     create_record,
     infer_record_type,
     list_records,
     read_record,
+    sanitize_short_text,
     supersede_record,
     update_record,
 )
@@ -70,6 +72,64 @@ class TestCreateRecord:
         )
         content = path.read_text()
         assert "captured_from:" in content
+
+
+class TestDailyLog:
+    def test_short_sanitization(self) -> None:
+        assert sanitize_short_text("  one\n two\tthree  ") == "one two three"
+        assert len(sanitize_short_text("x" * 130)) == 120
+
+    def test_daily_log_frontmatter_and_append(
+        self,
+        tmp_global_vault: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from codies_memory import records as records_module
+
+        real_open = records_module.os.open
+        real_write = records_module.os.write
+        real_close = records_module.os.close
+        open_flags: list[int] = []
+        writes: list[bytes] = []
+
+        def spy_open(path: str, flags: int, mode: int = 0o777) -> int:
+            open_flags.append(flags)
+            return real_open(path, flags, mode)
+
+        def spy_write(fd: int, payload: bytes) -> int:
+            writes.append(payload)
+            return real_write(fd, payload)
+
+        def spy_close(fd: int) -> None:
+            real_close(fd)
+
+        monkeypatch.setattr(records_module.os, "open", spy_open)
+        monkeypatch.setattr(records_module.os, "write", spy_write)
+        monkeypatch.setattr(records_module.os, "close", spy_close)
+
+        log_path = append_daily_log(
+            tmp_global_vault,
+            "SS-20260403-abcd",
+            "  Closed\nsession  ",
+            "_general",
+        )
+        text = log_path.read_text()
+        frontmatter = text.split("---", 2)[1]
+
+        assert log_path.parent == tmp_global_vault / "sessions"
+        assert "id: DL-" in text
+        assert "type: daily-log" in text
+        assert "trust: canonical" in text
+        assert "scope: global" in text
+        assert "- [[SS-20260403-abcd]] Closed session (_general)" in text
+        assert len(writes) == 1
+        assert open_flags[0] & records_module.os.O_APPEND
+
+        append_daily_log(tmp_global_vault, "RF-0001", "A reflection", "global")
+        updated = log_path.read_text()
+        assert updated.split("---", 2)[1] == frontmatter
+        assert "- [[RF-0001]] A reflection (global)" in updated
+        assert len(writes) == 2
 
 
 # ---------------------------------------------------------------------------

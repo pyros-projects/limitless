@@ -33,6 +33,7 @@ TYPE_EXTRA_FIELDS: dict[str, set[str]] = {
     "lesson": {"review_after", "related", "tags", "gate", "trigger", "why", "applies_to"},
     "session": {"review_after", "related", "tags", "gate", "mode", "next_step", "artifacts", "write_gate_summary"},
     "inbox": {"review_after", "related", "tags", "gate", "source", "compacted_into"},
+    "daily-log": set(),
     "reflection": {"review_after", "related", "tags", "gate", "mood", "horizon"},
     "dream": {"review_after", "related", "tags", "gate", "horizon"},
     "skill": {"review_after", "related", "tags", "gate", "applies_to"},
@@ -48,6 +49,7 @@ _ID_PREFIXES: dict[str, str] = {
     "lesson": "LS",
     "session": "SS",
     "inbox": "IN",
+    "daily-log": "DL",
     "reflection": "RF",
     "dream": "DR",
     "skill": "SK",
@@ -118,7 +120,7 @@ def validate_frontmatter(data: dict[str, Any], record_type: str) -> list[str]:
         REQUIRED_FIELDS
         | TYPE_EXTRA_FIELDS.get(record_type, set())
         | PROVENANCE_FIELDS
-        | {"probation_until", "promoted_from", "supersedes", "superseded_by", "compacted_into"}
+        | {"probation_until", "promoted_from", "supersedes", "superseded_by", "compacted_into", "short"}
     )
     unknown = set(data.keys()) - known
     if unknown:

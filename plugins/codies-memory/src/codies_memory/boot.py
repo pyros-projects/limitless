@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+DAILY_LOG_TAIL_LINES = 25
+
 
 # ---------------------------------------------------------------------------
 # Token estimation
@@ -94,6 +96,67 @@ def _read_if_exists(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
+def _read_latest_daily_log_tail_lines(
+    global_vault: Path,
+    line_count: int = DAILY_LOG_TAIL_LINES,
+) -> list[str]:
+    """Return the newest body lines from the latest global daily log."""
+    sessions_dir = global_vault / "sessions"
+    if not sessions_dir.is_dir():
+        return []
+
+    daily_logs = sorted(sessions_dir.glob("*.md"))
+    if not daily_logs:
+        return []
+
+    text = daily_logs[-1].read_text(encoding="utf-8")
+    if text.startswith("---"):
+        parts = text.split("---", 2)
+        body = parts[2] if len(parts) >= 3 else text
+    else:
+        body = text
+
+    lines = [line.strip() for line in body.splitlines() if line.strip()]
+    return lines[-line_count:]
+
+
+def _format_daily_log(lines: list[str]) -> str:
+    """Format daily-log body lines for the recent activity layer."""
+    if not lines:
+        return ""
+    return "## Global Daily Log\n" + "\n".join(lines)
+
+
+def _fit_recent_activity(
+    project_recent: str,
+    daily_lines: list[str],
+    budget: int,
+) -> str:
+    """Fit project recent activity first, then newest daily-log lines."""
+    separator = "\n\n---\n\n"
+    project_recent = project_recent.strip()
+    if estimate_tokens(project_recent) >= budget:
+        return truncate_to_budget(project_recent, budget)
+
+    if not daily_lines:
+        return project_recent
+
+    remaining = budget - estimate_tokens(project_recent)
+    kept_lines: list[str] = []
+    for line in reversed(daily_lines):
+        candidate_lines = [line] + kept_lines
+        candidate = _format_daily_log(candidate_lines)
+        if estimate_tokens(candidate) <= remaining:
+            kept_lines = candidate_lines
+        else:
+            break
+
+    daily_log = _format_daily_log(kept_lines)
+    if project_recent and daily_log:
+        return project_recent + separator + daily_log
+    return project_recent or daily_log
+
+
 # ---------------------------------------------------------------------------
 # Assemble boot packet
 # ---------------------------------------------------------------------------
@@ -174,9 +237,10 @@ def assemble_boot(
         "budget": budgets["project_working"],
     }
 
-    # Layer 5: recent episodes summary when available, otherwise branch overlay + latest session
-    layer5_raw = _read_if_exists(project_vault / "boot" / "recent-episodes.md")
-    if not layer5_raw:
+    # Layer 5: recent episodes summary when available, otherwise branch overlay + latest session.
+    # The global daily-log tail is then added as cross-project recent activity.
+    project_recent_raw = _read_if_exists(project_vault / "boot" / "recent-episodes.md")
+    if not project_recent_raw:
         branch_overlay_dir = project_vault / "project" / "branch-overlays"
         overlay_parts: list[str] = []
         if branch_overlay_dir.is_dir():
@@ -193,8 +257,11 @@ def assemble_boot(
                 if latest_session:
                     overlay_parts.append(latest_session)
 
-        layer5_raw = "\n\n---\n\n".join(overlay_parts)
-    layer5 = truncate_to_budget(layer5_raw, budgets["branch_session"])
+        project_recent_raw = "\n\n---\n\n".join(overlay_parts)
+    daily_log_lines = _read_latest_daily_log_tail_lines(global_vault)
+    daily_log_raw = _format_daily_log(daily_log_lines)
+    layer5_raw = "\n\n---\n\n".join([part for part in [project_recent_raw, daily_log_raw] if part])
+    layer5 = _fit_recent_activity(project_recent_raw, daily_log_lines, budgets["branch_session"])
     usage_layers["branch_session"] = {
         "used": estimate_tokens(layer5_raw),
         "budget": budgets["branch_session"],

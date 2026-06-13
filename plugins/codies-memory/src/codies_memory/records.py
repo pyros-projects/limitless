@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import os
 import re
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +34,23 @@ def _write_record(path: Path, frontmatter: dict[str, Any], body: str) -> None:
     yaml_text = yaml.dump(frontmatter, default_flow_style=False, sort_keys=False)
     content = f"---\n{yaml_text}---\n\n{body}\n"
     path.write_text(content, encoding="utf-8")
+
+
+def sanitize_short_text(text: str, limit: int = 120) -> str:
+    """Return a single-line short summary capped at *limit* characters."""
+    sanitized = re.sub(r"\s+", " ", text).strip()
+    if not sanitized:
+        sanitized = "untitled"
+    return sanitized[:limit]
+
+
+def _append_bytes_once(path: Path, payload: bytes) -> None:
+    """Append *payload* with one unbuffered ``os.write`` call."""
+    fd = os.open(str(path), os.O_APPEND | os.O_CREAT | os.O_WRONLY, 0o644)
+    try:
+        os.write(fd, payload)
+    finally:
+        os.close(fd)
 
 
 # ---------------------------------------------------------------------------
@@ -84,6 +102,42 @@ def create_record(
 
     _write_record(path, frontmatter, body)
     return path
+
+
+def append_daily_log(global_vault: Path, record_id: str, short_text: str, project_slug: str) -> Path:
+    """Append one record reference to the global daily log.
+
+    The daily log is intentionally CLI-layer glue: ``create_record`` remains
+    pure, while user-initiated commands can call this helper after they know
+    which vault handled the record.
+    """
+    now = datetime.now().astimezone().replace(microsecond=0)
+    day = now.date().isoformat()
+    compact_day = now.strftime("%Y%m%d")
+    log_dir = global_vault / "sessions"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / f"{day}.md"
+
+    if not log_path.exists():
+        timestamp = now.isoformat()
+        frontmatter: dict[str, Any] = {
+            "id": f"DL-{compact_day}",
+            "title": day,
+            "type": "daily-log",
+            "status": "active",
+            "trust": "canonical",
+            "scope": "global",
+            "created": timestamp,
+            "updated": timestamp,
+        }
+        errors = validate_frontmatter(frontmatter, "daily-log")
+        if errors:
+            raise ValidationError(f"Invalid frontmatter for daily log: {errors}")
+        _write_record(log_path, frontmatter, "")
+
+    line = f"- [[{record_id}]] {sanitize_short_text(short_text)} ({project_slug})\n"
+    _append_bytes_once(log_path, line.encode("utf-8"))
+    return log_path
 
 
 def read_record(filepath: Path) -> dict[str, Any]:

@@ -12,6 +12,8 @@ import yaml
 # Constants — directory layouts
 # ---------------------------------------------------------------------------
 
+GENERAL_PROJECT_SLUG = "_general"
+
 GLOBAL_DIRS: list[str] = [
     "registry",
     "identity",
@@ -25,7 +27,10 @@ GLOBAL_DIRS: list[str] = [
     "boot",
     "projects",
     "feedback",
+    "sessions",
 ]
+
+LAZY_GLOBAL_DIRS: set[str] = {"sessions"}
 
 PROJECT_DIRS: list[str] = [
     "project/branch-overlays",
@@ -60,6 +65,7 @@ _PATH_MAP: dict[tuple[str, str], str] = {
     ("lesson", "global"): "procedural/lessons",
     ("session", "project"): "sessions",
     ("inbox", "project"): "inbox",
+    ("daily-log", "global"): "sessions",
     ("reflection", "global"): "reflections",
     ("dream", "global"): "dreams",
     ("skill", "global"): "procedural/skills",
@@ -192,6 +198,8 @@ def init_global_vault(root: Path) -> Path:
     Returns *root*.
     """
     for d in GLOBAL_DIRS:
+        if d in LAZY_GLOBAL_DIRS:
+            continue
         (root / d).mkdir(parents=True, exist_ok=True)
 
     # profile.yaml
@@ -210,6 +218,8 @@ def init_global_vault(root: Path) -> Path:
             f"---\ntitle: {name[:-3]}\ntype: identity\n---\n",
         )
 
+    ensure_general_project_vault(root)
+
     return root
 
 
@@ -218,6 +228,7 @@ def init_project_vault(
     slug: str | None = None,
     working_dir: Path | None = None,
     register: bool = True,
+    write_marker: bool = True,
 ) -> Path:
     """Create project vault under ``global_vault/projects/slug/``.
 
@@ -225,13 +236,19 @@ def init_project_vault(
     registers the project in the global registry.
 
     *slug* defaults to ``working_dir.name`` if not provided.
-    *working_dir* defaults to ``Path.cwd()`` if not provided.
+    *working_dir* defaults to ``Path.cwd()`` if not provided and marker writing
+    is enabled. When *working_dir* is ``None``, marker writing and git remote
+    detection are skipped.
 
     Returns the project vault root (``global_vault / "projects" / slug``).
     """
-    if working_dir is None:
+    if slug == GENERAL_PROJECT_SLUG and write_marker:
+        raise ValueError("The reserved '_general' project is managed by the global vault.")
+    if working_dir is None and write_marker:
         working_dir = Path.cwd()
     if slug is None:
+        if working_dir is None:
+            raise ValueError("slug is required when working_dir is None.")
         slug = working_dir.name
 
     root = global_vault / "projects" / slug
@@ -240,21 +257,33 @@ def init_project_vault(
 
     _write_if_missing(root / "profile.yaml", f"project_name: {slug}\n")
 
-    # Write marker file in working directory
-    marker = working_dir / ".codies-memory"
-    marker.write_text(f"{slug}\n")
+    # Write marker file in working directory when this is a real project vault.
+    if write_marker and working_dir is not None:
+        marker = working_dir / ".codies-memory"
+        marker.write_text(f"{slug}\n")
 
     if register:
-        git_remote = _get_git_remote(working_dir)
+        git_remote = _get_git_remote(working_dir) if working_dir is not None else None
         register_project_vault(
             global_vault=global_vault,
             slug=slug,
-            working_dir=str(working_dir),
+            working_dir=str(working_dir) if working_dir is not None else None,
             metadata={},
             git_remote=git_remote,
         )
 
     return root
+
+
+def ensure_general_project_vault(global_vault: Path) -> Path:
+    """Ensure the reserved catch-all project vault exists and is registered."""
+    return init_project_vault(
+        global_vault=global_vault,
+        slug=GENERAL_PROJECT_SLUG,
+        working_dir=None,
+        register=True,
+        write_marker=False,
+    )
 
 
 def _get_git_remote(working_dir: Path) -> str | None:
@@ -280,7 +309,7 @@ def _get_git_remote(working_dir: Path) -> str | None:
 def register_project_vault(
     global_vault: Path,
     slug: str,
-    working_dir: str,
+    working_dir: str | None,
     metadata: dict,
     status: str = "active",
     git_remote: str | None = None,
@@ -301,10 +330,11 @@ def register_project_vault(
 
     new_entry: dict = {
         "slug": slug,
-        "working_dir": working_dir,
         "status": status,
         "metadata": metadata,
     }
+    if working_dir is not None:
+        new_entry["working_dir"] = working_dir
     if git_remote:
         new_entry["git_remote"] = git_remote
 
@@ -321,14 +351,39 @@ def validate_vault(root: Path, vault_type: str = "global") -> VaultValidationRes
 
     Returns a :class:`VaultValidationResult`.
     """
-    expected: list[str] = GLOBAL_DIRS if vault_type == "global" else PROJECT_DIRS
+    if vault_type == "global":
+        expected = [d for d in GLOBAL_DIRS if d not in LAZY_GLOBAL_DIRS]
+    else:
+        expected = PROJECT_DIRS
     required_files: list[str] = GLOBAL_REQUIRED_FILES if vault_type == "global" else PROJECT_REQUIRED_FILES
 
     missing_dirs: list[str] = [d for d in expected if not (root / d).is_dir()]
     missing_files: list[str] = [f for f in required_files if not (root / f).is_file()]
+    extra: list[str] = []
 
-    is_valid = len(missing_dirs) == 0 and len(missing_files) == 0
-    return VaultValidationResult(is_valid=is_valid, missing=missing_dirs, missing_files=missing_files)
+    if vault_type == "global":
+        sessions_dir = root / "sessions"
+        if sessions_dir.exists() and not sessions_dir.is_dir():
+            missing_dirs.append("sessions")
+        elif sessions_dir.is_dir():
+            from codies_memory.schemas import parse_record, validate_frontmatter
+
+            for md_file in sorted(sessions_dir.glob("*.md")):
+                try:
+                    record = parse_record(md_file)
+                    errors = validate_frontmatter(record["frontmatter"], "daily-log")
+                    if errors:
+                        extra.append(f"{md_file.relative_to(root)}: {errors}")
+                except Exception as exc:
+                    extra.append(f"{md_file.relative_to(root)}: {exc}")
+
+    is_valid = len(missing_dirs) == 0 and len(missing_files) == 0 and len(extra) == 0
+    return VaultValidationResult(
+        is_valid=is_valid,
+        missing=missing_dirs,
+        missing_files=missing_files,
+        extra=extra,
+    )
 
 
 def resolve_path(vault_root: Path, record_type: str, scope: str) -> Path:
