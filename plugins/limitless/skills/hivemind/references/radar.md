@@ -61,14 +61,15 @@ future Radar imports this file under its own admission contract.
 
 ## Sweep series — directory contract
 
-Default root `~/.hivemind` (Linux/macOS; `%USERPROFILE%\.hivemind` on
-Windows). Override: `HIVEMIND_DIR` env var.
+Default root `~/.limitless/hivemind` (Linux/macOS;
+`%USERPROFILE%\.limitless\hivemind` on Windows). Override:
+`HIVEMIND_DIR` env var.
 
 **All hivemind sweeps produce frames here** (see SKILL.md "Every sweep
 is a frame") — radar frames additionally carry `radar.json`/`radar.html`:
 
 ```
-~/.hivemind/<topic-slug>/
+~/.limitless/hivemind/<topic-slug>/
   2026-06-11/raw/ + manifest.md + brief.md + radar.json + radar.html
   2026-06-28/raw/ + manifest.md + brief.md + radar.json + radar.html
   index.html                      ← regenerated each sweep (back catalog)

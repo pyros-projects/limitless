@@ -71,7 +71,7 @@ orthogonal: a chained sweep still has a mode per stage venue.
 ## Phase 1 — Scope (and config lookup)
 
 **Config lookup comes first — and binding is name-gated.** Check
-`ls ~/.hivemind/*/config.md`:
+`ls ~/.limitless/hivemind/*/config.md`:
 
 - The ask **names** a config — slug, title, or a close expression of
   either ("ai-dev-weekly", "ai dev weekly", "my dev-weekly config") →
@@ -151,17 +151,18 @@ Rules:
 Per venue + one global control, JSON saved to the sweep's frame
 directory with **venue-prefixed names** (`r-*.json`, `x-*.json`,
 `gh-*.json`, `web-*.json`, `oa-*.json`, `arx-*.xml`) — create the frame
-at the start of Phase 2 so recon files land there too. Recipes, floor
-ladders, and venue quirks live in the playbooks:
+at the start of Phase 2, set `FRAME` to it, and write recon/fan-out
+files under `$FRAME/raw/`. Recipes, floor ladders, and venue quirks live
+in the playbooks:
 `references/reddit-playbook.md`, `references/x-playbook.md`,
 `references/gh-playbook.md`, `references/web-playbook.md`,
 `references/papers-playbook.md`. Read the playbook for every venue the
 chain touches. Core social patterns:
 
 ```bash
-rdt search "<variant>" -r <sub> -s top -t <window> -n 25 --json -o rN.json
+rdt search "<variant>" -r <sub> -s top -t <window> -n 25 --json -o "$FRAME/raw/rN.json"
 twitter search '"<topic>" <variant>' -t top --min-likes 50 --lang en \
-  --exclude retweets --since <start> -n 30 --json -o xN.json
+  --exclude retweets --since <start> -n 30 --json -o "$FRAME/raw/xN.json"
 ```
 
 Adaptive floors: <5 hits → halve floor, widen window once; noisy → double
@@ -187,8 +188,9 @@ for `repeat`.
    stars-per-day + release recency (gh), citations *with the lag rule*
    (papers), domain authority (web); each playbook states its ladder.
 3. **Deep-read where the knowledge lives:** `rdt read <id> -s top -n 30
-   --json` (the post is the question; comments are the answer);
-   `twitter tweet <id> -n 20 --json` (replies carry corrections and
+   --json > "$FRAME/raw/r-read-<id>.json"` (the post is the question;
+   comments are the answer); `twitter tweet <id> -n 20 --json >
+   "$FRAME/raw/x-thread-<id>.json"` (replies carry corrections and
    counterpoints).
 4. Discipline: dedup by URL/ID (papers: by DOI/arXiv id); max 3 items
    per author; cluster the same story across platforms — cross-platform
@@ -234,7 +236,7 @@ are fetch-time snapshots no re-run can reproduce. Every sweep (not just
 radar) writes a frame:
 
 ```
-~/.hivemind/<topic-slug>/<date>/
+~/.limitless/hivemind/<topic-slug>/<date>/
   raw/          recon + fan-out JSON (venue-prefixed), deep-read JSON,
                 throwaway parsers
   manifest.md   query, mode, window, venues, file list, adaptations,
@@ -250,16 +252,17 @@ radar) writes a frame:
   re-sweeps, frames immutable once written.
 - The manifest must let a future session re-triage without re-searching
   — rejected items are listed with the reason, not silently dropped.
-- `--no-keep` opts out for throwaway lookups (working files go to /tmp
-  as before). Default is keep.
+- `--no-keep` opts out of immutable frame persistence; throwaway working
+  files still stay under `~/.limitless/hivemind/tmp/<run-id>/`, not in
+  project docs. Default is keep.
 - These frames are the acquisition feed for a future Social Signal
   Radar: pull, not push — hivemind writes and walks away.
 
 ## Configs — living recipes for recurring intents
 
-`~/.hivemind/<topic-slug>/config.md` — topic level, beside the dated
-frames, never inside them. The frame says what *happened*; the config
-says what to do *next time*. Template + worked structure:
+`~/.limitless/hivemind/<topic-slug>/config.md` — topic level, beside the
+dated frames, never inside them. The frame says what *happened*; the
+config says what to do *next time*. Template + worked structure:
 `references/config-template.md`. Hard rule everywhere: **propose-
 confirm only** — the skill never silently rewrites user intent; every
 accepted change = edition bump + dated changelog line.
@@ -333,9 +336,10 @@ What happens after a declined fix offer depends on one distinction:
 - `repeat <slug>` — execute a saved config (see Configs).
 - `--radar "<topic>"` (alias `--report`) — full sweep → topic clusters →
   stance mining → budgeted enrichment → `radar.json` + `radar.html` in
-  `~/.hivemind/<slug>/<date>/`. Read `references/radar.md` first.
-- `--no-keep` — skip frame persistence (throwaway lookup; working files
-  to /tmp).
+  `~/.limitless/hivemind/<slug>/<date>/`. Read `references/radar.md`
+  first.
+- `--no-keep` — skip immutable frame persistence (throwaway working files
+  go to `~/.limitless/hivemind/tmp/<run-id>/`).
 
 ## Initiative
 

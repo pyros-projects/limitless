@@ -116,9 +116,11 @@ destroyed a paid take on 2026-06-11). Therefore:
 2. Parse the clip ids from the generate response — the real envelope is
    top-level `.clips` (verified live 2026-06-12); keep `.data.clips` as
    the defensive fallback.
-3. Per clip: download into a TEMP dir, then move to the take-aware name:
-   `suno-pp-cli download <clip_id> --out <tmpdir>/` →
-   `mv <tmpdir>/<title>.mp3 <pack>/audio/<slug>-<model>-take<N>-<clipid8>.mp3`
+3. Per clip: download into a pack-local staging dir, then move to the
+   take-aware name:
+   `mkdir -p <pack>/_tmp/downloads` →
+   `suno-pp-cli download <clip_id> --out <pack>/_tmp/downloads/` →
+   `mv <pack>/_tmp/downloads/<title>.mp3 <pack>/audio/<slug>-<model>-take<N>-<clipid8>.mp3`
    (slug = pack slug, N = batch order, clipid8 = first 8 hex of the id).
    Never download straight into `audio/` — the title-named file will
    CLOBBER any pre-existing take of the same title already sitting there
@@ -157,6 +159,10 @@ it validates, nothing more. Run the dry-run, then repeat the identical
 command without `--dry-run` after user confirmation.
 
 ## The already-ran check (before every spend)
+
+Pack roots default to `~/.limitless/suno-pack/suno_<slug>/`; `<pack>` in
+this reference means that directory unless the user explicitly chose
+another location.
 
 Before generating from a prompt file:
 1. Read the pack's `runs/` directory — if a prior run log carries the

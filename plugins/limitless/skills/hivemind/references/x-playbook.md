@@ -8,8 +8,8 @@
 
 ```bash
 twitter search '"<topic>" <variant>' -t top --min-likes 50 --lang en \
-  --exclude retweets --since 2026-05-12 -n 30 --json -o x1.json
-twitter search '"<topic>"' -t latest --min-likes 10 -n 20 --json -o x2.json
+  --exclude retweets --since 2026-05-12 -n 30 --json -o "$FRAME/raw/x1.json"
+twitter search '"<topic>"' -t latest --min-likes 10 -n 20 --json -o "$FRAME/raw/x2.json"
 ```
 
 - **Quote the topic term** (`'"suno"' prompt`) — unquoted multi-word
@@ -37,8 +37,8 @@ State every ladder move in the brief's coverage section.
 ## Thread mining
 
 ```bash
-twitter tweet <id> -n 20 --json     # replies: corrections, counterpoints
-twitter user-posts <handle> -n 20   # an author who keeps appearing
+twitter tweet <id> -n 20 --json > "$FRAME/raw/x-thread-<id>.json"
+twitter user-posts <handle> -n 20 --json > "$FRAME/raw/x-user-<handle>.json"
 ```
 
 Replies and quote-tweets are X's comment section — a confident claim

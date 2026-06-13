@@ -157,7 +157,7 @@ If saved to Claude Code settings, you'll need to **restart Claude Code** for the
 ```bash
 python skills/article-pack/scripts/generate_images.py \
   --prompt "your image prompt" \
-  --output path/to/image.png \
+  --output ~/.limitless/article-pack/<pack-slug>/assets/01-image.png \
   --model gemini
 ```
 
@@ -232,7 +232,7 @@ User: "Social media kit + AI images + podcast transcript"
 Claude: "Here's your config:
   Articles: EN-Substack (full voice), DE-LinkedIn (professional)
   Extras: Social kit, images, podcast (hosts will be dice-rolled!)
-  Output: ./2024-11-29-AI-Trends-2026/
+  Output: ~/.limitless/article-pack/2024-11-29-AI-Trends-2026/
 
 Ready to generate?"
 
@@ -259,7 +259,7 @@ Claude: [Generates everything, reports completion]
 - assets/02-diagram.png
 
 ### Output
-./2024-11-29-AI-Trends-2026/
+~/.limitless/article-pack/2024-11-29-AI-Trends-2026/
 
 ### Next Steps
 - [ ] Review and edit articles

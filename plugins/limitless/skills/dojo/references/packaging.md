@@ -41,16 +41,20 @@ House style:
    hivemind's first ship — caught by Pyro 2026-06-11.
 5. `/reload-plugins` — confirm the skill appears in the listing.
 6. Smoke-invoke once with a tiny real input.
-7. Persist the full evidence set under the target repo's docs/dojo/:
+7. Persist the full evidence set under
+   `~/.limitless/dojo/<repo-slug>/<skill>/`:
    `<skill>-scenarios.md` (battery + verbatim prompts as sent),
    `<skill>-runs/` (every test workspace's output files + README table).
 8. Write/finalize the dojo record (below) linking both, commit, push.
 
 ## Dojo Record Template
 
-One record per skill at `docs/dojo/<skill>-record.md`. The record is the
-skill's belt rank: proof of what was tested, what broke, what was fixed,
-and what is known not to hold.
+One record per skill at
+`~/.limitless/dojo/<repo-slug>/<skill>/<skill>-record.md`. The record is
+the skill's belt rank: proof of what was tested, what broke, what was
+fixed, and what is known not to hold. Copy only curated summaries or
+examples into a target repo, and only when the user explicitly wants
+checked-in documentation.
 
 ```markdown
 # Dojo record — <skill>

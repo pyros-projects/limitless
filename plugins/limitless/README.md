@@ -36,6 +36,11 @@ Copy the skill folders you want into your local Claude Code skills area, or poin
 - Prefer living skills over historical bundles
 - Ship skills that make the agent materially more capable, not just more ceremonial
 - Let each skill stay opinionated and sharp
+- Keep skill-owned runtime output out of project docs by default:
+  generated packs, sweep frames, dojo evidence, and scratch artifacts
+  live under `~/.limitless/<skill>/`. Write into the target project only
+  when the project artifact itself is the requested deliverable, or when
+  the user explicitly chooses that path.
 
 ## License
 

@@ -30,8 +30,8 @@ citation count.
 OpenAlex indexing lags arXiv by days-to-weeks):**
 
 ```bash
-curl -s "http://export.arxiv.org/api/query?search_query=all:%22<q>%22&sortBy=submittedDate&sortOrder=descending&max_results=10" -o arx-1.xml
-grep -oP '(?<=<title>)[^<]+' arx-1.xml   # quick triage; full parse for abstracts
+curl -s "http://export.arxiv.org/api/query?search_query=all:%22<q>%22&sortBy=submittedDate&sortOrder=descending&max_results=10" -o "$FRAME/raw/arx-1.xml"
+grep -oP '(?<=<title>)[^<]+' "$FRAME/raw/arx-1.xml"   # quick triage; full parse for abstracts
 ```
 
 Atom XML — a throwaway parser is fine (Initiative section applies).

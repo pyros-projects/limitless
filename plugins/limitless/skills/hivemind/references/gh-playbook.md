@@ -31,7 +31,7 @@ trending page works without auth and may be fetched + parsed with a
 throwaway parser (record it in raw/ like any other source):
 
 ```bash
-curl -s "https://github.com/trending?since=weekly" -o gh-trending.html
+curl -s "https://github.com/trending?since=weekly" -o "$FRAME/raw/gh-trending.html"
 ```
 
 Parse the `<h2>` anchors, not sponsor links (observed trap 2026-06-12:

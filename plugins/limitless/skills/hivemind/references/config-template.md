@@ -1,9 +1,9 @@
 # Config Template — living recipes for recurring sweeps
 
-Distilled from the first real config (`~/.hivemind/ai-dev-weekly/
-config.md`, hand-crystallized 2026-06-12 from a live session) — read
-that file as the worked example if it exists; every section below is
-present there with real values.
+Distilled from the first real config
+(`~/.limitless/hivemind/ai-dev-weekly/config.md`, hand-crystallized
+2026-06-12 from a live session) — read that file as the worked example
+if it exists; every section below is present there with real values.
 
 A config is a **contract**: prose is binding, the skill executes what
 it says in the order it says. Propose-confirm only — every accepted

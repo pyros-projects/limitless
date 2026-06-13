@@ -51,14 +51,16 @@ adversarial variants (time pressure, sunk cost, authority pressure).
 1. **Intake.** What skill, which tier, new or edit. Design the test
    scenarios NOW — one per archetype the skill claims to handle, each
    with pre-written y/n pass criteria. **Persist the battery immediately
-   to `docs/dojo/<skill>-scenarios.md`** in the target repo — and during
-   kata 2–6, append every subagent prompt VERBATIM as actually sent,
-   plus each run's result line. Dojo artifacts live in the repo's
-   `docs/dojo/`, never only in /tmp — the operator reads how the test
-   went; that is the point of the dojo. **Hold 1–2 scenarios back**: never
-   used during iteration, run once at the end (kata 5). If a transcript
-   or session sparked the skill, mine it for scenario material. See
-   `references/pressure-testing.md` for scenario and criteria design.
+   to `~/.limitless/dojo/<repo-slug>/<skill>/<skill>-scenarios.md`** —
+   and during kata 2–6, append every subagent prompt VERBATIM as
+   actually sent, plus each run's result line. Dojo artifacts are
+   skill-owned runtime output: keep them under `~/.limitless/dojo/` by
+   default so target repos do not fill with raw training debris. Curated
+   docs/examples may be copied into the repo only when the user asks.
+   **Hold 1–2 scenarios back**: never used during iteration, run once at
+   the end (kata 5). If a transcript or session sparked the skill, mine
+   it for scenario material. See `references/pressure-testing.md` for
+   scenario and criteria design.
 
 2. **Baseline (RED).** Before writing anything: fresh subagents run the
    training scenarios *without* the skill. Score the criteria, document
@@ -97,11 +99,12 @@ adversarial variants (time pressure, sunk cost, authority pressure).
 7. **Package & record.** Plugin layout, manifest/README updates, reload,
    smoke-invoke. **Preserve the run outputs**: copy every test
    workspace (baselines, pressure, holdouts) into
-   `docs/dojo/<skill>-runs/<run-name>/` with a short README table —
-   the produced files ARE the readable evidence. Leak-check anything
-   copied from scratch space before it enters the repo. Then write the
-   **dojo record** to `docs/dojo/<skill>-record.md`, linking the
-   scenarios file and the runs dir:
+   `~/.limitless/dojo/<repo-slug>/<skill>/<skill>-runs/<run-name>/`
+   with a short README table — the produced files ARE the readable
+   evidence. Leak-check anything copied from scratch space before it
+   enters the long-lived dojo folder. Then write the **dojo record** to
+   `~/.limitless/dojo/<repo-slug>/<skill>/<skill>-record.md`, linking
+   the scenarios file and the runs dir:
    baseline findings, loopholes closed, rejected fixes, graduation
    result, trigger score, known limitations. Every skill carries its belt
    rank. See `references/packaging.md` for the checklist and template.

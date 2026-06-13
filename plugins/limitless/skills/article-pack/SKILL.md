@@ -277,7 +277,7 @@ Note: AskUserQuestion only supports 4 options max, so present in batches:
 Question: "Where should I save the article pack?"
 Header: "Location"
 Options:
-- [Suggest sensible default based on context]
+- Default: ~/.limitless/article-pack/{YYYY-MM-DD}-{Slug}/
 - Let me specify a path
 - Current directory
 ```
@@ -307,7 +307,7 @@ First, display the full configuration summary:
 
 **Images:** Will be decided after confirmation (OpenRouter detected / skill assessment)
 
-**Output:** /path/to/output/{YYYY-MM-DD}-{Slug}/
+**Output:** ~/.limitless/article-pack/{YYYY-MM-DD}-{Slug}/
 ```
 
 Then use `AskUserQuestion` for explicit confirmation:
@@ -337,8 +337,11 @@ Options:
 
 `index.html` is always a **container shell** (app shell with nav bar + iframe) — not the article itself. The primary article lives in its own file. Just open `index.html` in any browser to navigate the entire pack.
 
+Default location:
+`~/.limitless/article-pack/{YYYY-MM-DD}-{Slug}/`
+
 ```
-{output-directory}/{YYYY-MM-DD}-{Slug}/
+~/.limitless/article-pack/{YYYY-MM-DD}-{Slug}/
 ├── assets/                                    # Generated images
 │   ├── 01-{description}.png
 │   ├── 02-{description}.png
@@ -976,7 +979,7 @@ Example approaches:
 - index.html (app shell with nav bar + iframe, keyboard nav, loading spinner)
 
 ### Output Location
-/path/to/2024-11-29-Article-Title/
+~/.limitless/article-pack/2024-11-29-Article-Title/
 
 ### Next Steps
 - [ ] Open index.html to review the full pack

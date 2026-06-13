@@ -128,12 +128,13 @@ the reference. This is the quality path for prompt-obedience maximalists.
 
 ### 5. Emit the package
 
-Create `suno_<slug>/` in the current working directory — `<slug>` is the
-track name, lowercased, spaces to underscores, ASCII only (e.g. "Sodium
-Lights" → `suno_sodium_lights/`). Default file set:
+Create `~/.limitless/suno-pack/suno_<slug>/` by default — `<slug>` is
+the track name, lowercased, spaces to underscores, ASCII only (e.g.
+"Sodium Lights" → `suno_sodium_lights/`). Write elsewhere only when the
+user explicitly chooses a path. Default file set:
 
 ```
-suno_<slug>/
+~/.limitless/suno-pack/suno_<slug>/
 ├── concept.md
 ├── lyrics_v5.5.md
 ├── no_lyrics_v5.5.md
@@ -156,10 +157,10 @@ pre-rolled picks with re-roll menus, never generic madlib fills.
 Executed packs accumulate `audio/` and `runs/`.
 
 Then present a compact summary: track name, premise line, file list, and the
-recommended pipeline order, ending with the handoff line: the pack is
-paper until the user says so — "say 'make it real' to render it
-(credits, I'll confirm cost first), or pick a lane from experiments.md /
-'give me experiment N'". Offer variations (different genre lens,
+output path, recommended pipeline order, ending with the handoff line:
+the pack is paper until the user says so — "say 'make it real' to render
+it (credits, I'll confirm cost first), or pick a lane from experiments.md
+/ 'give me experiment N'". Offer variations (different genre lens,
 language, vocal swap) as a follow-up, don't generate them unasked.
 
 ## Make It Real — Executing a Pack
