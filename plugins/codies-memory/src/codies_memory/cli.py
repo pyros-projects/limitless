@@ -320,10 +320,12 @@ def cmd_list(args: argparse.Namespace) -> None:
     scope = args.scope
 
     if scope == "global":
+        if getattr(args, "general", False):
+            print("Error: --general can only be used with --scope project.", file=sys.stderr)
+            sys.exit(1)
         vault = global_vault
     else:
-        working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
-        vault = resolve_project_vault(global_vault, working_dir)
+        vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
         if vault is None:
             print(f"Error: no project vault found for {working_dir}", file=sys.stderr)
             sys.exit(1)
@@ -390,8 +392,7 @@ def cmd_status(args: argparse.Namespace) -> None:
     agent = _resolve_agent(args)
     global_vault = resolve_global_vault(agent)
 
-    working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
-    project_vault = resolve_project_vault(global_vault, working_dir)
+    project_vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
 
     if project_vault is None:
         print(f"Global vault: {global_vault}")
@@ -616,6 +617,12 @@ def main() -> None:
         default=None,
         help="Project working directory (default: cwd).",
     )
+    status_parser.add_argument(
+        "--general",
+        action="store_true",
+        default=False,
+        help="Read the reserved _general project vault instead of resolving from the working directory.",
+    )
     status_parser.set_defaults(func=cmd_status)
 
     # --- capture ---
@@ -760,6 +767,12 @@ def main() -> None:
         dest="working_dir",
         default=None,
         help="Working directory (defaults to cwd).",
+    )
+    list_parser.add_argument(
+        "--general",
+        action="store_true",
+        default=False,
+        help="List records from the reserved _general project vault instead of resolving from the working directory.",
     )
     list_parser.set_defaults(func=cmd_list)
 

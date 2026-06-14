@@ -432,6 +432,40 @@ class TestCmdStatus:
         assert "Project vault: none" in out
         assert "init --type project" in out
 
+    def test_status_general_flag_reads_general_inbox(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_capture(argparse.Namespace(
+            agent="claude",
+            content="General inbox item",
+            source="test",
+            gate="allow",
+            short="General inbox item",
+            working_dir=None,
+        ))
+        capsys.readouterr()
+
+        cmd_status(argparse.Namespace(
+            agent="claude",
+            all=True,
+            working_dir=None,
+            general=True,
+        ))
+
+        out = capsys.readouterr().out
+        assert "Project vault:" in out
+        assert "/_general" in out
+        assert "Active: 1" in out
+        assert "General inbox item" in out
+
 
 # ---------------------------------------------------------------------------
 # Shared vault setup helper
@@ -1001,6 +1035,68 @@ class TestCmdList:
 
         out = capsys.readouterr().out
         assert "DL-" in out
+
+    def test_cmd_list_general_flag_reads_general_sessions(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="session",
+            title="General session",
+            body="Session body in _general.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short="General session",
+            working_dir=None,
+        ))
+        capsys.readouterr()
+
+        cmd_list(argparse.Namespace(
+            agent="claude",
+            type="sessions",
+            scope="project",
+            status=None,
+            trust=None,
+            format="table",
+            working_dir=None,
+            general=True,
+        ))
+
+        out = capsys.readouterr().out
+        assert "General session" in out
+
+    def test_cmd_list_general_conflicts_with_global_scope(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        capsys.readouterr()
+
+        with pytest.raises(SystemExit):
+            cmd_list(argparse.Namespace(
+                agent="claude",
+                type="reflections",
+                scope="global",
+                status=None,
+                trust=None,
+                format="table",
+                working_dir=None,
+                general=True,
+            ))
+
+        err = capsys.readouterr().err
+        assert "--general can only be used with --scope project" in err
 
 
 # ---------------------------------------------------------------------------
