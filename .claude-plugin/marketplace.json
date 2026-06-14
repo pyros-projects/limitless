@@ -27,7 +27,7 @@
     {
       "name": "codies-memory",
       "source": "./plugins/codies-memory",
-      "description": "Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, and CLI write commands. Requires uv sync setup."
+      "description": "Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, CLI write commands, and explicit _general read mode for vault-less notes. Requires uv sync setup."
     }
   ]
 }

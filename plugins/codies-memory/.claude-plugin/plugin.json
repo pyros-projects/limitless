@@ -1,7 +1,7 @@
 {
   "name": "codies-memory",
-  "version": "1.2.1",
-  "description": "File-based two-tier memory system for AI agents. Agent-namespaced vaults with promotion pipelines, trust levels, and CLI write commands. Gives any agent persistent memory across sessions.",
+  "version": "1.2.2",
+  "description": "File-based two-tier memory system for AI agents. Agent-namespaced vaults with promotion pipelines, trust levels, CLI write commands, and explicit _general read mode for vault-less notes. Gives any agent persistent memory across sessions.",
   "author": {
     "name": "Pyro"
   },

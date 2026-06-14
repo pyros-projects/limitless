@@ -27,7 +27,7 @@ A curated Claude Code plugin marketplace with high-leverage skills designed to u
 | [**limitless**](plugins/limitless/) | 8 | Article generation, research, surface-first prototyping, privacy-respecting web search, Suno music packs with real rendering + experiment lanes, collective-brain search across social/GitHub/web/papers with saved sweep configs (hivemind), verified skill authoring (dojo), and persistent constrained review with recipes + review chains for self-contained planning docs (James). |
 | [**after-hours**](plugins/after-hours/) | 7 | Calm, high-taste product intelligence: identity, subtraction, naming, coherence, and first-contact honesty. |
 | [**pyro-kit**](plugins/pyro-kit/) | 17 | Complete 7-phase creative lifecycle: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting. |
-| [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, and CLI write commands. Requires `uv sync` setup — see INSTALL.md. |
+| [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, CLI write commands, and explicit `_general` read mode for vault-less notes. Requires `uv sync` setup — see INSTALL.md. |
 
 ---
 
