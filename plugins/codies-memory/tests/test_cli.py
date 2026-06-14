@@ -142,6 +142,86 @@ class TestCmdBoot:
         assert "Global Packet" in captured.out
         assert "no project vault found" in captured.err
 
+    def test_boot_general_flag_loads_general_project(self, tmp_path, monkeypatch, capsys):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="session",
+            title="General closeout",
+            body="This is a session stored in the general project.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short="General closeout",
+            working_dir=None,
+        ))
+        capsys.readouterr()
+
+        cmd_boot(argparse.Namespace(
+            agent="claude",
+            branch="main",
+            budget=4000,
+            working_dir=None,
+            general=True,
+        ))
+
+        captured = capsys.readouterr()
+        assert "no project vault found" not in captured.err
+        assert "Using reserved _general project vault" in captured.err
+        assert "## Global Daily Log" in captured.out
+        assert "General closeout (_general)" in captured.out
+
+    def test_normal_vaultless_boot_after_general_write_does_not_load_general_project(
+        self, tmp_path, monkeypatch, capsys
+    ):
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        unrelated = tmp_path / "no-project"
+        unrelated.mkdir()
+        monkeypatch.chdir(unrelated)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude",
+            type="session",
+            title="General-only body guard",
+            body="This body must not appear during normal vaultless boot.",
+            body_file=None,
+            scope="project",
+            trust="working",
+            field=None,
+            short="General-only body guard",
+            working_dir=None,
+        ))
+        capsys.readouterr()
+
+        cmd_boot(argparse.Namespace(
+            agent="claude",
+            branch="main",
+            budget=4000,
+            working_dir=None,
+            general=False,
+        ))
+
+        captured = capsys.readouterr()
+        assert "no project vault found" in captured.err
+        assert "## Global Daily Log" in captured.out
+        assert "General-only body guard (_general)" in captured.out
+        assert "This body must not appear during normal vaultless boot." not in captured.out
+
     def test_boot_with_project(self, tmp_path, monkeypatch, capsys):
         """Boot with a project vault produces both packets."""
         fake_home = tmp_path / "home"

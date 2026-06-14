@@ -67,6 +67,26 @@ def _resolve_project_vault(
     return global_vault, project_vault
 
 
+def _resolve_project_vault_for_read(
+    args: argparse.Namespace,
+    global_vault: Path,
+) -> tuple[Path | None, Path]:
+    """Resolve project context for read commands.
+
+    Normal reads use the working directory. Explicit ``--general`` reads use
+    the reserved catch-all project vault and create it if an older global vault
+    does not have it yet.
+    """
+    working_dir = (
+        Path(args.working_dir).resolve()
+        if getattr(args, "working_dir", None)
+        else Path.cwd()
+    )
+    if getattr(args, "general", False):
+        return ensure_general_project_vault(global_vault), working_dir
+    return resolve_project_vault(global_vault, working_dir), working_dir
+
+
 def _format_usage_line(name: str, stats: dict) -> str:
     """Format one boot-budget line; flag slices at 90%+ of capacity."""
     used = stats["used"]
@@ -148,11 +168,12 @@ def cmd_boot(args: argparse.Namespace) -> None:
     agent = _resolve_agent(args)
     global_vault = resolve_global_vault(agent)
 
-    working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
-    project_vault = resolve_project_vault(global_vault, working_dir)
+    project_vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
 
     if project_vault is None:
         print("Warning: no project vault found; global-only boot.", file=sys.stderr)
+    elif getattr(args, "general", False):
+        print("Using reserved _general project vault.", file=sys.stderr)
 
     # Rebuild warm summaries so boot never serves stale derived artifacts.
     write_warm_artifacts(global_vault, project_vault=project_vault)
@@ -567,6 +588,12 @@ def main() -> None:
         dest="working_dir",
         default=None,
         help="Project working directory (default: cwd).",
+    )
+    boot_parser.add_argument(
+        "--general",
+        action="store_true",
+        default=False,
+        help="Load the reserved _general project vault instead of resolving from the working directory.",
     )
     boot_parser.set_defaults(func=cmd_boot)
 
