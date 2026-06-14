@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Curated Claude Code plugins by Pyro \u2014 research, prototyping, publishing, creative lifecycle, and persistent agent memory.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "homepage": "https://github.com/pyros-projects/limitless"
   },
   "plugins": [
     {
       "name": "limitless",
       "source": "./plugins/limitless",
-      "description": "Pyro's curated skill pack: article-pack, Codies Research, Surface-First Development, SearXNG, Suno Pack (authoring, rendering, experiment lanes, saga-synced journals), Hivemind (collective-brain search: social + GitHub + web + papers, pivot chains, saved sweep configs), Dojo (verified skill authoring), and James (persistent constrained review with recipes and review chains for self-contained planning docs)."
+      "description": "Pyro's curated skill pack: article-pack, Codies Research, Surface-First Development, SearXNG, Suno Pack (authoring, lyric beat-map craft, inspiration audits, rendering, experiment lanes, saga-synced journals), Hivemind (collective-brain search: social + GitHub + web + papers, pivot chains, saved sweep configs), Dojo (verified skill authoring), and James (persistent constrained review with recipes and review chains for self-contained planning docs)."
     },
     {
       "name": "after-hours",

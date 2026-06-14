@@ -20,12 +20,14 @@ writing any prompt — it carries the shared truth: field limits, the canonical
 metatag taxonomy, per-version behavior and slider settings, the cover
 workflow, and the instrumental anti-vocal-hallucination kit. When v4.5 is
 among the requested versions, ALSO read `references/suno-v4-5-prompting.md`
-for the v4.5-specific prompt styles and lore. Before ANY execution work
-(rendering, covers, library, experiments), read `references/pp-cli.md` —
-the verified command truth; for experiment mode additionally
-`references/experiment-lanes.md`. Do not prompt from memory and do not
-improvise CLI flags — model behavior, limits, and the CLI surface are all
-version-specific.
+for the v4.5-specific prompt styles and lore. Before authoring vocal lyrics,
+rewriting lyrics, or diagnosing lyric density/flow problems, read
+`references/lyrics-rhythm-craft.md` — it is the lyric beat-map and performance
+notation contract. Before ANY execution work (rendering, covers, library,
+experiments), read `references/pp-cli.md` — the verified command truth; for
+experiment mode additionally `references/experiment-lanes.md`. Do not prompt
+from memory and do not improvise CLI flags — model behavior, limits, lyrics,
+and the CLI surface are all version-specific.
 
 ## When to Use
 
@@ -88,6 +90,46 @@ specific enough that two readers would imagine the same track:
   to budget per version, post-production flags (de-esser, mastering), and
   any niche-genre workaround that applies.
 
+### 2.5 Write the lyric beat map (vocal/lyrics work only)
+
+For any vocal track, lyric rewrite, or "lyrics for Suno" request, read
+`references/lyrics-rhythm-craft.md` before writing the `## Lyrics` block.
+Suno lyrics are not poems; they are a **beat map plus performance score**.
+
+- Pick a cadence-reference artist by emotional intent before writing. Search
+  for real lyric/form examples when tools are available; do not go from vibes
+  and do not copy lyrics. Extract structure, line lengths, repetition/chant
+  patterns, open-vowel releases, build devices (anaphora, call-and-response,
+  wordless climb), negative space, and delivery/layering ideas, then write
+  original lyrics with that rhythmic DNA.
+- After every vocal `## Lyrics` block, add `## Lyric Form Inspiration` naming
+  the artist(s) and song title(s) used for form/cadence inspiration, plus the
+  specific structural observations borrowed. This is provenance for the human
+  and a test surface for the skill; do not paste or quote lyric lines. If no
+  search/source was available, say so instead of inventing references.
+- Build the section skeleton first (`[Intro]`, `[Verse 1]`, `[Chorus]`,
+  `[Bridge]`, `[Final Chorus]`, `[Outro]`, `[End]`).
+- Keep corresponding lines roughly within the ±2 syllable rule. Use short
+  verses, tighter chantable choruses, and open-vowel release lines where the
+  voice should soar.
+- Preserve the source motifs, but spend one image per slot. Translate dense
+  concepts, jargon, and stacked metaphors into singable concrete phrases.
+- Use `[ ]` only for structure, arrangement, delivery, and section cues; use
+  `( )` only for sung backing layers, echoes, ad-libs, or harmonies. Never put
+  production instructions in parentheses.
+- Add performance notation while writing: sparse backing echoes in `( )`,
+  power words in CAPS (1-3 per section), sustained vowels with `...`, `~`, or
+  repeated letters, and chorus layering cues such as
+  `[Chorus | stacked harmonies]` when the concept supports them.
+- Verify line shape before claiming the lyric is fixed. If the lyric cadence
+  implies a faster pulse, chant percussion, 6/8 feel, or a different BPM,
+  update the style prompt too so music and words agree.
+
+Pure instrumental/no-lyrics files do **not** use this as lyric authoring:
+their Lyrics block remains structure tags only, starting with `[Instrumental]`
+and ending with `[End]`, with no verses, sung words, ad-libs, or
+parenthetical backing vocals.
+
 ### 3. Derive the prompts (one vocal + one instrumental file per version)
 
 Every line of every prompt must trace back to the concept. Follow the
@@ -110,10 +152,10 @@ prompt is version-specific, never copy-pasted across versions:**
   All variants ≤500 chars, genre first; repeat the genre name for
   stubborn niches.
 
-The lyrics field ports across versions unchanged (same metatag system).
-Write it as a lyricist, not a rhyme machine: concrete images from the
-concept's motif list, singable line lengths, a chorus that earns repetition,
-and one turn — a line or image that recontextualizes the song near the end.
+The vocal lyrics field ports across versions unchanged (same metatag system)
+and must come from Step 2.5: concrete motifs, sparse density, verified line
+shape, deliberate performance notation, a chorus that earns repetition, and
+one turn — a line or image that recontextualizes the song near the end.
 
 Every prompt file carries a **Settings block** with the per-version slider
 defaults from the reference (adjusted by the concept's Generation Notes).
@@ -229,8 +271,9 @@ render the lineage tree, update the running credit total.
 ## Artifact Specs
 
 Field order in every prompt file mirrors Suno's Custom Mode UI top-to-bottom,
-so the user can paste while scrolling: **Settings → Lyrics → Style →
-Exclude → Title.**
+so the user can paste while scrolling: **Settings → Lyrics → Lyric Form
+Inspiration (read-only provenance; do not paste to Suno) → Style → Exclude →
+Title.**
 
 ### `concept.md`
 
@@ -278,6 +321,11 @@ Exclude → Title.**
 [Outro: <wind-down descriptors>]
 [End]
 ```
+
+## Lyric Form Inspiration
+| Artist | Song(s) studied | What was studied | How it shaped these lyrics |
+|---|---|---|---|
+| <artist> | <song title(s)> | <line length, repetition, open vowels, build, negative space, layering> | <specific original-form decision; no copied lyric lines> |
 
 ## Style of Music
 ```text
