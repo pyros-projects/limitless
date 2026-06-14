@@ -120,7 +120,7 @@ loud before fan-out** — it goes in the manifest and the brief's
 coverage section, like adaptations do:
 
 ```
-discover → pivot(entities) → enrich | react | verify
+discover → pivot(entities) → enrich | react | verify | analyze
 ```
 
 - **discover** — open-ended search in ONE venue; output = entity list
@@ -130,6 +130,8 @@ discover → pivot(entities) → enrich | react | verify
 - **react** — social/web search per entity — sentiment, friction, takes
 - **verify** — chase claims to primary sources (papers venue is its
   natural home; subsumes `--verify`)
+- **analyze** — shallow-clone selected repositories, inspect the code
+  read-only, and write repo-specific analysis files in the frame root
 
 The ask defines the order. "Trending repos and what is X saying" =
 gh discovers → social reacts. "Most mentioned repos on reddit" =
@@ -142,6 +144,13 @@ Rules:
 - **An entity ask is incomplete without its enrich stage.** "Which
   repos are mentioned most" answered without per-entity gh metadata
   (stars, recency, what it is) is half an answer.
+- **Repo/source/code analysis is an explicit stage.** If the user asks
+  to "analyze/analyse repos", "analyze code", "inspect source", "check
+  the repo", or similar, shallow-clone the interesting repos found by
+  the sweep, perform a read-only static code/source review, and write a
+  dedicated `<repo>_analysis.md` for each analyzed repo in the frame's
+  main directory. If repo names collide, prefix the owner. Mention these
+  files in the brief and manifest.
 - Inferred chains: 2 stages typical, 3 max — more is a research
   project, not a sweep. Config-authored chains are exempt.
 - Material ambiguity about the intended chain → ask the user.
@@ -238,7 +247,9 @@ radar) writes a frame:
 ```
 ~/.limitless/hivemind/<topic-slug>/<date>/
   raw/          recon + fan-out JSON (venue-prefixed), deep-read JSON,
-                throwaway parsers
+                throwaway parsers, shallow repo clones for analysis
+  <repo>_analysis.md
+                repo/source analysis files when the ask requested them
   manifest.md   query, mode, window, venues, file list, adaptations,
                 NAMED triage rejections with reasons — plus, for
                 chained sweeps: the chain (e.g. `chain: gh → x,reddit`)

@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Curated Claude Code plugins by Pyro \u2014 research, prototyping, publishing, creative lifecycle, and persistent agent memory.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "homepage": "https://github.com/pyros-projects/limitless"
   },
   "plugins": [

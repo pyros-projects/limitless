@@ -21,9 +21,15 @@ the user.
 **Discover — trending by creation window (primary):**
 
 ```bash
-gh search repos --created=">2026-05-29" --sort=stars --limit 10 --json fullName,stargazersCount,createdAt,description -- "<topic terms>"
+gh search repos --match=readme,description --created=">2026-05-29" --sort=stars --limit 20 --json fullName,stargazersCount,createdAt,pushedAt,description,url -- "<topic terms>"
 gh search repos --topic=<topic-slug> --created=">-3 weeks" --sort=stars --limit 10
 ```
+
+Default vague repo discovery should include README plus description
+matching. GitHub repo search otherwise behaves like an incantation
+machine: name/description/topics can miss repos whose real contract
+lives in the README. Topic-filtered search is still useful as a
+supplement, not a replacement.
 
 This finds *new* breakouts. For "trending" in the velocity sense
 (established repos gaining now), the API has no endpoint; the public
@@ -51,8 +57,46 @@ answer.
 **Landscape check** (who else is in this space):
 
 ```bash
-gh search repos --sort=stars --limit 15 --json fullName,stargazersCount,pushedAt -- "<concept>"
+gh search repos --match=readme,description --sort=stars --limit 20 --json fullName,stargazersCount,pushedAt,description,url -- "<concept>"
 ```
+
+**Analyze — read-only code/source check:**
+
+When the user asks to analyze/analyse repos, code, or source, this is an
+explicit GitHub stage, not optional enrichment. After discovery and
+relevance triage, shallow-clone the interesting repos (default 3-5;
+fewer if the sweep is thin) under the frame's raw directory, inspect
+them read-only, and write one analysis file per repo in the frame root.
+
+```bash
+mkdir -p "$FRAME/raw/repos"
+git clone --depth 1 --single-branch https://github.com/<owner>/<repo>.git "$FRAME/raw/repos/<owner>__<repo>"
+git -C "$FRAME/raw/repos/<owner>__<repo>" rev-parse --short HEAD
+```
+
+Analysis is static and read-only by default: read files, use `rg`,
+inspect manifests and source layout, but do not install dependencies,
+run project code, run package scripts, or modify the clone unless the
+user explicitly asks. If a check would execute untrusted code, name it
+as a skipped dynamic check.
+
+Write the result to:
+
+```bash
+$FRAME/<repo>_analysis.md
+```
+
+If repo names collide, prefix the owner:
+
+```bash
+$FRAME/<owner>_<repo>_analysis.md
+```
+
+Each analysis file should include: repo URL, cloned commit, files/dirs
+read, what the project appears to do, architecture/source-layout notes,
+evidence-backed findings, skipped checks, and limitations. Mention the
+analysis files in `manifest.md` and the brief's freshness/coverage
+section.
 
 ## Engagement proxies & triage
 
@@ -83,6 +127,9 @@ an entity name as a search term in another venue:
 
 - `gh search repos` `--created` accepts both `">2026-05-29"` and
   relative `">-3 weeks"` forms.
+- `gh search repos --match=readme,description` is the CLI form of
+  forcing README/description matching; prefer it for vague concept or
+  architecture discovery.
 - `--json` field names differ between `gh search repos`
   (`stargazersCount`) and `gh repo view` (`stargazerCount`). Check with
   `--json` and no fields to list what's available.
