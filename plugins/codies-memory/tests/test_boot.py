@@ -200,6 +200,37 @@ class TestAssembleBoot:
         assert "Daily item 01" not in result["project_packet"]
         assert f"Daily item {DAILY_LOG_TAIL_LINES + 5:02d}" in result["project_packet"]
 
+    def test_global_only_boot_includes_daily_log_tail(
+        self, tmp_global_vault: Path
+    ) -> None:
+        sessions = tmp_global_vault / "sessions"
+        sessions.mkdir()
+        lines = [
+            f"- [[SS-20260614-{i:04d}]] Daily item {i:02d} (project-{i:02d})"
+            for i in range(1, DAILY_LOG_TAIL_LINES + 4)
+        ]
+        (sessions / "2026-06-14.md").write_text(
+            "---\n"
+            "id: DL-20260614\n"
+            "title: '2026-06-14'\n"
+            "type: daily-log\n"
+            "status: active\n"
+            "trust: canonical\n"
+            "scope: global\n"
+            "created: '2026-06-14T12:00:00+02:00'\n"
+            "updated: '2026-06-14T12:00:00+02:00'\n"
+            "---\n\n"
+            + "\n".join(lines)
+            + "\n"
+        )
+
+        result = assemble_boot(tmp_global_vault, project_vault=None, budget=4000)
+
+        assert result["project_packet"].startswith("## Global Daily Log")
+        assert "Daily item 01" not in result["project_packet"]
+        assert f"Daily item {DAILY_LOG_TAIL_LINES + 3:02d}" in result["project_packet"]
+        assert "branch_session" in result["usage"]["layers"]
+
 
 # ---------------------------------------------------------------------------
 # TestBootCache

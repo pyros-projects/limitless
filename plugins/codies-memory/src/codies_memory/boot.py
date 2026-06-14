@@ -211,11 +211,18 @@ def assemble_boot(
     separator = "\n\n---\n\n"
     global_layers = [l for l in [layer1, layer2] if l]
 
-    # Global-only boot: no project context
+    # Global-only boot: no project context, but keep cross-project awareness.
     if project_vault is None:
+        daily_log_lines = _read_latest_daily_log_tail_lines(global_vault)
+        daily_log_raw = _format_daily_log(daily_log_lines)
+        layer5 = _fit_recent_activity("", daily_log_lines, budgets["branch_session"])
+        usage_layers["branch_session"] = {
+            "used": estimate_tokens(daily_log_raw),
+            "budget": budgets["branch_session"],
+        }
         return {
             "global_packet": separator.join(global_layers),
-            "project_packet": "",
+            "project_packet": layer5,
             "usage": _usage(usage_layers),
         }
 
