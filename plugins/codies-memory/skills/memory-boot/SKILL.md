@@ -120,12 +120,17 @@ This assembles your boot packet from:
 
 Read the output — it contains your identity, project context, and recent state.
 
-Boot does not fall back to `_general`. If no project vault resolves, it reports a
-global-only boot. When a project vault does resolve, the recent activity layer
-also includes `Global Daily Log`, a cross-project tail from
-`~/.memory/<agent>/sessions/YYYY-MM-DD.md`. If the resolved project vault is
-`_general`, tell the user records are landing in the default catch-all project,
-not a named project.
+Boot does not implicitly fall back to `_general`. If no project vault resolves,
+normal boot reports a global-only boot and still includes the latest
+`Global Daily Log` tail for cross-project awareness. To intentionally load the
+reserved catch-all project, use:
+
+```bash
+codies-memory boot --agent <name> --general
+```
+
+If the resolved project vault is `_general`, tell the user records are landing
+in the default catch-all project, not a named project.
 
 The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
 
@@ -158,7 +163,10 @@ Check `qmd status` and the collection timestamps / last updated values before tr
 codies-memory status --agent <name>
 ```
 
-Handle any aging or stale items before starting work. If no project vault exists yet, this will say so — that's fine for global-only boot. `status` also does not fall back to `_general`.
+Handle any aging or stale items before starting work. If no project vault exists
+yet, this will say so — that's fine for global-only boot. `status` also does
+not implicitly fall back to `_general`; run `codies-memory status --agent <name> --general --all`
+when you intentionally want the catch-all project.
 
 ## Available Commands
 
@@ -177,6 +185,9 @@ codies-memory create lesson --title "Title" --short "one-line summary" --body "C
 # List records
 codies-memory list inbox --agent <name>
 codies-memory list lessons --scope global --agent <name>
+
+# Intentionally boot the catch-all project for vault-less notes
+codies-memory boot --agent <name> --general
 
 # Check inbox status (active, aging, stale counts)
 codies-memory status --agent <name>

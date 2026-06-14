@@ -138,8 +138,10 @@ When you run a command with `--working-dir`, the system finds the project vault 
 3. **Git remote** — matches the git remote URL
 
 For `create` and `capture`, if no project vault resolves, the command falls back
-to `_general`. Other commands (`status`, `boot`, `validate`, `list`) report
-which vault resolved, or None, without fallback.
+to `_general` so the memory is not lost. Read commands do not implicitly load
+`_general`: use `--general` with `boot`, `status`, or `list` when you want the
+reserved catch-all project. `validate` still requires a normally resolved
+project vault.
 
 ### Recall Workflow
 
@@ -171,6 +173,17 @@ keep explicit `-term` negation in `lex` queries only.
 ## Commands
 
 All commands require `--agent <name>`. Use `--working-dir /path` to target a project without being in its directory.
+
+```bash
+# Boot vault-less notes intentionally
+codies-memory boot --agent <name> --general
+
+# Inspect the catch-all inbox
+codies-memory status --agent <name> --general --all
+
+# List catch-all sessions
+codies-memory list sessions --agent <name> --general
+```
 
 ### Boot (every session start)
 

@@ -37,6 +37,14 @@ If you don't specify a type, the system infers from content:
 - **Project types** (thread, decision, lesson, session, inbox) -> project vault (auto-resolved from cwd)
 - If no project vault resolves, `capture` and project-scoped `create` fall back to the reserved `_general` project vault. Other commands do not silently fall back.
 
+To read those catch-all records later, use explicit read mode:
+
+```bash
+codies-memory boot --agent <name> --general
+codies-memory status --agent <name> --general --all
+codies-memory list sessions --agent <name> --general
+```
+
 ## Trust Assignment
 
 - Operator-confirmed or captured from proven source -> `confirmed`
