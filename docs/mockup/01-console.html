@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mneme — console // limitless</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04080a;
+  --bg-deep:#020405;
+  --panel:#06100f;
+  --panel-2:#04100d;
+  --line:#13392f;
+  --line-bright:#1f6b4f;
+  --ink:#46e08a;
+  --ink-bright:#c8ffd9;
+  --ink-soft:#79cfa0;
+  --dim:#1c5a40;
+  --dim-2:#0e3325;
+  --amber:#ffb347;
+  --red:#e06666;
+  --blue:#5fb8d6;
+  --violet:#b58aff;
+  --glow:0 0 6px rgba(70,224,138,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg-deep)}
+body{
+  background:
+    radial-gradient(ellipse 130% 90% at 50% -10%, rgba(31,107,79,.10), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13.5px;line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding:0 0 60px;
+}
+/* CRT scanlines */
+body::before{
+  content:"";position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.20) 0px, rgba(0,0,0,.20) 1px, transparent 1px, transparent 3px);
+  mix-blend-mode:multiply;
+}
+/* curvature vignette */
+body::after{
+  content:"";position:fixed;inset:0;z-index:9001;pointer-events:none;
+  background:radial-gradient(ellipse 96% 94% at 50% 50%, transparent 56%, rgba(0,0,0,.30) 84%, rgba(0,0,0,.66) 100%);
+}
+::selection{background:var(--ink);color:var(--bg-deep)}
+a{color:var(--ink-soft);text-decoration:none;border-bottom:1px dotted var(--dim)}
+a:hover{color:var(--ink-bright);border-bottom-color:var(--ink);text-shadow:var(--glow)}
+
+.wrap{max-width:1320px;margin:0 auto;padding:26px 30px 0}
+
+/* ---------- top bar ---------- */
+.topnav{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:18px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+  padding-bottom:14px;margin-bottom:22px;
+}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand .logo{
+  font-family:'VT323',monospace;font-size:42px;line-height:1;
+  color:var(--ink-bright);text-shadow:var(--glow), 0 0 24px rgba(70,224,138,.20);
+  letter-spacing:1px;
+}
+.brand .logo .dot{color:var(--amber)}
+.brand .tag{font-size:12px;color:var(--dim);letter-spacing:3px;text-transform:uppercase}
+.topnav .jump{display:flex;gap:8px;flex-wrap:wrap}
+.topnav .jump a{
+  font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  border:1px solid var(--line);padding:5px 11px;border-radius:2px;color:var(--ink-soft);
+}
+.topnav .jump a:hover{border-color:var(--ink);color:var(--ink-bright);text-shadow:var(--glow)}
+.topnav .jump a.back{border-color:var(--amber);color:var(--amber)}
+
+/* ---------- thesis strip ---------- */
+.thesis{
+  border:1px dashed var(--line-bright);
+  background:linear-gradient(180deg, rgba(31,107,79,.10), transparent);
+  padding:14px 18px;margin-bottom:24px;border-radius:3px;
+  font-size:12.5px;color:var(--ink-soft);
+}
+.thesis b{color:var(--amber);letter-spacing:1px}
+.thesis .pos{color:var(--ink-bright)}
+
+/* ---------- command prompt line ---------- */
+.promptline{
+  display:flex;align-items:center;gap:10px;
+  font-size:13.5px;color:var(--ink-soft);
+  border:1px solid var(--line);background:var(--panel);
+  padding:11px 16px;border-radius:3px;margin-bottom:20px;
+  flex-wrap:wrap;
+}
+.promptline .ps{color:var(--amber)}
+.promptline .cmd{color:var(--ink-bright)}
+.promptline .cursor{
+  display:inline-block;width:9px;height:16px;background:var(--ink);
+  vertical-align:-3px;animation:blink 1.1s steps(1) infinite;
+  box-shadow:var(--glow);
+}
+@keyframes blink{50%{opacity:0}}
+.promptline .right{margin-left:auto;display:flex;gap:16px;color:var(--dim);font-size:11.5px}
+.promptline .right b{color:var(--ink-soft)}
+
+/* ---------- grid ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.col-full{grid-column:1 / -1}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+
+/* ---------- panel ---------- */
+.panel{
+  border:1px solid var(--line);background:var(--panel);
+  border-radius:3px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(0,0,0,.4), inset 0 0 60px rgba(0,0,0,.25);
+}
+.panel .ph{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(180deg, rgba(31,107,79,.18), rgba(6,16,15,0));
+  border-bottom:1px solid var(--line);
+  padding:8px 14px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.panel .ph .sigil{color:var(--amber)}
+.panel .ph .right{margin-left:auto;color:var(--dim);text-transform:none;letter-spacing:0;font-size:11px}
+.panel .pb{padding:14px 16px}
+.panel.tight .pb{padding:12px 14px}
+
+/* ---------- status rows ---------- */
+.stat{display:flex;gap:12px;padding:5px 0;border-bottom:1px dotted var(--dim-2);font-size:13px}
+.stat:last-child{border-bottom:0}
+.stat .led{width:11px;height:11px;border-radius:50%;flex:none;margin-top:4px;box-shadow:0 0 6px currentColor}
+.led.ok{background:var(--ink);color:var(--ink)}
+.led.warn{background:var(--amber);color:var(--amber)}
+.led.bad{background:var(--red);color:var(--red)}
+.stat .k{color:var(--ink-soft);min-width:108px}
+.stat .v{color:var(--ink-bright)}
+.stat .v .sub{color:var(--dim);font-size:11.5px}
+.stat .v.warn{color:var(--amber)}
+.stat .note{margin-left:auto;color:var(--dim);font-size:11px;text-align:right}
+
+/* ---------- layer legend ---------- */
+.layers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.layer{
+  border:1px solid var(--line);background:var(--panel-2);
+  padding:10px 12px;border-radius:2px;
+}
+.layer .nm{display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.5px}
+.layer .dot{width:9px;height:9px;border-radius:1px;flex:none}
+.layer.l-mem .dot{background:var(--blue)}
+.layer.l-comp .dot{background:var(--ink)}
+.layer.l-ins .dot{background:var(--violet)}
+.layer.l-cap .dot{background:var(--amber)}
+.layer .ct{font-family:'VT323',monospace;font-size:30px;color:var(--ink-bright);line-height:1;margin-top:6px;text-shadow:var(--glow)}
+.layer .desc{color:var(--dim);font-size:11px;margin-top:2px}
+
+/* ---------- ask results ---------- */
+.ask .hit{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:11px 0;border-bottom:1px dashed var(--dim-2)}
+.ask .hit:last-child{border-bottom:0}
+.ask .layer-tag{
+  font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
+  text-align:center;padding:3px 4px;border-radius:2px;border:1px solid;font-weight:600;
+  height:max-content;
+}
+.layer-tag.compiled{color:var(--ink);border-color:var(--ink);background:rgba(70,224,138,.08)}
+.layer-tag.insight{color:var(--violet);border-color:var(--violet);background:rgba(181,138,255,.08)}
+.layer-tag.memory{color:var(--blue);border-color:var(--blue);background:rgba(95,184,214,.08)}
+.layer-tag.capture{color:var(--amber);border-color:var(--amber);background:rgba(255,179,71,.08)}
+.ask .ref{color:var(--ink-soft);font-size:12px;word-break:break-all}
+.ask .ref .trust{color:var(--dim);font-size:11px}
+.ask .snip{color:var(--ink-bright);font-size:12.5px;margin-top:3px}
+.ask .vintage{color:var(--amber);font-size:11px;margin-top:2px}
+.ask .footer{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);color:var(--dim);font-size:11.5px}
+.ask .footer b{color:var(--ink-soft)}
+
+/* ---------- boot packet ---------- */
+.boot{font-size:12.5px}
+.boot .sect{color:var(--amber);letter-spacing:1px;margin:12px 0 6px;font-size:11.5px}
+.boot .sect:first-child{margin-top:0}
+.boot .row{display:flex;gap:10px;padding:2px 0;color:var(--ink-soft)}
+.boot .row .id{color:var(--ink-bright);min-width:118px}
+.boot .ep{padding:2px 0}
+.boot .ep .d{color:var(--dim);min-width:96px;display:inline-block}
+.budget{margin-top:12px}
+.bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--dim);padding:2px 0}
+.bar .lbl{min-width:90px;color:var(--ink-soft)}
+.bar .track{flex:1;height:7px;background:var(--dim-2);border:1px solid var(--line);border-radius:1px;overflow:hidden}
+.bar .fill{height:100%;background:linear-gradient(90deg,var(--ink),var(--ink-bright));box-shadow:var(--glow)}
+.bar .fill.id{background:var(--amber)}
+.bar .pct{min-width:64px;text-align:right;color:var(--ink-bright)}
+
+/* ---------- dossier card ---------- */
+.dossier-card{
+  border:1px solid var(--line-bright);background:var(--panel-2);
+  border-radius:3px;padding:16px 18px;
+  box-shadow:inset 0 0 50px rgba(31,107,79,.08);
+}
+.dossier-card .ed{
+  float:right;font-family:'VT323',monospace;font-size:34px;line-height:1;
+  color:var(--amber);text-shadow:0 0 10px rgba(255,179,71,.3);
+}
+.dossier-card h3{font-size:15px;color:var(--ink-bright);letter-spacing:.5px;font-weight:600}
+.dossier-card .meta{color:var(--dim);font-size:11.5px;margin:4px 0 10px}
+.dossier-card .premise{
+  border-left:2px solid var(--amber);padding:6px 12px;
+  background:rgba(255,179,71,.05);color:var(--ink-soft);font-style:italic;font-size:12.5px;
+  margin-bottom:12px;
+}
+.dossier-card .answer{color:var(--ink-bright);font-size:13px}
+.dossier-card .cite{margin-top:12px;color:var(--dim);font-size:11px;border-top:1px dotted var(--dim-2);padding-top:8px}
+.dossier-card .cite b{color:var(--ink-soft)}
+.dossier-card .edhist{margin-top:10px;color:var(--dim);font-size:11px}
+.dossier-card .edhist .cur{color:var(--ink)}
+
+/* footer */
+.foot{text-align:center;color:var(--dim);font-size:11px;margin-top:34px;letter-spacing:.5px}
+.foot b{color:var(--ink-soft)}
+
+/* boot-in animation */
+.fade{animation:fade .5s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+.d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}.d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.40s}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav fade d1">
+    <div class="brand">
+      <div class="logo">mneme<span class="dot">::</span>console</div>
+      <div class="tag">cli is the product · phase 1</div>
+    </div>
+    <div class="jump">
+      <a class="back" href="00-index.html">◂ 3 paradigms</a>
+      <a href="#status">status</a>
+      <a href="#ask">ask</a>
+      <a href="#boot">boot</a>
+      <a href="02-dossier.html">dossier ▸</a>
+      <a href="03-atlas.html">atlas ▸</a>
+    </div>
+  </nav>
+
+  <div class="thesis fade d2">
+    <b>POSITION ▸</b> <span class="pos">Agrees with the spec.</span>
+    "no custom UI" is not a limitation — it's the point. Mneme is an
+    agent-operated substrate with a CLI/MCP surface, and the terminal <i>is</i>
+    the product. The job here is to render <code>status</code> / <code>ask</code> /
+    <code>boot</code> so well that no one misses a GUI. (Obsidian stays the
+    long-form reader.)
+  </div>
+
+  <div class="promptline fade d2">
+    <span class="ps">mneme@limitless</span><span>:</span><span style="color:var(--blue)">~/.mneme/vault</span><span>$</span>
+    <span class="cmd">mneme status</span>
+    <span class="cursor"></span>
+    <span class="right">
+      <span>v0.1.0</span>
+      <span>2 hosts ●</span>
+      <span>qmd ● 6m</span>
+      <span>main · <b>clean</b></span>
+    </span>
+  </div>
+
+  <div class="grid">
+
+    <!-- STATUS -->
+    <section class="panel col-full fade d3" id="status">
+      <div class="ph"><span class="sigil">▰</span> mneme status
+        <span class="right">$ mneme status → vault health, one screen</span>
+      </div>
+      <div class="pb" style="display:grid;grid-template-columns:1.1fr 1fr;gap:26px">
+        <div>
+          <div class="stat"><span class="led ok"></span><span class="k">vault</span><span class="v">~/.mneme/vault</span><span class="note">inside git · clean · 7e73851</span></div>
+          <div class="stat"><span class="led ok"></span><span class="k">project</span><span class="v">limitless</span><span class="note">cwd-resolved</span></div>
+          <div class="stat"><span class="led ok"></span><span class="k">bindings</span><span class="v">codex <span class="sub">(primary, stdio mcp)</span> · claude <span class="sub">(stdio mcp)</span></span><span class="note">since 2026-05-02</span></div>
+          <div class="stat"><span class="led ok"></span><span class="k">qmd sidecar</span><span class="v">~/.mneme/bin/qmd mcp</span><span class="note">index fresh · 6m</span></div>
+          <div class="stat"><span class="led ok"></span><span class="k">hooks</span><span class="v">SessionStart · UserPromptSubmit · Stop</span><span class="note">both hosts</span></div>
+          <div class="stat"><span class="led warn"></span><span class="k">stale dossier</span><span class="v warn">compiled/host-binding/ed-2</span><span class="note">cited DC-0003 changed 2d ago</span></div>
+          <div class="stat"><span class="led warn"></span><span class="k">inbox</span><span class="v warn">2 aging</span><span class="note">IN-…a1f3 (9d) · IN-…7c02 (2d)</span></div>
+          <div class="stat"><span class="led warn"></span><span class="k">tension</span><span class="v warn">TS-0007 (cross-agent)</span><span class="note">confidence: annot vs rank</span></div>
+          <div class="stat"><span class="led ok"></span><span class="k">pub-graph</span><span class="v">1 head / series · supersedes resolve · no cycles</span><span class="note">doctor ✓</span></div>
+        </div>
+        <div>
+          <div style="color:var(--dim);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">layers</div>
+          <div class="layers">
+            <div class="layer l-mem"><div class="nm"><span class="dot"></span>memory/</div><div class="ct">2·1·4·1</div><div class="desc">operational · agents·proj·lessons·dec</div></div>
+            <div class="layer l-comp"><div class="nm"><span class="dot"></span>compiled/</div><div class="ct">3·6</div><div class="desc">dossiers · topics·editions</div></div>
+            <div class="layer l-ins"><div class="nm"><span class="dot"></span>insights/</div><div class="ct">214</div><div class="desc">atomic claims · 8 in tension</div></div>
+            <div class="layer l-cap"><div class="nm"><span class="dot"></span>captures/</div><div class="ct">31</div><div class="desc">raw · pre-distill</div></div>
+          </div>
+          <div style="margin-top:14px;padding:10px 12px;border:1px solid var(--line);background:var(--panel-2);border-radius:2px;font-size:11.5px;color:var(--dim)">
+            <span style="color:var(--amber)">$</span> mneme doctor → treats retrieval as a product subsystem:<br>
+            model avail · index freshness · transport health · binding health · fallback · layer-rank applied
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ASK -->
+    <section class="panel fade d4" id="ask">
+      <div class="ph"><span class="sigil">▰</span> mneme ask
+        <span class="right">layer-priority merge owned by mneme</span>
+      </div>
+      <div class="pb ask">
+        <div style="color:var(--dim);font-size:11.5px;margin-bottom:8px">
+          <span class="ps" style="color:var(--amber)">$</span> mneme ask <span style="color:var(--ink-bright)">"how does mneme handle retrieval?"</span>
+        </div>
+        <div class="hit">
+          <span class="layer-tag compiled">compiled</span>
+          <div>
+            <div class="ref">compiled/retrieval-packaging/ed-3.md <span class="trust">· trust: canonical · 2026-04-26</span></div>
+            <div class="snip">Mneme ships QMD as a managed sidecar; <b>mneme ask owns layer-priority ranking</b> so compiled can outrank insights…</div>
+            <div class="vintage">⚠ vintage: pre-dates TS-0007 (confidence-vs-trust) → see Contradictions</div>
+          </div>
+        </div>
+        <div class="hit">
+          <span class="layer-tag insight">insight</span>
+          <div>
+            <div class="ref">insights/hybrid-search-with-rrf-outperforms… <span class="trust">· confidence: confirmed</span></div>
+            <div class="snip">Hybrid lex+vec+hyde + RRF beats pure keyword or semantic for agent memory.</div>
+          </div>
+        </div>
+        <div class="hit">
+          <span class="layer-tag memory">memory</span>
+          <div>
+            <div class="ref">memory/projects/limitless/lessons/LS-0003.md <span class="trust">· trust: working · 2026-06-10</span></div>
+            <div class="snip">Index-document boot pattern beats inlining everything in boot packets.</div>
+          </div>
+        </div>
+        <div class="hit">
+          <span class="layer-tag capture">capture</span>
+          <div>
+            <div class="ref">captures/2026-04-26-adr-001-retrieval-packaging.md <span class="trust">· raw · pre-distill</span></div>
+            <div class="snip" style="color:var(--dim)">(deeper excavation only)</div>
+          </div>
+        </div>
+        <div class="footer">
+          → answer grounded in <b>1 dossier (current)</b> + <b>1 confirmed insight</b> + <b>1 working lesson</b><br>
+          → 4 records · ~612 / 8192 tokens · <b>--trace</b> for retrieval arms · <b>--include-sources</b> for chunks
+        </div>
+      </div>
+    </section>
+
+    <!-- BOOT PACKET -->
+    <section class="panel fade d5" id="boot">
+      <div class="ph"><span class="sigil">▰</span> boot packet
+        <span class="right">SessionStart · limitless</span>
+      </div>
+      <div class="pb boot">
+        <div class="sect">IDENTITY  <span style="color:var(--dim)">(boot-exempt, unlimited)</span></div>
+        <div class="row"><span class="id">self/Claude/</span> name · model · rules · memory-map</div>
+
+        <div class="sect">PROJECT ▸ limitless</div>
+        <div class="row"><span class="id">decision</span> DC-0001 boot contract: identity is limitless, budget 12000</div>
+        <div class="row"><span class="id">thread</span> TH-0001 our own ideation pipeline as a skill</div>
+        <div class="row"><span class="id">thread</span> TH-0002 CE multi-persona review as SFD gate</div>
+        <div class="row"><span class="id">thread</span> TH-0003 cc-ecosystem steal-now patterns</div>
+        <div class="row"><span class="id">lesson</span> LS-0004 engine-pattern: Pyro's billing-bounded window</div>
+
+        <div class="sect">EPISODES  <span style="color:var(--dim)">(delta digest, last 3)</span></div>
+        <div class="ep"><span class="d">2026-06-13</span> Hivemind 0.11, wd-briefing v2, name-gated lookup</div>
+        <div class="ep"><span class="d">2026-06-12</span> Memory architecture consolidated ("clunky Mneme")</div>
+        <div class="ep"><span class="d">2026-06-12</span> suno-pack 0.8.0→0.10.2: dojo, Pins on Mars</div>
+
+        <div class="budget">
+          <div class="sect">BOOT BUDGET  <span style="color:var(--dim)">12000</span></div>
+          <div class="bar"><span class="lbl">identity</span><span class="track"><span class="fill id" style="width:100%"></span></span><span class="pct">∞</span></div>
+          <div class="bar"><span class="lbl">project</span><span class="track"><span class="fill" style="width:38%"></span></span><span class="pct">38%</span></div>
+          <div class="bar"><span class="lbl">procedural</span><span class="track"><span class="fill" style="width:51%"></span></span><span class="pct">51%</span></div>
+          <div class="bar"><span class="lbl">episodic</span><span class="track"><span class="fill" style="width:22%"></span></span><span class="pct">22%</span></div>
+          <div class="bar"><span class="lbl">total</span><span class="track"><span class="fill" style="width:41%"></span></span><span class="pct"><b>41%</b></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOSSIER CARD -->
+    <section class="panel col-full fade d6">
+      <div class="ph"><span class="sigil">▰</span> mneme compile retrieval-packaging
+        <span class="right">dossier · rendered as card here · full publication → 02-dossier</span>
+      </div>
+      <div class="pb">
+        <div class="dossier-card">
+          <div class="ed">ed·3</div>
+          <h3>Retrieval Packaging</h3>
+          <div class="meta">series retrieval-packaging · supersedes ed-2 (2026-04-24) · generated 2026-04-26 · current head · currency confirmed 2026-06-14</div>
+          <div class="premise">
+            This compile assumes the question is "how does Mneme package retrieval <b>as part of the product</b>," not "which embedding model is best."
+          </div>
+          <div class="answer">
+            Ship <b>QMD as a managed sidecar.</b> <code>mneme init</code> installs <code>~/.mneme/bin/qmd</code>;
+            <code>mneme bind &lt;host&gt;</code> writes the host MCP entry to launch the same managed
+            <code>qmd mcp</code> over stdio. <b>QMD provides candidate retrieval; Mneme owns product-ranking.</b>
+            Collection filters are not layer priority — <code>mneme ask</code> merges with explicit layer weights.
+          </div>
+          <div class="cite">
+            <b>cites</b> [1] adr/ADR-001-retrieval-packaging · [2] decisions-resolved :: Retrieval · [3] spec :: Retrieval Semantics · [4] insights/hybrid-search-with-rrf… <span style="color:var(--red)">⚠ contradiction TS-0007 unresolved</span>
+          </div>
+          <div class="edhist">
+            <span class="cur">ed-3</span> 2026-04-26 current · added layer-priority invariant + stdio-first &nbsp;·&nbsp;
+            <span>ed-2</span> 2026-04-24 superseded · ranked collections as layer priority (the bug) &nbsp;·&nbsp;
+            <span>ed-1</span> 2026-04-23 superseded · initial "bundle QMD" framing
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:11.5px;color:var(--dim)">
+          <span style="color:var(--amber)">$</span> mneme compile retrieval-packaging --budget high &nbsp;▸&nbsp; <a href="02-dossier.html">open full dossier ▸</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot">
+    <b>mneme</b> · one install · one vault · one retrieval surface · one command model · files are the truth<br>
+    MOCKUP DATA · grounded in <code>docs/brainstorm/mneme/</code> · console paradigm = "no custom UI, rendered well"
+  </div>
+
+</div>
+</body>
+</html>

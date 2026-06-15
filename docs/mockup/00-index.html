@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mneme — 3 design paradigms (mockups)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15171a;
+  --bg-2:#1c1f23;
+  --ink:#ece7dc;
+  --ink-soft:#a8a499;
+  --ink-faint:#6c685f;
+  --rule:#2c3036;
+  --amber:#d9a441;
+  --ox:#c8675f;
+  --teal:#6fb3ad;
+  --green:#7fb069;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{
+  background:
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(217,164,65,.06), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter Tight',sans-serif;
+  font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.025 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.wrap{position:relative;z-index:4;max-width:1080px;margin:0 auto;padding:56px 32px 80px}
+
+.kicker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--amber)}
+h1{
+  font-family:'Fraunces',serif;font-weight:600;font-size:clamp(40px,6.5vw,72px);
+  line-height:1.02;letter-spacing:-1.5px;margin:14px 0 0;color:var(--ink);
+}
+h1 em{font-style:italic;font-weight:500;color:var(--amber)}
+.lede{font-family:'Fraunces',serif;font-size:21px;line-height:1.5;color:var(--ink-soft);max-width:54ch;margin:22px 0 0;font-weight:400}
+
+/* the tension block */
+.tension{
+  margin:40px 0;border:1px solid var(--rule);border-left:3px solid var(--ox);
+  background:var(--bg-2);border-radius:4px;padding:24px 28px;
+}
+.tension .lab{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ox);margin-bottom:10px}
+.tension blockquote{font-family:'Fraunces',serif;font-style:italic;font-size:19px;line-height:1.5;color:var(--ink);border:none;padding:0;margin:0}
+.tension blockquote b{font-style:normal;color:var(--amber);font-weight:600}
+.tension p{margin-top:14px;color:var(--ink-soft);font-size:14.5px}
+.tension p b{color:var(--ink)}
+
+/* shared data note */
+.shared{display:flex;gap:18px;align-items:flex-start;background:var(--bg-2);border:1px solid var(--rule);border-radius:4px;padding:16px 20px;margin:22px 0 48px}
+.shared .ico{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:20px;line-height:1;flex:none}
+.shared .t{font-size:13.5px;color:var(--ink-soft)}
+.shared .t b{color:var(--ink)}
+.shared .t a{color:var(--teal);border-bottom:1px dotted var(--ink-faint)}
+
+/* exhibits */
+.exhibits-lab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:18px}
+
+.exhibits{display:grid;grid-template-columns:1fr;gap:18px}
+.exhibit{
+  display:grid;grid-template-columns:200px 1fr auto;gap:26px;align-items:center;
+  border:1px solid var(--rule);background:var(--bg-2);border-radius:6px;
+  padding:24px 26px;text-decoration:none;color:inherit;
+  transition:border-color .2s, transform .2s, box-shadow .2s;
+}
+.exhibit:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.exhibit .preview{
+  height:120px;border-radius:4px;position:relative;overflow:hidden;
+  border:1px solid var(--rule);
+}
+.exhibit .num{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--ink-faint)}
+.exhibit h2{font-family:'Fraunces',serif;font-weight:600;font-size:30px;letter-spacing:-.5px;margin:4px 0 8px;color:var(--ink)}
+.exhibit .pos{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:inline-block;padding:3px 9px;border-radius:3px;border:1px solid}
+.exhibit .pos.agree{color:var(--green);border-color:var(--green)}
+.exhibit .pos.find{color:var(--amber);border-color:var(--amber)}
+.exhibit .pos.disagree{color:var(--ox);border-color:var(--ox)}
+.exhibit .thesis{color:var(--ink-soft);font-size:14.5px;line-height:1.55;max-width:54ch}
+.exhibit .thesis b{color:var(--ink)}
+.exhibit .go{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-faint);white-space:nowrap}
+.exhibit:hover .go{color:var(--amber)}
+
+/* preview swatches per paradigm */
+.pv-console{background:#04080a}
+.pv-console::before{content:"";position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg, rgba(0,0,0,.3) 0 1px, transparent 1px 3px),
+  radial-gradient(circle at 30% 40%, rgba(70,224,138,.25), transparent 50%);}
+.pv-console::after{content:"$ mneme status";position:absolute;left:14px;top:14px;font-family:'IBM Plex Mono',monospace;color:#46e08a;font-size:12px;text-shadow:0 0 6px rgba(70,224,138,.5)}
+
+.pv-dossier{background:#f3ece0}
+.pv-dossier::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(90deg, transparent 70%, rgba(122,46,42,.12));
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence baseFrequency='0.9'/><feColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.09 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
+.pv-dossier::after{content:"ed·3";position:absolute;right:14px;top:10px;font-family:'Fraunces',serif;font-style:italic;font-weight:900;font-size:34px;color:#7a2e2a;line-height:1}
+
+.pv-atlas{background:#efe7d6}
+.pv-atlas svg{position:absolute;inset:0;width:100%;height:100%}
+
+/* how to read */
+.howto{margin-top:54px;border-top:1px solid var(--rule);padding-top:30px}
+.howto h3{font-family:'Fraunces',serif;font-weight:600;font-size:22px;margin-bottom:14px;color:var(--ink)}
+.howto ol{padding-left:20px;color:var(--ink-soft);font-size:14.5px;line-height:1.7}
+.howto ol li{margin-bottom:6px}
+.howto ol li b{color:var(--ink)}
+.howto ol li code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--bg-2);padding:1px 6px;border-radius:3px;color:var(--amber)}
+
+.foot{margin-top:54px;padding-top:24px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint)}
+.foot a{color:var(--ink-soft);border-bottom:1px dotted var(--ink-faint)}
+.foot a:hover{color:var(--amber)}
+
+@media(max-width:760px){.exhibit{grid-template-columns:1fr;gap:16px}.exhibit .preview{height:80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">design mockups · clickdummies · 2026-06-14</div>
+  <h1>What could <em>Mneme</em> look like?</h1>
+  <p class="lede">Three paradigms for the same product — one local-first memory and knowledge substrate for AI agents. Same vault data, three completely different positions on a single line in the spec.</p>
+
+  <div class="tension">
+    <div class="lab">▸ the line these mockups exist to test</div>
+    <blockquote>"<b>MVP Non-Goals:</b> no custom UI … Obsidian can be the human viewer. Mneme is the agent-operated substrate and CLI/MCP surface."</blockquote>
+    <p>That's a strong, deliberate stance — and the right default for v0.1. But "no UI" deserves to be pressure-tested, not assumed. Each paradigm below argues one position on that line: <b>agree, find-the-surface-anyway, or disagree on purpose.</b> Walk all three and decide where the line actually sits.</p>
+  </div>
+
+  <div class="shared">
+    <div class="ico">▤</div>
+    <div class="t">All three render <b>the exact same vault snapshot</b> — so you compare aesthetics and information architecture, not content. The flagship dossier even dogfoods Mneme's own ADR-001. &nbsp;<a href="_shared-data.md">view shared dataset ▸</a></div>
+  </div>
+
+  <div class="exhibits-lab">three paradigms — click to enter</div>
+
+  <div class="exhibits">
+
+    <a class="exhibit" href="01-console.html">
+      <div class="preview pv-console"></div>
+      <div>
+        <div class="num">01 — paradigm</div>
+        <h2>Console</h2>
+        <span class="pos agree">agrees with the spec</span>
+        <div class="thesis"><b>The CLI is the product.</b> Render <code style="font-family:'JetBrains Mono',monospace;color:var(--green)">status</code> / <code style="font-family:'JetBrains Mono',monospace;color:var(--green)">ask</code> / <code style="font-family:'JetBrains Mono',monospace;color:var(--green)">boot</code> so well that no one misses a GUI. "No custom UI" isn't a limitation here — it's a virtue, executed with care.</div>
+      </div>
+      <div class="go">open ▸</div>
+    </a>
+
+    <a class="exhibit" href="02-dossier.html">
+      <div class="preview pv-dossier"></div>
+      <div>
+        <div class="num">02 — paradigm</div>
+        <h2>Dossier</h2>
+        <span class="pos find">finds the surface anyway</span>
+        <div class="thesis"><b>The compiled layer is a publication.</b> Immutable, dated, cited — and publications get designed whether or not there's an app. This is the one human surface the spec already commits to; here it's treated as the flagship artifact.</div>
+      </div>
+      <div class="go">open ▸</div>
+    </a>
+
+    <a class="exhibit" href="03-atlas.html">
+      <div class="preview pv-atlas">
+        <svg viewBox="0 0 200 120" preserveAspectRatio="xMidYMid slice">
+          <rect width="200" height="120" fill="#efe7d6"/>
+          <path d="M10 90 Q40 70 70 85 Q90 100 70 110 Q40 115 10 105 Z" fill="#dfe4d8" stroke="#2a6b66" stroke-width="1"/>
+          <path d="M90 30 Q120 20 150 40 Q170 65 150 85 Q120 90 95 75 Z" fill="#e4ddc9" stroke="#1d4d49" stroke-width="1.2"/>
+          <path d="M120 55 L135 30 L150 55 Z" fill="#1d4d49"/>
+          <path d="M60 60 L75 80" stroke="#2a6b66" stroke-width="1.2" fill="none"/>
+          <path d="M150 55 Q160 50 170 45" stroke="#1d4d49" stroke-width="1.2" fill="none"/>
+          <path d="M30 40 Q50 30 70 45" fill="none" stroke="#c4a06a" stroke-width="0.7" opacity=".7"/>
+          <path d="M40 50 Q55 42 65 52" fill="none" stroke="#c4a06a" stroke-width="0.6" opacity=".5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="num">03 — paradigm</div>
+        <h2>Atlas</h2>
+        <span class="pos disagree">disagrees on purpose</span>
+        <div class="thesis"><b>What if Mneme shipped its own viewer?</b> A topographic survey of the memory terrain — four regions by layer, elevation by trust, routes for promotion. Pressure-tests ceding the human surface to Obsidian. What's gained, what must now be maintained.</div>
+      </div>
+      <div class="go">open ▸</div>
+    </a>
+
+  </div>
+
+  <div class="howto">
+    <h3>How to read these</h3>
+    <ol>
+      <li><b>Don't evaluate implementation.</b> These are self-contained HTML clickdummies with mock data — no backend, no live vault. Judge the <i>position</i> and the <i>information architecture</i>, not the stack.</li>
+      <li><b>Compare the same moment across all three.</b> Every paradigm renders <code>mneme status</code>, the dossier on <code>retrieval-packaging</code>, a <code>mneme ask</code> result, and the boot budget. The differences are the point.</li>
+      <li><b>Notice what each one refuses.</b> Console refuses chrome. Dossier refuses interactivity. Atlas refuses the spec's "no viewer" call. Restraint is a feature here.</li>
+      <li><b>Then pick the line.</b> The real question isn't "which is prettiest" — it's: <i>does Mneme stay CLI-only (Console), design only the dossier (Dossier), or build a viewer (Atlas)?</i></li>
+    </ol>
+  </div>
+
+  <div class="foot">
+    <span>grounded in <a href="../brainstorm/mneme/">docs/brainstorm/mneme/</a> · MOCKUP DATA</span>
+    <span><a href="../brainstorm/mneme/2026-04-23-mneme-product-spec.md">the spec ▸</a> &nbsp;·&nbsp; <a href="../brainstorm/hivemind-mockups/">sister mockups (hivemind) ▸</a></span>
+  </div>
+
+</div>
+</body>
+</html>

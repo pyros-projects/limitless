@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mneme — Atlas // terrain survey of the vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500;0,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#efe7d6;
+  --paper-2:#e6dcc6;
+  --paper-deep:#dccfb3;
+  --ink:#1d2a2e;        /* chart ink */
+  --ink-soft:#4a5557;
+  --ink-faint:#8a8472;
+  --sepia:#9a6b3a;      /* contour / land */
+  --sepia-soft:#c4a06a;
+  --teal:#2a6b66;       /* cartographic accent */
+  --teal-deep:#1d4d49;
+  --water:#9fb8b6;
+  --sand:#cdb279;
+  --red:#a33b2a;        /* danger / tension */
+  --green:#4a6b3a;
+  --line:#c4b89a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#16201f}
+body{
+  background:
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,.10)),
+    var(--paper);
+  color:var(--ink);
+  font-family:'Bricolage Grotesque',sans-serif;
+  font-size:14px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+/* paper texture + grid ticks */
+body::before{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.4;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.07 0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode:multiply;
+}
+::selection{background:var(--teal);color:var(--paper)}
+a{color:var(--teal-deep);text-decoration:none;border-bottom:1px solid var(--sepia-soft)}
+a:hover{color:var(--red);border-bottom-color:var(--red)}
+
+.wrap{position:relative;z-index:4;max-width:1320px;margin:0 auto;padding:0 28px 60px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  border-bottom:2px solid var(--ink);padding:30px 0 16px;margin-bottom:0;
+}
+.masthead .left .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--sepia)}
+.masthead h1{
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(40px,6vw,64px);
+  line-height:.95;letter-spacing:-1.5px;color:var(--ink);margin-top:6px;
+}
+.masthead h1 em{font-family:'Newsreader',serif;font-style:italic;font-weight:500;color:var(--teal-deep);letter-spacing:0}
+.masthead .sub{font-family:'Newsreader',serif;font-style:italic;font-size:18px;color:var(--ink-soft);margin-top:8px;max-width:48ch}
+.masthead .right{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);line-height:1.8}
+.masthead .right b{color:var(--ink)}
+.masthead .right .stamp{display:inline-block;border:2px solid var(--teal-deep);color:var(--teal-deep);font-family:'Bricolage Grotesque',sans-serif;font-weight:700;letter-spacing:1.5px;font-size:11px;padding:5px 11px;border-radius:2px;transform:rotate(2deg);margin-top:8px}
+
+/* nav */
+.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);padding:11px 0;margin-bottom:22px}
+.nav a{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.5px;border:1px solid var(--line);padding:5px 11px;border-radius:2px;color:var(--ink-soft)}
+.nav a:hover{border-color:var(--teal-deep);color:var(--teal-deep)}
+.nav a.back{border-color:var(--sepia);color:var(--sepia)}
+.nav .sp{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint)}
+.nav .sp b{color:var(--teal-deep)}
+
+/* thesis */
+.thesis{border:1px solid var(--sepia);border-left-width:5px;background:rgba(154,107,58,.06);padding:14px 18px;margin-bottom:24px;border-radius:2px;font-size:13.5px;color:var(--ink-soft)}
+.thesis b{color:var(--red);letter-spacing:.5px}
+.thesis .pos{color:var(--ink);font-weight:600}
+
+/* ---------- layout ---------- */
+.main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:22px}
+@media(max-width:980px){.main{grid-template-columns:1fr}}
+
+/* ---------- map card ---------- */
+.mapcard{border:1px solid var(--ink);background:var(--paper);border-radius:3px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.1)}
+.mapcard .mh{display:flex;align-items:center;justify-content:space-between;background:var(--paper-2);border-bottom:1px solid var(--line);padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft)}
+.mapcard .mh b{color:var(--ink)}
+.mapcard .mh .coord{color:var(--sepia)}
+.mapsvg{display:block;width:100%;height:auto;background:
+  linear-gradient(180deg, rgba(159,184,182,.18), rgba(159,184,182,0) 40%),
+  var(--paper);
+}
+
+/* legend */
+.legend{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px;border-top:1px solid var(--line);background:var(--paper-2)}
+.lg{font-size:12px}
+.lg .sw{display:inline-block;width:18px;height:14px;border:1px solid var(--ink);vertical-align:middle;margin-right:7px;border-radius:1px}
+.lg .nm{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);font-weight:600;letter-spacing:.5px}
+.lg .ds{color:var(--ink-faint);font-size:10.5px;margin-top:2px;font-family:'Newsreader',serif;font-style:italic}
+
+/* elevation scale */
+.elev{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);background:var(--paper);font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft)}
+.elev .lab{color:var(--sepia);letter-spacing:1px;text-transform:uppercase}
+.elev .bar{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--water),var(--sepia-soft),var(--sepia),var(--teal-deep))}
+.elev .ticks{display:flex;justify-content:space-between;width:100%;margin-top:4px;color:var(--ink-faint)}
+.elev .wrap2{flex:1}
+
+/* ---------- right column panels ---------- */
+.panel{border:1px solid var(--ink);background:var(--paper);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.panel .ph{display:flex;align-items:center;justify-content:space-between;background:var(--paper-2);border-bottom:1px solid var(--line);padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft)}
+.panel .ph b{color:var(--ink)}
+.panel .ph .badge{font-size:10px;border:1px solid;padding:1px 6px;border-radius:2px;letter-spacing:1px}
+.panel .ph .badge.ok{border-color:var(--green);color:var(--green)}
+.panel .ph .badge.warn{border-color:var(--sepia);color:var(--sepia)}
+.panel .pb{padding:13px 15px}
+
+/* survey status rows */
+.srow{display:flex;align-items:center;gap:11px;padding:6px 0;border-bottom:1px dotted var(--line);font-size:13px}
+.srow:last-child{border-bottom:0}
+.srow .dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid var(--ink)}
+.srow .dot.ok{background:var(--green)}
+.srow .dot.warn{background:var(--sepia)}
+.srow .dot.bad{background:var(--red)}
+.srow .k{color:var(--ink-soft);min-width:96px;font-family:'JetBrains Mono',monospace;font-size:11.5px}
+.srow .v{color:var(--ink)}
+.srow .v .s{color:var(--ink-faint);font-size:11px}
+.srow .nt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);text-align:right}
+
+/* dossier rows */
+.drow{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px dotted var(--line);font-size:13px;align-items:center}
+.drow:last-child{border-bottom:0}
+.drow .t{font-family:'Newsreader',serif;font-weight:500;font-size:15px;color:var(--ink)}
+.drow .t .ed{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--sepia);margin-left:6px}
+.drow .m{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint)}
+.drow .st{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.5px;padding:3px 7px;border-radius:2px;border:1px solid;white-space:nowrap}
+.drow .st.cur{border-color:var(--green);color:var(--green);background:rgba(74,107,58,.06)}
+.drow .st.stale{border-color:var(--sepia);color:var(--sepia);background:rgba(154,107,58,.06)}
+.drow .st.cur.hi{border-color:var(--teal-deep);color:var(--teal-deep)}
+.drow .cite{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint);margin-top:2px}
+
+/* tension alert */
+.tension{border:1px solid var(--red);background:rgba(163,59,42,.05);border-radius:3px;padding:13px 15px;margin-bottom:18px}
+.tension .lab{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--red);font-weight:600;margin-bottom:6px}
+.tension .t{font-family:'Newsreader',serif;font-style:italic;font-size:15px;color:var(--ink);line-height:1.45}
+.tension .meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);margin-top:8px}
+
+/* expedition log */
+.log{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
+@media(max-width:760px){.log{grid-template-columns:1fr}}
+.log .panel{margin-bottom:0}
+.log .ep{padding:6px 0;border-bottom:1px dotted var(--line);font-size:12.5px}
+.log .ep:last-child{border-bottom:0}
+.log .ep .d{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sepia);display:block;margin-bottom:1px}
+.log .ep .x{color:var(--ink)}
+.log .stat-big{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;color:var(--teal-deep);line-height:1}
+.log .stat-big .u{font-size:14px;color:var(--ink-faint);font-weight:500}
+.log .stat-l{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+/* retrieval trace */
+.trace{font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.8;color:var(--ink-soft)}
+.trace .arm{display:flex;align-items:center;gap:9px}
+.trace .arm .n{color:var(--sepia);min-width:74px}
+.trace .arm .bar{flex:1;height:5px;background:var(--paper-deep);border-radius:3px;overflow:hidden}
+.trace .arm .bar i{display:block;height:100%;background:var(--teal)}
+.trace .arm .v{min-width:30px;text-align:right;color:var(--ink)}
+
+.foot{text-align:center;color:var(--ink-faint);font-family:'JetBrains Mono',monospace;font-size:10.5px;margin-top:34px;letter-spacing:.5px}
+.foot b{color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- masthead -->
+  <header class="masthead">
+    <div class="left">
+      <div class="eyebrow">mneme · terrain survey · sheet 01</div>
+      <h1>The <em>Atlas</em> of what you know</h1>
+      <div class="sub">One vault, surveyed as landscape. Four regions by layer, elevation by trust. The path between a raw capture and a canonical insight is a route you can read.</div>
+    </div>
+    <div class="right">
+      <div><b>survey of</b> ~/.mneme/vault</div>
+      <div><b>project</b> limitless</div>
+      <div><b>dated</b> 2026-06-14</div>
+      <div><b>scale</b> 1 : ∞</div>
+      <div class="stamp">phase 1 · surveyed</div>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <a class="back" href="00-index.html">◂ 3 paradigms</a>
+    <a href="01-console.html">console ▸</a>
+    <a href="02-dossier.html">dossier ▸</a>
+    <span class="sp">position: <b>disagrees with the spec on purpose</b></span>
+  </nav>
+
+  <div class="thesis">
+    <b>POSITION ▸</b> <span class="pos">Disagrees with the spec, deliberately.</span>
+    "Obsidian is the viewer" cedes Mneme's most legible surface to a generic
+    tool. What if Mneme shipped its own viewer — one that <i>understands the four
+    layers, the trust pipeline, and dossier editions</i> instead of treating every
+    file as an opaque note? This is the counterfactual: what's gained (a map that
+    reflects the substrate), what's risked (a UI Mneme now must maintain).
+  </div>
+
+  <div class="main">
+
+    <!-- ============ MAP ============ -->
+    <div class="mapcard">
+      <div class="mh">
+        <span><b>fig. 1</b> · the vault, as terrain</span>
+        <span class="coord">42.3°N · ~/.mneme/vault</span>
+      </div>
+
+      <svg class="mapsvg" viewBox="0 0 760 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Topographic map of the Mneme vault, four regions by layer">
+        <defs>
+          <!-- region patterns -->
+          <pattern id="p-captures" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="9" height="9" fill="#efe7d6"/>
+            <circle cx="2" cy="2" r="0.9" fill="#9a6b3a" opacity="0.5"/>
+          </pattern>
+          <pattern id="p-memory" width="11" height="11" patternUnits="userSpaceOnUse">
+            <rect width="11" height="11" fill="#dfe4d8"/>
+            <path d="M0 5.5 H11" stroke="#2a6b66" stroke-width="0.6" opacity="0.4"/>
+          </pattern>
+          <pattern id="p-compiled" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="10" height="10" fill="#e6dcc6"/>
+            <path d="M0 0 L10 10" stroke="#4a6b3a" stroke-width="0.7" opacity="0.45"/>
+          </pattern>
+          <pattern id="p-insights" width="8" height="8" patternUnits="userSpaceOnUse">
+            <rect width="8" height="8" fill="#e4ddc9"/>
+            <path d="M0 0 L8 8 M8 0 L0 8" stroke="#1d4d49" stroke-width="0.5" opacity="0.3"/>
+          </pattern>
+        </defs>
+
+        <!-- border frame ticks -->
+        <g stroke="#8a8472" stroke-width="0.7" opacity="0.6">
+          <g><line x1="20" y1="14" x2="20" y2="22"/><line x1="20" y1="14" x2="28" y2="14"/></g>
+          <g><line x1="740" y1="14" x2="740" y2="22"/><line x1="732" y1="14" x2="740" y2="14"/></g>
+          <g><line x1="20" y1="506" x2="20" y2="498"/><line x1="20" y1="506" x2="28" y2="506"/></g>
+          <g><line x1="740" y1="506" x2="740" y2="498"/><line x1="732" y1="506" x2="740" y2="506"/></g>
+        </g>
+        <!-- graticule ticks top -->
+        <g font-family="JetBrains Mono, monospace" font-size="8" fill="#8a8472">
+          <text x="20" y="11">0°</text><text x="200" y="11">30°E</text><text x="380" y="11">60°E</text><text x="560" y="11">90°E</text><text x="715" y="11">120°E</text>
+        </g>
+
+        <!-- =========== WATER / overall wash =========== -->
+        <rect x="20" y="20" width="720" height="480" fill="url(#p-captures)" opacity="0.35"/>
+
+        <!-- =========== CAPTURES (frontier, NW) =========== -->
+        <path d="M40 40 Q120 30 210 60 Q250 110 220 160 Q180 200 110 190 Q50 170 40 110 Z"
+              fill="url(#p-captures)" stroke="#9a6b3a" stroke-width="1.4"/>
+        <!-- contour lines for captures (raw, shallow) -->
+        <path d="M70 70 Q130 60 190 85 Q215 120 190 150" fill="none" stroke="#c4a06a" stroke-width="0.7" opacity="0.7"/>
+        <path d="M85 90 Q140 80 175 105" fill="none" stroke="#c4a06a" stroke-width="0.6" opacity="0.5"/>
+        <!-- scattered raw markers -->
+        <g fill="#9a6b3a">
+          <circle cx="90" cy="120" r="2.5"/><circle cx="135" cy="100" r="2.5"/><circle cx="160" cy="140" r="2.5"/>
+          <circle cx="110" cy="160" r="2.5"/><circle cx="180" cy="110" r="2.5"/><circle cx="65" cy="95" r="2.5"/>
+        </g>
+
+        <!-- =========== MEMORY (lowlands, SW) =========== -->
+        <path d="M40 250 Q90 230 180 245 Q260 270 300 330 Q310 410 240 460 Q150 490 70 450 Q30 390 40 250 Z"
+              fill="url(#p-memory)" stroke="#2a6b66" stroke-width="1.4"/>
+        <path d="M80 290 Q160 280 240 320 Q275 370 240 420" fill="none" stroke="#5a8f8a" stroke-width="0.8" opacity="0.6"/>
+        <path d="M110 320 Q180 310 230 340" fill="none" stroke="#5a8f8a" stroke-width="0.6" opacity="0.45"/>
+        <!-- memory markers (sessions/decisions/lessons) -->
+        <g>
+          <rect x="95" y="360" width="7" height="7" fill="#2a6b66"/>
+          <rect x="140" y="330" width="7" height="7" fill="#2a6b66"/>
+          <rect x="190" y="390" width="7" height="7" fill="#2a6b66"/>
+          <rect x="120" y="410" width="7" height="7" fill="#2a6b66"/>
+          <rect x="220" y="350" width="7" height="7" fill="#2a6b66"/>
+        </g>
+
+        <!-- =========== COMPILED (ridges, center) =========== -->
+        <path d="M300 110 Q380 90 470 120 Q540 160 545 230 Q535 290 470 300 Q380 310 320 270 Q280 200 300 110 Z"
+              fill="url(#p-compiled)" stroke="#4a6b3a" stroke-width="1.4"/>
+        <path d="M330 150 Q400 135 470 165 Q510 205 490 250" fill="none" stroke="#6b8a5a" stroke-width="0.8" opacity="0.6"/>
+        <path d="M350 175 Q410 165 460 190" fill="none" stroke="#6b8a5a" stroke-width="0.6" opacity="0.45"/>
+        <!-- dossier ridges (the publications) -->
+        <g font-family="Newsreader, serif" font-style="italic" font-size="11" fill="#1d2a2e">
+          <!-- flagship: retrieval-packaging (highest ridge) -->
+          <path d="M360 210 L400 150 L440 210 Z" fill="#4a6b3a" stroke="#1d2a2e" stroke-width="1.2"/>
+          <path d="M370 210 L400 165 L430 210" fill="none" stroke="#6b8a5a" stroke-width="0.7"/>
+          <text x="455" y="155">retrieval-packaging</text>
+          <text x="455" y="167" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#2a6b66">ed·3 · canonical ▲</text>
+
+          <!-- host-binding (stale) -->
+          <path d="M470 235 L495 200 L520 235 Z" fill="#cdb279" stroke="#9a6b3a" stroke-width="1.2" stroke-dasharray="2 2"/>
+          <text x="528" y="222" fill="#9a6b3a">host-binding</text>
+          <text x="528" y="233" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#9a6b3a">ed·2 · ◐ stale</text>
+
+          <!-- agent-memory-architecture -->
+          <path d="M330 250 L352 220 L374 250 Z" fill="#4a6b3a" stroke="#1d2a2e" stroke-width="1.2"/>
+          <text x="240" y="240" text-anchor="end">agent-memory-arch.</text>
+          <text x="240" y="252" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#2a6b66">ed·1 · current</text>
+        </g>
+
+        <!-- =========== INSIGHTS (highlands, NE — the KG) =========== -->
+        <path d="M470 40 Q580 30 680 70 Q730 130 720 210 Q690 280 600 280 Q510 270 480 210 Q450 120 470 40 Z"
+              fill="url(#p-insights)" stroke="#1d4d49" stroke-width="1.6"/>
+        <!-- dense contour (high elevation) -->
+        <path d="M500 80 Q590 75 660 110 Q695 165 670 215" fill="none" stroke="#3a6b66" stroke-width="0.8" opacity="0.6"/>
+        <path d="M520 105 Q595 100 645 130" fill="none" stroke="#3a6b66" stroke-width="0.7" opacity="0.5"/>
+        <path d="M540 130 Q600 128 630 150" fill="none" stroke="#3a6b66" stroke-width="0.6" opacity="0.4"/>
+        <!-- insight peaks: trust elevation (canonical = highest) -->
+        <g>
+          <path d="M555 150 L575 95 L595 150 Z" fill="#1d4d49" stroke="#1d2a2e" stroke-width="1.2"/>
+          <path d="M565 150 L575 110 L585 150" fill="none" stroke="#5a8f8a" stroke-width="0.6"/>
+          <text x="600" y="110" font-family="JetBrains Mono, monospace" font-size="8" fill="#1d4d49">RRF-beats-single ▲ canonical</text>
+
+          <path d="M615 175 L630 140 L645 175 Z" fill="#2a6b66" stroke="#1d2a2e" stroke-width="1"/>
+          <text x="650" y="160" font-family="JetBrains Mono, monospace" font-size="8" fill="#2a6b66">3-phase pipeline ▲ confirmed</text>
+
+          <path d="M640 220 L652 195 L664 220 Z" fill="#3a6b66" stroke="#1d2a2e" stroke-width="1"/>
+          <text x="670" y="212" font-family="JetBrains Mono, monospace" font-size="8" fill="#2a6b66">5-archetypes ▲ confirmed</text>
+        </g>
+
+        <!-- a contested insight (tension marker) -->
+        <g>
+          <path d="M500 230 L514 205 L528 230 Z" fill="#a33b2a" stroke="#7a2a1d" stroke-width="1.2" stroke-dasharray="3 2"/>
+          <text x="535" y="222" font-family="JetBrains Mono, monospace" font-size="8" fill="#a33b2a">TS-0007 ◆ contested</text>
+        </g>
+
+        <!-- =========== ROUTES (promotion paths A/B/C) =========== -->
+        <!-- Path A: capture -> memory -->
+        <path d="M160 175 Q150 220 150 300" fill="none" stroke="#9a6b3a" stroke-width="1.4" stroke-dasharray="1 4" opacity="0.7"/>
+        <text x="100" y="240" font-family="Newsreader, serif" font-style="italic" font-size="11" fill="#9a6b3a">path A · capture→memory</text>
+
+        <!-- Path B: memory+captures -> compiled -->
+        <path d="M250 330 Q300 300 360 230" fill="none" stroke="#2a6b66" stroke-width="1.6" marker-end="url(#arr)"/>
+        <path d="M200 170 Q300 150 360 200" fill="none" stroke="#2a6b66" stroke-width="1.4" stroke-dasharray="5 3" opacity="0.7"/>
+        <text x="285" y="345" font-family="Newsreader, serif" font-style="italic" font-size="11" fill="#2a6b66">path B · → compiled</text>
+
+        <!-- Path C: compiled/recurring -> insights -->
+        <path d="M440 200 Q470 160 540 150" fill="none" stroke="#1d4d49" stroke-width="1.6" marker-end="url(#arr2)"/>
+        <text x="440" y="140" font-family="Newsreader, serif" font-style="italic" font-size="11" fill="#1d4d49">path C · → durable insight</text>
+
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#2a6b66"/></marker>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 Z" fill="#1d4d49"/></marker>
+        </defs>
+
+        <!-- compass rose -->
+        <g transform="translate(690,440)">
+          <circle r="26" fill="#efe7d6" stroke="#1d2a2e" stroke-width="1.2"/>
+          <path d="M0 -22 L5 0 L0 22 L-5 0 Z" fill="#1d2a2e"/>
+          <path d="M0 -22 L5 0 L0 0 Z" fill="#a33b2a"/>
+          <text x="0" y="-30" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#1d2a2e" font-weight="600">N · trust</text>
+          <text x="0" y="38" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" fill="#8a8472">speculative</text>
+        </g>
+
+        <!-- scale bar -->
+        <g transform="translate(40,470)">
+          <rect x="0" y="0" width="40" height="6" fill="#1d2a2e"/>
+          <rect x="40" y="0" width="40" height="6" fill="#efe7d6" stroke="#1d2a2e"/>
+          <rect x="80" y="0" width="40" height="6" fill="#1d2a2e"/>
+          <text x="0" y="20" font-family="JetBrains Mono, monospace" font-size="8" fill="#8a8472">0</text>
+          <text x="115" y="20" font-family="JetBrains Mono, monospace" font-size="8" fill="#8a8472">3 records</text>
+        </g>
+
+        <!-- region labels -->
+        <text x="125" y="100" font-family="Newsreader, serif" font-style="italic" font-weight="500" font-size="17" fill="#9a6b3a">captures</text>
+        <text x="130" y="115" font-family="JetBrains Mono, monospace" font-size="9" fill="#9a6b3a">31 · raw, pre-distill</text>
+
+        <text x="135" y="370" font-family="Newsreader, serif" font-style="italic" font-weight="500" font-size="17" fill="#1d4d49">memory</text>
+        <text x="140" y="385" font-family="JetBrains Mono, monospace" font-size="9" fill="#2a6b66">operational · lowlands</text>
+
+        <text x="395" y="278" font-family="Newsreader, serif" font-style="italic" font-weight="500" font-size="17" fill="#3a5a2a">compiled</text>
+        <text x="400" y="293" font-family="JetBrains Mono, monospace" font-size="9" fill="#4a6b3a">3 topics · the ridges</text>
+
+        <text x="560" y="60" font-family="Newsreader, serif" font-style="italic" font-weight="500" font-size="17" fill="#1d4d49">insights</text>
+        <text x="565" y="73" font-family="JetBrains Mono, monospace" font-size="9" fill="#1d4d49">214 · the highlands (KG)</text>
+      </svg>
+
+      <!-- legend -->
+      <div class="legend">
+        <div class="lg"><span class="sw" style="background:url('') ;background:repeating-linear-gradient(45deg,#efe7d6 0 4px,#c4a06a 4px 5px)"></span><span class="nm">captures/</span><div class="ds">raw frontier</div></div>
+        <div class="lg"><span class="sw" style="background:linear-gradient(#dfe4d8,#dfe4d6);border-color:#2a6b66"></span><span class="nm">memory/</span><div class="ds">operational lowlands</div></div>
+        <div class="lg"><span class="sw" style="background:repeating-linear-gradient(45deg,#e6dcc6 0 5px,#6b8a5a 5px 6px)"></span><span class="nm">compiled/</span><div class="ds">surveyed ridges</div></div>
+        <div class="lg"><span class="sw" style="background:repeating-linear-gradient(45deg,#e4ddc9 0 4px,#1d4d49 4px 5px),repeating-linear-gradient(-45deg,#e4ddc9 0 4px,#1d4d49 4px 5px)"></span><span class="nm">insights/</span><div class="ds">durable highlands</div></div>
+      </div>
+
+      <!-- elevation -->
+      <div class="elev">
+        <span class="lab">trust ▲ elevation</span>
+        <div class="wrap2">
+          <div class="bar"></div>
+          <div class="ticks"><span>speculative</span><span>working</span><span>confirmed</span><span>canonical</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT COLUMN ============ -->
+    <div>
+
+      <!-- survey status -->
+      <div class="panel">
+        <div class="ph"><span><b>survey status</b> · mneme status</span><span class="badge ok">surveyed</span></div>
+        <div class="pb">
+          <div class="srow"><span class="dot ok"></span><span class="k">vault</span><span class="v">~/.mneme/vault <span class="s">· main · clean</span></span><span class="nt">7e73851</span></div>
+          <div class="srow"><span class="dot ok"></span><span class="k">bindings</span><span class="v">codex · claude <span class="s">stdio mcp</span></span><span class="nt">2 hosts</span></div>
+          <div class="srow"><span class="dot ok"></span><span class="k">qmd sidecar</span><span class="v">healthy <span class="s">· index fresh</span></span><span class="nt">6m ago</span></div>
+          <div class="srow"><span class="dot warn"></span><span class="k">stale ridge</span><span class="v">host-binding/ed-2 <span class="s">· DC-0003 changed</span></span><span class="nt">2d</span></div>
+          <div class="srow"><span class="dot warn"></span><span class="k">inbox</span><span class="v">2 aging <span class="s">· no stale</span></span><span class="nt">triage</span></div>
+          <div class="srow"><span class="dot warn"></span><span class="k">tension</span><span class="v">TS-0007 <span class="s">· cross-agent</span></span><span class="nt">open</span></div>
+          <div class="srow"><span class="dot ok"></span><span class="k">pub-graph</span><span class="v">1 head/series · no cycles</span><span class="nt">doctor ✓</span></div>
+        </div>
+      </div>
+
+      <!-- dossier ridges -->
+      <div class="panel">
+        <div class="ph"><span><b>compiled ridges</b> · the publications</span><span class="badge warn">1 stale</span></div>
+        <div class="pb">
+          <div class="drow">
+            <div><div class="t">retrieval-packaging <span class="ed">ed·3</span></div><div class="cite">4 cites · supersedes ed·2 · 2026-04-26</div></div>
+            <span class="st cur hi">current</span>
+          </div>
+          <div class="drow">
+            <div><div class="t">host-binding <span class="ed">ed·2</span></div><div class="cite">3 cites · cited source changed 2d ago</div></div>
+            <span class="st stale">◐ stale</span>
+          </div>
+          <div class="drow">
+            <div><div class="t">agent-memory-architecture <span class="ed">ed·1</span></div><div class="cite">6 cites · 2026-04-23</div></div>
+            <span class="st cur">current</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- tension alert -->
+      <div class="tension">
+        <div class="lab">◆ contested ground · TS-0007</div>
+        <div class="t">"Claude treats <code style="font-family:'JetBrains Mono',monospace;font-size:13px;background:#e6dcc6;padding:0 4px">confidence</code> as display; Codie wants it to nudge ranking." Two records, written. Reconciliation is v2.</div>
+        <div class="meta">cross-agent · unresolved · flagged on the map as a dashed peak</div>
+      </div>
+
+      <!-- retrieval trace -->
+      <div class="panel">
+        <div class="ph"><span><b>retrieval trace</b> · mneme ask</span><span class="badge ok">layer-rank on</span></div>
+        <div class="pb">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);margin-bottom:9px">q "how does mneme handle retrieval?" · ~612 / 8192 tok</div>
+          <div class="trace">
+            <div class="arm"><span class="n">compiled</span><span class="bar"><i style="width:96%"></i></span><span class="v">96</span></div>
+            <div class="arm"><span class="n">insight</span><span class="bar"><i style="width:74%"></i></span><span class="v">74</span></div>
+            <div class="arm"><span class="n">memory</span><span class="bar"><i style="width:52%"></i></span><span class="v">52</span></div>
+            <div class="arm"><span class="n">capture</span><span class="bar"><i style="width:18%"></i></span><span class="v">18</span></div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);margin-top:10px;line-height:1.6">
+            arms: lex · vec · hyde · RRF · rerank bge-v2-m3<br>
+            <span style="color:var(--sepia)">⚠</span> dossier vintage pre-dates TS-0007 → stated in answer
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- expedition log -->
+  <div class="log">
+    <div class="panel">
+      <div class="ph"><span><b>expedition log</b></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint)">delta digest</span></div>
+      <div class="pb">
+        <div class="ep"><span class="d">2026-06-13</span><span class="x">Hivemind 0.11, wd-briefing v2, name-gated lookup</span></div>
+        <div class="ep"><span class="d">2026-06-12</span><span class="x">Memory architecture consolidated ("clunky Mneme")</span></div>
+        <div class="ep"><span class="d">2026-06-12</span><span class="x">suno-pack 0.8.0→0.10.2: dojo, Pins on Mars</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span><b>terrain by count</b></span></div>
+      <div class="pb">
+        <div class="stat-big">214<span class="u"> insights</span></div><div class="stat-l">durable claims · 8 contested</div>
+        <div class="stat-big" style="margin-top:14px">6<span class="u"> editions</span></div><div class="stat-l">across 3 compiled ridges</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><span><b>boot budget</b></span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-faint)">12000</span></div>
+      <div class="pb">
+        <div class="trace">
+          <div class="arm"><span class="n">identity</span><span class="bar"><i style="width:100%;background:#9a6b3a"></i></span><span class="v">∞</span></div>
+          <div class="arm"><span class="n">project</span><span class="bar"><i style="width:38%"></i></span><span class="v">38</span></div>
+          <div class="arm"><span class="n">procedural</span><span class="bar"><i style="width:51%"></i></span><span class="v">51</span></div>
+          <div class="arm"><span class="n">episodic</span><span class="bar"><i style="width:22%"></i></span><span class="v">22</span></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-faint);margin-top:10px">total <b style="color:var(--teal-deep)">41%</b> of 12000 · sorted by semantic date, never ID</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>mneme · atlas</b> — what if the viewer understood the substrate? · MOCKUP DATA · grounded in docs/brainstorm/mneme/
+  </div>
+
+</div>
+</body>
+</html>

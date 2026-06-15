@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mneme — Dossier: Retrieval Packaging (ed. 3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3ece0;
+  --paper-2:#ebe2d2;
+  --ink:#211c16;
+  --ink-soft:#5c5043;
+  --ink-faint:#8a7c6b;
+  --rule:#c9bca5;
+  --rule-soft:#dccfb7;
+  --ox:#7a2e2a;        /* oxblood accent */
+  --ox-soft:#a85a4f;
+  --gold:#9a7b2e;
+  --teal:#2f5d57;
+  --margin-bg:#efe6d4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#1a1510}
+body{
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(0,0,0,0), rgba(0,0,0,.08)),
+    var(--paper);
+  color:var(--ink);
+  font-family:'Spectral',Georgia,serif;
+  font-size:17px;line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+/* paper grain */
+body::before{
+  content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background-image:
+    radial-gradient(circle at 23% 17%, rgba(122,46,42,.025) 0, transparent 40%),
+    radial-gradient(circle at 78% 63%, rgba(47,93,87,.03) 0, transparent 45%);
+  mix-blend-mode:multiply;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.35;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.09 0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode:multiply;
+}
+::selection{background:var(--ox);color:var(--paper)}
+a{color:var(--ox);text-decoration:none;border-bottom:1px solid var(--ox-soft)}
+a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+/* top utility bar */
+.utility{
+  position:relative;z-index:5;
+  background:#1a1510;color:#cdbfa6;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.5px;
+  border-bottom:2px solid var(--ox);
+}
+.utility .u{max-width:1180px;margin:0 auto;padding:9px 30px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.utility .u .b{font-family:'Fraunces',serif;font-weight:600;letter-spacing:1px;color:#e8dcc4;font-size:13px}
+.utility .u a{color:#b8a98e;border-bottom:1px dotted #6b5d47}
+.utility .u a:hover{color:#fff;border-bottom-color:#fff}
+.utility .u .sp{margin-left:auto;color:#7d6f59}
+.utility .u .sp b{color:#d8c4a0}
+
+/* page frame */
+.page{
+  position:relative;z-index:4;
+  max-width:1180px;margin:0 auto;padding:48px 30px 80px;
+  display:grid;grid-template-columns:minmax(0,1fr) 248px;gap:56px;
+}
+@media(max-width:980px){.page{grid-template-columns:1fr;gap:28px}.rail{order:2}}
+
+/* ---------- masthead ---------- */
+.masthead{grid-column:1 / -1;border-bottom:3px double var(--ink);padding-bottom:14px;margin-bottom:8px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.masthead .pub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ink-soft)}
+.masthead .pub b{color:var(--ox)}
+.masthead .layermark{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:1px}
+.masthead .layermark .pill{display:inline-block;border:1px solid var(--ox);color:var(--ox);padding:1px 7px;border-radius:2px;margin-left:4px;letter-spacing:1.5px}
+
+/* edition stamp */
+.edstamp{
+  grid-column:1 / -1;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  border-bottom:1px solid var(--rule);padding:14px 0 22px;margin-bottom:30px;
+}
+.edstamp .num{
+  font-family:'Fraunces',serif;font-weight:900;font-style:italic;font-size:78px;line-height:.8;
+  color:var(--ox);letter-spacing:-2px;
+}
+.edstamp .num small{font-size:30px;color:var(--gold);font-style:normal;font-weight:600;vertical-align:super}
+.edstamp .meta{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);line-height:1.9}
+.edstamp .meta b{color:var(--ink);font-weight:600}
+.edstamp .meta .k{display:inline-block;min-width:104px;color:var(--ink-faint)}
+.edstamp .stamp{
+  margin-left:auto;border:2px solid var(--ox);color:var(--ox);
+  font-family:'Fraunces',serif;font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;
+  padding:8px 16px;border-radius:3px;transform:rotate(-3deg);
+  box-shadow:2px 2px 0 rgba(122,46,42,.12);
+}
+.edstamp .stamp small{display:block;font-size:9px;letter-spacing:1px;color:var(--ox-soft);font-weight:500;margin-top:2px}
+
+/* title */
+h1.title{
+  font-family:'Fraunces',serif;font-weight:600;font-size:clamp(40px,6vw,68px);
+  line-height:1.02;letter-spacing:-1.5px;color:var(--ink);margin-bottom:10px;
+}
+h1.title em{font-style:italic;font-weight:500;color:var(--ox)}
+.dek{font-family:'Spectral',serif;font-style:italic;font-size:21px;color:var(--ink-soft);max-width:42ch;line-height:1.5;margin-bottom:26px}
+.byline{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-faint);letter-spacing:.5px;margin-bottom:30px}
+.byline b{color:var(--ink-soft)}
+
+/* premise gate */
+.premise{
+  border:1px solid var(--ox);border-left-width:5px;background:rgba(122,46,42,.04);
+  padding:18px 22px;margin:0 0 36px;border-radius:2px;position:relative;
+}
+.premise .lab{
+  position:absolute;top:-10px;left:18px;background:var(--paper);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ox);padding:0 8px;font-weight:600;
+}
+.premise p{font-family:'Spectral',serif;font-style:italic;color:var(--ink);font-size:16.5px;margin:0}
+.premise p b{font-style:normal;color:var(--ox)}
+
+/* body prose */
+.body{max-width:66ch}
+.body h2{
+  font-family:'Fraunces',serif;font-weight:600;font-size:26px;letter-spacing:-.3px;
+  margin:38px 0 12px;color:var(--ink);display:flex;align-items:baseline;gap:12px;
+}
+.body h2:first-of-type{margin-top:6px}
+.body h2 .n{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ox);font-weight:600;letter-spacing:1px}
+.body p{margin:0 0 16px}
+.body p.lead::first-letter{
+  font-family:'Fraunces',serif;font-weight:900;font-size:74px;line-height:.78;
+  float:left;padding:6px 12px 0 0;color:var(--ox);
+}
+.body code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:var(--paper-2);padding:1px 5px;border-radius:2px;color:var(--ox)}
+.body strong{font-weight:600}
+sup.fn{font-family:'JetBrains Mono',monospace;font-size:.7em;color:var(--ox);font-weight:600;padding:0 1px;cursor:default}
+sup.fn:hover{color:var(--ink)}
+
+/* lists */
+.body ul{margin:0 0 16px;padding-left:2px;list-style:none}
+.body ul li{position:relative;padding-left:22px;margin-bottom:7px}
+.body ul li::before{content:"§";position:absolute;left:0;color:var(--gold);font-family:'Fraunces',serif;font-weight:600}
+
+/* pull quote (contradiction) */
+.pullquote{
+  margin:30px -8px;padding:26px 30px;border-top:2px solid var(--ox);border-bottom:2px solid var(--ox);
+  background:rgba(122,46,42,.05);position:relative;
+}
+.pullquote .qm{position:absolute;top:6px;left:18px;font-family:'Fraunces',serif;font-size:60px;color:var(--ox-soft);opacity:.4;line-height:1}
+.pullquote p{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:22px;line-height:1.4;color:var(--ink);margin:0;padding-left:32px}
+.pullquote .attr{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ox);margin-top:12px;padding-left:32px}
+.pullquote .attr .badge{display:inline-block;border:1px solid var(--ox);padding:1px 6px;border-radius:2px;margin-right:6px}
+
+/* footnotes */
+.footnotes{margin-top:48px;border-top:1px solid var(--rule);padding-top:18px}
+.footnotes .lab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px}
+.footnotes ol{padding-left:22px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;color:var(--ink-soft)}
+.footnotes li::marker{color:var(--ox);font-weight:600}
+.footnotes li b{color:var(--ink);font-weight:600}
+.footnotes li .conf{color:var(--teal);font-weight:600}
+
+/* edition history */
+.editions{margin-top:44px;border:1px solid var(--rule);background:var(--margin-bg);border-radius:3px;padding:20px 24px}
+.editions .lab{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:16px}
+.editions .lab b{color:var(--ox)}
+.timeline{position:relative;padding-left:22px;border-left:2px solid var(--rule)}
+.timeline .e{position:relative;padding-bottom:18px}
+.timeline .e:last-child{padding-bottom:0}
+.timeline .e::before{content:"";position:absolute;left:-28px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--rule)}
+.timeline .e.cur::before{background:var(--ox);border-color:var(--ox);box-shadow:0 0 0 4px rgba(122,46,42,.15)}
+.timeline .e .h{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink)}
+.timeline .e .h b{color:var(--ox);font-weight:600}
+.timeline .e.cur .h b{font-size:14px}
+.timeline .e .d{font-family:'Spectral',serif;font-style:italic;color:var(--ink-soft);font-size:14px;margin-top:2px}
+.timeline .e.cur .d{color:var(--ink)}
+.timeline .e .tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-faint);margin-left:8px}
+
+/* ---------- margin rail ---------- */
+.rail{position:relative}
+.rail .sticky{position:sticky;top:18px}
+.railbox{border:1px solid var(--rule);background:var(--margin-bg);border-radius:3px;padding:16px 16px;margin-bottom:16px}
+.railbox .lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;border-bottom:1px solid var(--rule-soft);padding-bottom:7px}
+.railbox .lab b{color:var(--ox)}
+.railbox .row{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;color:var(--ink-soft);margin-bottom:4px;word-break:break-word}
+.railbox .row .k{color:var(--ink-faint);display:inline-block;min-width:64px}
+.railbox .row .v{color:var(--ink)}
+.railbox .row .ok{color:var(--teal)}
+.railbox .reflist{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1.8;color:var(--ink-soft)}
+.railbox .reflist .n{color:var(--ox);font-weight:600;margin-right:5px}
+.railbox .related{font-family:'Spectral',serif;font-size:13px;color:var(--ink-soft);line-height:1.5}
+.railbox .related a{font-family:'JetBrains Mono',monospace;font-size:11px}
+.railbox .stale{border-left:3px solid var(--gold);padding-left:10px;margin-top:8px;font-size:12px;color:var(--ink)}
+.railbox .stale b{color:var(--gold)}
+
+/* thesis card at top of rail */
+.thesis-rail{border:1px solid var(--ox);background:rgba(122,46,42,.06);border-radius:3px;padding:14px 16px;margin-bottom:18px}
+.thesis-rail .lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ox);margin-bottom:8px;font-weight:600}
+.thesis-rail p{font-family:'Spectral',serif;font-style:italic;font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
+.thesis-rail p b{font-style:normal;color:var(--ox)}
+
+/* colophon */
+.colophon{grid-column:1 / -1;margin-top:54px;border-top:3px double var(--ink);padding-top:18px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-faint);letter-spacing:.3px}
+.colophon b{color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<div class="utility">
+  <div class="u">
+    <span class="b">MNEME</span>
+    <span>compiled/ · dossier</span>
+    <a href="00-index.html">◂ 3 paradigms</a>
+    <a href="01-console.html">console ▸</a>
+    <a href="03-atlas.html">atlas ▸</a>
+    <span class="sp">files are the truth · <b>editions, not caches</b></span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- masthead -->
+  <header class="masthead">
+    <div class="pub"><b>MNEME</b> · COMPILED DOSSIER — a publication of the vault</div>
+    <div class="layermark">layer<span class="pill">COMPILED</span></div>
+  </header>
+
+  <div class="edstamp">
+    <div class="num">3<small>rd ed.</small></div>
+    <div class="meta">
+      <div><span class="k">series</span><b>retrieval-packaging</b></div>
+      <div><span class="k">supersedes</span>edition 2 &nbsp;(2026-04-24)</div>
+      <div><span class="k">generated</span><b>2026-04-26</b> · <code>mneme compile retrieval-packaging --budget high</code></div>
+      <div><span class="k">currency</span>confirmed 2026-06-14 · pre-dates <b>TS-0007</b></div>
+    </div>
+    <div class="stamp">current head<small>of the series</small></div>
+  </div>
+
+  <!-- title -->
+  <div style="grid-column:1 / -1">
+    <h1 class="title">Retrieval, <em>packaged</em>.</h1>
+    <p class="dek">Mneme does not ask you to install a retrieval service. It ships one — managed, sidecar, and deliberately subordinate to Mneme's own ranking.</p>
+    <p class="byline">current-best understanding · grounded in 4 sources · 1 open contradiction · <b>vintage stated, not hidden</b></p>
+  </div>
+
+  <!-- BODY + RAIL -->
+  <main class="body">
+
+    <div class="premise">
+      <span class="lab">premise gate</span>
+      <p>This compile assumes the question is <b>"how does Mneme package retrieval as part of the product,"</b> not "which embedding model is best." If you're asking the latter, that's a different dossier.</p>
+    </div>
+
+    <h2><span class="n">01</span>The answer</h2>
+    <p class="lead">Mneme ships <strong>QMD as a managed sidecar</strong>, not as a user-installed dependency. <code>mneme init</code> installs <code>~/.mneme/bin/qmd</code> and the configured retrieval models; <code>mneme bind &lt;host&gt;</code> writes the host's MCP entry to launch the same managed <code>qmd mcp</code> over <strong>stdio</strong> — the proven transport.<sup class="fn">1,2</sup></p>
+    <p>The critical invariant: <strong>QMD provides candidate retrieval; Mneme owns product-ranking semantics.</strong> Collection filters are not layer priority. <code>mneme ask</code> merges and ranks results with explicit layer weights so <code>compiled/</code> can outrank <code>insights/</code>, insights outrank <code>memory/</code>, and <code>captures/</code> stays a deeper-excavation path.<sup class="fn">3</sup> This prevents "QMD decided what matters" from becoming invisible product logic.</p>
+
+    <h2><span class="n">02</span>Support</h2>
+    <ul>
+      <li>ADR-001 records the managed-sidecar decision over three rejected alternatives (in-process, optional install, hosted).<sup class="fn">1</sup></li>
+      <li>The reference integration — <code>claude-knowledge ↔ QMD</code> — already proves the stdio MCP + multi-collection shape Mneme adopts.</li>
+      <li>KG evidence: hybrid lex+vec+hyde search with RRF outperforms pure keyword or pure semantic for agent memory.<sup class="fn">4</sup></li>
+    </ul>
+
+    <h2><span class="n">03</span>Complications</h2>
+    <p><code>mneme doctor</code> must treat retrieval as a product subsystem, not a troubleshooting appendix: model availability, index freshness, transport health, host-MCP binding health, fallback when vector search is unavailable, and whether layer-priority ranking is being applied.</p>
+    <p>Index freshness is load-bearing for trust. A QMD miss must not read as "the memory doesn't exist" when the index is stale relative to the newest vault file — surface staleness, never silently serve it.</p>
+
+    <h2><span class="n">04</span>Contradiction, open</h2>
+    <div class="pullquote">
+      <span class="qm">"</span>
+      <p>Claude treats <code>confidence</code> as a display annotation; Codie wants it to nudge retrieval ranking. Both records were written. Reconciliation is v2.</p>
+      <div class="attr"><span class="badge">TS-0007</span> cross-agent tension · unresolved</div>
+    </div>
+    <p>This dossier treats <code>confidence</code> as display-only. <strong>Edition 4 will revisit if TS-0007 resolves toward ranking.</strong> The tension is named here, not hidden — because an answer that quietly ignores an open disagreement is the failure mode Mneme exists to prevent.</p>
+
+    <h2><span class="n">05</span>What this dossier does <em>not</em> claim</h2>
+    <ul>
+      <li>It does not claim the reranker is final — <code>bge-reranker-v2-m3</code> is the phase-1 empirical pick; a lighter alternative is on the inbox.</li>
+      <li>It does not claim graph/temporal retrieval arms ship in v1 — those are phase 3, per the five-archetypes insight. Mneme deliberately defers the temporal/entity-graph archetype.</li>
+    </ul>
+
+    <!-- footnotes -->
+    <div class="footnotes">
+      <div class="lab">source references — provenance</div>
+      <ol>
+        <li><b>adr/ADR-001-retrieval-packaging.md</b> — decision record; managed QMD sidecar over 3 rejected alternatives.</li>
+        <li><b>decisions-resolved.md</b> :: Retrieval Packaging — stdio MCP first; HTTP/socket daemon optional later.</li>
+        <li><b>mneme-product-spec.md</b> :: Retrieval Semantics — layer-priority invariant; <code>doctor</code> introspects retrieval.</li>
+        <li><b>insights/hybrid-search-with-rrf-outperforms…</b> — KG evidence · <span class="conf">confidence: confirmed</span>.</li>
+      </ol>
+    </div>
+
+    <!-- edition history -->
+    <div class="editions">
+      <div class="lab"><b>edition history</b> — backwards links only · old editions never learn the future</div>
+      <div class="timeline">
+        <div class="e cur">
+          <div class="h"><b>edition 3</b> · 2026-04-26 <span class="tag">current head</span></div>
+          <div class="d">added the layer-priority invariant + stdio-first transport correction.</div>
+        </div>
+        <div class="e">
+          <div class="h">edition 2 · 2026-04-26 <span class="tag">superseded by ed. 3</span></div>
+          <div class="d">ranked QMD collections as layer priority — the bug edition 3 fixes.</div>
+        </div>
+        <div class="e">
+          <div class="h">edition 1 · 2026-04-23 <span class="tag">superseded by ed. 2</span></div>
+          <div class="d">initial "bundle QMD" framing, pre-transport decision.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RAIL -->
+  <aside class="rail">
+    <div class="sticky">
+      <div class="thesis-rail">
+        <div class="lab">position ▸ dossier</div>
+        <p>Finds the must-design surface <b>inside</b> the spec. The compiled dossier is a <b>published artifact</b>, and publications get designed — whether or not there's an app.</p>
+      </div>
+
+      <div class="railbox">
+        <div class="lab"><b>artifact</b> contract</div>
+        <div class="row"><span class="k">series</span><span class="v">retrieval-packaging</span></div>
+        <div class="row"><span class="k">edition</span><span class="v">3 (current)</span></div>
+        <div class="row"><span class="k">class</span><span class="v">publication · immutable</span></div>
+        <div class="row"><span class="k">vintage</span><span class="ok">current</span></div>
+        <div class="row"><span class="k">cites</span><span class="v">4 sources</span></div>
+        <div class="row"><span class="k">trust</span><span class="v">canonical</span></div>
+      </div>
+
+      <div class="railbox">
+        <div class="lab">cited sources</div>
+        <div class="reflist">
+          <div><span class="n">[1]</span>adr/ADR-001-retrieval-packaging.md</div>
+          <div><span class="n">[2]</span>decisions-resolved :: Retrieval</div>
+          <div><span class="n">[3]</span>spec :: Retrieval Semantics</div>
+          <div><span class="n">[4]</span>insights/hybrid-search-with-rrf…</div>
+        </div>
+      </div>
+
+      <div class="railbox">
+        <div class="lab">related · compiled/</div>
+        <div class="related">
+          <a href="#">host-binding/ed-2</a><br>
+          <div class="stale"><b>◐ stale</b> — cited <code>DC-0003</code> changed 2d ago. Staleness is metadata, not a defect. Publish ed-3 to supersede.</div>
+        </div>
+        <div class="related" style="margin-top:10px">
+          <a href="#">agent-memory-architecture/ed-1</a><br>
+          <span style="color:var(--ink-faint);font-size:11px">current · 6 cites</span>
+        </div>
+      </div>
+
+      <div class="railbox">
+        <div class="lab">do next</div>
+        <div class="row" style="font-family:'Spectral',serif;font-size:13px;color:var(--ink-soft);line-height:1.5">
+          <code style="font-size:11px">$ mneme compile host-binding</code><br>
+          <span style="color:var(--ink-faint)">→ publish ed-3 (supersedes ed-2)</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- colophon -->
+  <footer class="colophon">
+    <span><b>Mneme</b> · compiled dossiers are publications, not caches — immutable, dated, cited.</span>
+    <span>MOCKUP DATA · grounded in <b>docs/brainstorm/mneme/</b></span>
+  </footer>
+
+</div>
+</body>
+</html>
