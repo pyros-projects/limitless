@@ -30,12 +30,16 @@ citation count.
 OpenAlex indexing lags arXiv by days-to-weeks):**
 
 ```bash
-curl -s "http://export.arxiv.org/api/query?search_query=all:%22<q>%22&sortBy=submittedDate&sortOrder=descending&max_results=10" -o "$FRAME/raw/arx-1.xml"
+curl -s "https://export.arxiv.org/api/query?search_query=all:%22<q>%22&sortBy=submittedDate&sortOrder=descending&max_results=10" -o "$FRAME/raw/arx-1.xml"
 grep -oP '(?<=<title>)[^<]+' "$FRAME/raw/arx-1.xml"   # quick triage; full parse for abstracts
 ```
 
 Atom XML — a throwaway parser is fine (Initiative section applies).
-URL-encode the query (`%22` for phrase quotes).
+URL-encode the query (`%22` for phrase quotes). **https only**: the
+`http://` endpoint returns an empty body with no error (observed
+2026-08-13, 4 queries) — a sweep using it degrades silently. If the
+response file is 0 bytes, check the scheme before declaring the venue
+degraded.
 
 **SearXNG science category** — breadth aggregator (google scholar,
 pubmed, semantic scholar, openaire) when the local instance is up; see
