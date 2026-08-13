@@ -1,7 +1,7 @@
 {
   "name": "limitless",
-  "version": "0.13.0",
-  "description": "Pyro's curated Claude Code skill pack: article-pack, Codies Research, Surface-First Development, SFD v2 (docket-emitting contract handoff), SearXNG, Suno Pack (lyric craft, inspiration audits, rendering, experiment lanes, saga-synced journals), Hivemind, Dojo, and James. A small set of high-leverage skills for research, prototyping, publishing, web search, AI music, verified skill authoring, and restartable planning docs.",
+  "version": "0.14.0",
+  "description": "Pyro's curated Claude Code skill pack: article-pack, Codies Research, Surface-First Development, SFD v2 (docket-emitting contract handoff), SearXNG, Suno Pack (lyric craft, inspiration audits, rendering, experiment lanes, saga-synced journals), Hivemind, Dojo, Learn Anything (tier-gated beginner\u2192expert curricula), and James. A small set of high-leverage skills for research, prototyping, publishing, web search, AI music, verified skill authoring, and restartable planning docs.",
   "author": {
     "name": "Pyro"
   },
