@@ -43,14 +43,14 @@ class TestResolveGlobalVault:
         memory = tmp_path / ".memory"
         (memory / "Claude").mkdir(parents=True)
         result = resolve_global_vault("claude")
-        assert result == memory / "Claude"
+        assert result.samefile(memory / "Claude")
 
     def test_case_insensitive_upper(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(Path, "home", staticmethod(lambda: tmp_path))
         memory = tmp_path / ".memory"
         (memory / "Claude").mkdir(parents=True)
         result = resolve_global_vault("CLAUDE")
-        assert result == memory / "Claude"
+        assert result.samefile(memory / "Claude")
 
     def test_no_match_returns_exact_path(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """When no directory exists, return the exact (as-typed) path for init."""
