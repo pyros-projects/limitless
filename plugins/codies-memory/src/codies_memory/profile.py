@@ -37,13 +37,13 @@ def load_profile(
 
     global_profile_path = global_vault / "profile.yaml"
     if global_profile_path.exists():
-        data = yaml.safe_load(global_profile_path.read_text()) or {}
+        data = yaml.safe_load(global_profile_path.read_text(encoding="utf-8")) or {}
         profile.update(data)
 
     if project_vault is not None:
         project_profile_path = project_vault / "profile.yaml"
         if project_profile_path.exists():
-            data = yaml.safe_load(project_profile_path.read_text()) or {}
+            data = yaml.safe_load(project_profile_path.read_text(encoding="utf-8")) or {}
             profile.update(data)
 
     return profile

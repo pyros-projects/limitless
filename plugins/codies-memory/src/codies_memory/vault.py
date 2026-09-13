@@ -94,12 +94,12 @@ class VaultValidationResult:
 def _write_if_missing(path: Path, content: str) -> None:
     """Write *content* to *path* only if the file does not already exist."""
     if not path.exists():
-        path.write_text(content)
+        path.write_text(content, encoding="utf-8")
 
 
 def _read_registry(global_vault: Path) -> dict:
     registry_path = global_vault / "registry" / "projects.yaml"
-    data = yaml.safe_load(registry_path.read_text()) or {}
+    data = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
     if "projects" not in data:
         data["projects"] = []
     return data
@@ -107,17 +107,9 @@ def _read_registry(global_vault: Path) -> dict:
 
 def _write_registry(global_vault: Path, data: dict) -> None:
     registry_path = global_vault / "registry" / "projects.yaml"
-    registry_path.write_text(yaml.dump(data, default_flow_style=False, allow_unicode=True))
-
-
-def _update_registry_working_dir(global_vault: Path, slug: str, working_dir: str) -> None:
-    """Lazily update the working_dir for a project in the registry."""
-    data = _read_registry(global_vault)
-    for entry in data.get("projects", []):
-        if entry.get("slug") == slug and entry.get("working_dir") != working_dir:
-            entry["working_dir"] = working_dir
-            _write_registry(global_vault, data)
-            break
+    registry_path.write_text(
+        yaml.dump(data, default_flow_style=False, allow_unicode=True), encoding="utf-8"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -150,21 +142,24 @@ def resolve_project_vault(global_vault: Path, working_dir: Path) -> Path | None:
 
     Uses a three-tier lookup:
 
-    1. **Marker file** — read ``.codies-memory`` in *working_dir* for the slug.
+    1. **Nearest marker** — search parents up to and including the Git root.
     2. **Registry working_dir** — match *working_dir* against registry entries.
     3. **Git remote URL** — match git remote against registry entries.
 
     Returns the project vault path, or ``None`` if no match is found.
+    Resolution never writes device-specific paths to the shared registry.
     """
     # --- Tier 1: marker file ---
-    marker = working_dir / ".codies-memory"
-    if marker.is_file():
-        slug = marker.read_text().strip()
-        if slug:
+    working_dir = working_dir.resolve()
+    for directory in (working_dir, *working_dir.parents):
+        marker = directory / ".codies-memory"
+        if marker.is_file():
+            slug = marker.read_text(encoding="utf-8").strip()
             vault_path = global_vault / "projects" / slug
-            if vault_path.is_dir():
-                _update_registry_working_dir(global_vault, slug, str(working_dir))
-                return vault_path
+            # An explicit marker must not fall back to another project's vault.
+            return vault_path if slug and vault_path.is_dir() else None
+        if (directory / ".git").exists():
+            break
 
     # --- Tier 2: registry working_dir ---
     data = _read_registry(global_vault)
@@ -184,7 +179,6 @@ def resolve_project_vault(global_vault: Path, working_dir: Path) -> Path | None:
                 slug = entry["slug"]
                 vault_path = global_vault / "projects" / slug
                 if vault_path.is_dir():
-                    _update_registry_working_dir(global_vault, slug, working_dir_str)
                     return vault_path
 
     return None
@@ -260,7 +254,7 @@ def init_project_vault(
     # Write marker file in working directory when this is a real project vault.
     if write_marker and working_dir is not None:
         marker = working_dir / ".codies-memory"
-        marker.write_text(f"{slug}\n")
+        marker.write_text(f"{slug}\n", encoding="utf-8")
 
     if register:
         git_remote = _get_git_remote(working_dir) if working_dir is not None else None

@@ -662,8 +662,10 @@ class TestResolveProjectVault:
             lambda _wd: "git@github.com:user/remote-proj.git",
         )
 
+        before = (global_vault / "registry" / "projects.yaml").read_bytes()
         result = resolve_project_vault(global_vault, new_dir)
         assert result == global_vault / "projects" / "remote-proj"
+        assert (global_vault / "registry" / "projects.yaml").read_bytes() == before
 
     def test_resolve_unregistered_returns_none(self, tmp_path: Path) -> None:
         """Unknown working_dir with no marker, no registry match → None."""
@@ -675,8 +677,8 @@ class TestResolveProjectVault:
         result = resolve_project_vault(global_vault, unknown_dir)
         assert result is None
 
-    def test_resolve_lazily_updates_registry(self, tmp_path: Path) -> None:
-        """Resolve from a new path with the marker → vault found AND registry updated."""
+    def test_resolve_preserves_registry(self, tmp_path: Path) -> None:
+        """Reading a shared vault from another device must not persist its path."""
         global_vault = tmp_path / "global"
         init_global_vault(global_vault)
         original_dir = tmp_path / "path-a"
@@ -702,9 +704,37 @@ class TestResolveProjectVault:
         result = resolve_project_vault(global_vault, new_dir)
         assert result == global_vault / "projects" / "mobile-proj"
 
-        # Registry should now reflect the new working_dir
+        # The original device's registry stays unchanged.
         registry = yaml.safe_load(
             (global_vault / "registry" / "projects.yaml").read_text()
         )
         entry = next(p for p in registry["projects"] if p["slug"] == "mobile-proj")
-        assert entry["working_dir"] == str(new_dir)
+        assert entry["working_dir"] == str(original_dir)
+
+    def test_nested_marker_with_git_boundary(self, tmp_path: Path) -> None:
+        global_vault = init_global_vault(tmp_path / "global")
+        repo = tmp_path / "Wissen mit Umlauten ä"
+        nested = repo / "writings" / "substack" / "draft"
+        nested.mkdir(parents=True)
+        (repo / ".git").mkdir()
+        root_vault = init_project_vault(global_vault, "knowledge", repo)
+        writing_vault = init_project_vault(global_vault, "writings", repo / "writings")
+        registry = global_vault / "registry" / "projects.yaml"
+        before = registry.read_bytes()
+        assert resolve_project_vault(global_vault, nested) == writing_vault
+        assert resolve_project_vault(global_vault, repo / "writings") == writing_vault
+        assert resolve_project_vault(global_vault, repo) == root_vault
+        assert registry.read_bytes() == before
+
+        # A nested checkout must not inherit the outer repository's identity.
+        (nested / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
+        assert resolve_project_vault(global_vault, nested) is None
+
+    def test_missing_marked_vault_does_not_select_parent(self, tmp_path: Path) -> None:
+        global_vault = init_global_vault(tmp_path / "global")
+        repo = tmp_path / "repo"
+        child = repo / "portfolio"
+        child.mkdir(parents=True)
+        init_project_vault(global_vault, "knowledge", repo)
+        (child / ".codies-memory").write_text("portfolio\n", encoding="utf-8")
+        assert resolve_project_vault(global_vault, child) is None

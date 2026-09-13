@@ -462,7 +462,7 @@ class TestCmdStatus:
 
         out = capsys.readouterr().out
         assert "Project vault:" in out
-        assert "/_general" in out
+        assert str(Path("projects") / "_general") in out
         assert "Active: 1" in out
         assert "General inbox item" in out
 

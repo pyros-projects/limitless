@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 
@@ -48,7 +49,8 @@ def test_smoke_script_covers_general_and_project_flows() -> None:
     checklist = (REPO_ROOT / "docs" / "TESTING-CHECKLIST.md").read_text(encoding="utf-8")
 
     assert smoke.is_file()
-    assert smoke.stat().st_mode & 0o111
+    if os.name != "nt":
+        assert smoke.stat().st_mode & 0o111
     assert "scripts/smoke.sh" in checklist
     assert "temporary HOME" in checklist
 
