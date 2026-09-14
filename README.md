@@ -27,7 +27,7 @@ A curated Claude Code plugin marketplace with high-leverage skills designed to u
 | [**limitless**](plugins/limitless/) | 10 | Article generation, research, surface-first prototyping, docket-emitting SFD v2 contract handoffs, privacy-respecting web search, Suno music packs with lyric beat-map craft + inspiration audits + real rendering + experiment lanes, collective-brain search across social/GitHub/web/papers with saved sweep configs (hivemind), verified skill authoring (dojo), tier-gated curricula (Learn Anything), and persistent constrained review with recipes + review chains for self-contained planning docs (James). |
 | [**after-hours**](plugins/after-hours/) | 7 | Calm, high-taste product intelligence: identity, subtraction, naming, coherence, and first-contact honesty. |
 | [**pyro-kit**](plugins/pyro-kit/) | 17 | Complete 7-phase creative lifecycle: idea excavation, design exploration, prototyping, contracts, building, momentum tracking, and anti-abandonment composting. |
-| [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, CLI write commands, and explicit `_general` read mode for vault-less notes. Requires `uv sync` setup — see INSTALL.md. |
+| [**codies-memory**](plugins/codies-memory/) | 4 | Persistent agent memory with agent-namespaced vaults, promotion pipelines, trust levels, CLI write commands, and explicit `_general` read mode for vault-less notes. CLI installed via `uv tool` — see the [installation guide](plugins/codies-memory/INSTALL.md). |
 
 ---
 
@@ -48,8 +48,11 @@ In Claude Code, run:
 /plugin install limitless@limitless        # Curated Pyro skill pack
 /plugin install after-hours@limitless      # Calm, wholesome product-intelligence skills
 /plugin install pyro-kit@limitless         # Full creative lifecycle toolkit
-/plugin install codies-memory@limitless    # Persistent agent memory (requires uv sync)
+/plugin install codies-memory@limitless    # Persistent agent memory (CLI via uv tool)
 ```
+
+For codies-memory on Codex or another agent, including CLI setup, see its
+[installation guide](plugins/codies-memory/INSTALL.md).
 
 ### 3. Manage
 

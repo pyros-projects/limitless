@@ -6,11 +6,16 @@ description: "This skill should be used when the agent needs a reminder of what 
 # Memory Help
 
 > **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
-> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+> `codies-memory feedback "describe what happened" --agent <name>` — your feedback is saved and reviewed.
+
+For installation or migration, follow [INSTALL.md](../../INSTALL.md): native
+plugins provide the skills, and `uv tool` installs the CLI separately. Run
+`codies-memory` from the user's project directory; `codies-memory --version`
+identifies the backend in use.
 
 ## What This System Is
 
-You have a persistent file-based memory system. It stores what you learn, observe, and decide across sessions. Your vault lives at `~/.memory/<your-agent-name>/`. Every command requires `--agent <your-agent-name>`.
+You have a persistent file-based memory system. It stores what you learn, observe, and decide across sessions. Your vault lives at `~/.memory/<your-agent-name>/`. Memory commands require `--agent <your-agent-name>`; `--version` and `--help` do not.
 
 There are two scopes:
 - **Global** — knowledge that applies across all projects (your identity, cross-project lessons, reflections)
@@ -172,7 +177,8 @@ keep explicit `-term` negation in `lex` queries only.
 
 ## Commands
 
-All commands require `--agent <name>`. Use `--working-dir /path` to target a project without being in its directory.
+Memory commands require `--agent <name>`; `--version` and `--help` do not. Run from
+the user's project directory or use `--working-dir /path` to target another one.
 
 ```bash
 # Boot vault-less notes intentionally
@@ -254,9 +260,16 @@ skim quickly:
 ### Promote
 
 ```bash
+codies-memory promote /absolute/path/to/record.md --check --agent <name>
 codies-memory promote /path/to/record.md --to thread --agent <name>
 codies-memory promote /path/to/record.md --to-global --agent <name>
 ```
+
+For inbox and thread records, `--check` returns JSON (`eligible`, `suggested_types`,
+`reason`) without changing the record. It does not evaluate other source types
+and cannot be combined with `--to` or `--to-global`. Optional
+`--session-count N` and `--references N` default to `0`; supply only observed
+evidence for the individual record. Use `memory-promote` for the review workflow.
 
 ### Init project
 

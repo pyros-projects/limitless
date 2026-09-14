@@ -6,7 +6,7 @@ description: "This skill should be used at end of session, when wrapping up work
 # Memory Close Session
 
 > **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
-> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+> `codies-memory feedback "describe what happened" --agent <name>` — your feedback is saved and reviewed.
 
 ## When To Use
 
@@ -24,14 +24,13 @@ At the end of every work session.
 
 ## How To Run
 
+Run the installed CLI from the user's project directory. For setup or PATH issues,
+see [INSTALL.md](../../INSTALL.md). Fill in the agent name and today's date below.
+
 ```bash
 # 1. Write session summary
 AGENT="your-agent-name"
-TODAY="$(python - <<'PY'
-from datetime import date
-print(date.today().isoformat())
-PY
-)"
+TODAY="YYYY-MM-DD"
 
 codies-memory create session \
   --agent "$AGENT" \
@@ -46,29 +45,26 @@ codies-memory create session \
 
 # 2. Check inbox aging and status
 codies-memory status --agent "$AGENT"
+```
 
-# 3. Run promotion evaluation
-uv run python -c "
-from codies_memory.records import list_records
-from codies_memory.promotion import evaluate_for_promotion
-from codies_memory.vault import resolve_global_vault, resolve_project_vault
-from pathlib import Path
+If no named project vault resolves, skip project lists and promotion evaluation.
+To review the catch-all intentionally, add `--general` to `status` and `list`;
+do not silently switch scope.
 
-agent = 'your-agent-name'
-global_vault = resolve_global_vault(agent)
-project_vault = resolve_project_vault(global_vault, Path.cwd())
-if project_vault is None:
-    print(f'No named project vault found for {Path.cwd()}; skipping project promotion evaluation.')
-else:
-    for rtype in ['inbox', 'thread']:
-        items = list_records(project_vault, rtype, scope='project', status='active')
-        for item in items:
-            result = evaluate_for_promotion(item, context={'session_count': 1})
-            if result['eligible']:
-                print(f'  Promote {rtype}: {item[\"frontmatter\"][\"title\"][:60]}')
+```bash
+# 3. For the intended project, list candidates and read each record
+codies-memory list inbox --status active --format paths --agent "$AGENT"
+codies-memory list threads --status active --format paths --agent "$AGENT"
+codies-memory promote /absolute/path/to/record.md --check --agent "$AGENT"
+```
 
-"
+Run `--check` for each candidate. It prints JSON with `eligible`, `suggested_types`,
+and `reason` without changing the record. Counts default to `0`: supply
+`--session-count N` or `--references N` only from observed evidence for that
+individual record, never a hardcoded count for the whole inbox. See `memory-promote`
+for promotion commands; `--check` is exclusive with `--to` and `--to-global`.
 
+```bash
 # 4. Refresh warm summaries
 codies-memory refresh --agent "$AGENT"
 ```

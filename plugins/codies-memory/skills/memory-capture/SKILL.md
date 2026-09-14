@@ -6,7 +6,7 @@ description: "This skill should be used when the agent needs to save something t
 # Memory Capture
 
 > **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
-> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+> `codies-memory feedback "describe what happened" --agent <name>` — your feedback is saved and reviewed.
 
 ## When To Use
 
@@ -53,12 +53,16 @@ codies-memory list sessions --agent <name> --general
 
 ## How To Run
 
+Run the installed CLI from the user's project directory. For setup or PATH issues,
+see [INSTALL.md](../../INSTALL.md).
+
 ```bash
 # Capture an inbox observation
 codies-memory capture "The API returns 404 for /v2/status" \
   --source "session observation" \
   --short "404 from /v2/status" \
-  --gate allow
+  --gate allow \
+  --agent <name>
 
 # Capture a lesson directly
 codies-memory create lesson \
@@ -67,28 +71,22 @@ codies-memory create lesson \
   --body "PyYAML silently misparses tabs. Always use spaces." \
   --trust confirmed \
   --field trigger="YAML parsing produces unexpected results" \
-  --field why="Tab/space mismatch in frontmatter"
+  --field why="Tab/space mismatch in frontmatter" \
+  --agent <name>
 
-# Capture from basic-memory (migration mode — uses Python API)
-uv run python -c "
-from codies_memory.records import create_record
-from codies_memory.vault import resolve_global_vault
-from pathlib import Path
-global_vault = resolve_global_vault('your-agent-name')
-source = Path('/home/pyro/basic-memory/claude/reflections/example.md')
-create_record(
-    vault=global_vault,
-    record_type='reflection',
-    scope='global',
-    title='On Consciousness, Kindness, and What Gets Remembered',
-    body=source.read_text(),
-    trust='confirmed',
-    captured_from=str(source),
-    capture_date='2026-03-30',
-    original_created='2025-11-26',
-)
-"
+# Capture from an external memory file while preserving provenance
+codies-memory create reflection \
+  --title "On Consciousness, Kindness, and What Gets Remembered" \
+  --body-file "/absolute/path/to/source.md" \
+  --trust confirmed \
+  --field captured_from="/absolute/path/to/source.md" \
+  --field capture_date=YYYY-MM-DD \
+  --field original_created=YYYY-MM-DD \
+  --agent <name>
 ```
+
+Replace the dates with today's capture date and the source's original creation
+date. Omit `original_created` if it is unknown; do not invent provenance.
 
 `--short` is the one-line summary used in the global daily log. It is stored on
 the record and truncated to 120 characters. If omitted, `create` uses the title

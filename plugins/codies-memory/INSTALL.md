@@ -1,240 +1,217 @@
-# Codies Memory — Agent Self-Installation
+# Codies Memory — Installation
 
-This guide is for agents that cannot use Claude Code plugins (e.g. Codie/Codex, OpenCode). If you're running as a Claude Code plugin, the `memory-boot` skill handles setup automatically.
+Install the skills through your agent's plugin manager and the CLI through `uv tool`.
+The maintained source for both is the public [Limitless repository](https://github.com/pyros-projects/limitless).
+The Python wheel contains the CLI, not the skills or their bundled references.
 
-## Supported Modes
+## Prerequisites
 
-`codies-memory` works in two supported modes:
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- Git
 
-- **Standalone mode** — local canonical vault only
-- **Full mode** — local canonical vault plus QMD retrieval across memory layers
+`uv` manages the CLI's isolated environment and a compatible Python (3.11 or newer).
+You do not need a separate Python installation or a development virtualenv.
 
-The plugin owns structured writes, promotion, trust, and boot behavior. QMD is the
-recommended read path when available, but it is not packaged inside this plugin.
+## Step 1: Install the Skills
 
-Standalone mode is fully usable. Full mode is recommended because QMD makes recall:
+In Claude Code:
 
-- faster
-- more token-efficient
-- semantic as well as keyword-based
-- better across multiple memory stores
+```text
+/plugin marketplace add pyros-projects/limitless
+/plugin install codies-memory@limitless
+```
 
-If the user wants the better recall path, recommend installing QMD and offer to
-help install QMD instead of making them discover it later.
-
-## Step 0: Check If Already Installed
+In the Codex CLI:
 
 ```bash
-which codies-memory 2>/dev/null || echo "NOT_INSTALLED"
+codex plugin marketplace add pyros-projects/limitless
+codex plugin add codies-memory@limitless
 ```
 
-**If the CLI exists**, do not assume it is current. First verify which copy you are using:
+Start a new agent session after installing or updating the plugin so its skills
+are available.
+
+Other agents can load the skills from `plugins/codies-memory/skills/` in the
+public repository. Include each skill's bundled references.
+
+## Step 2: Install and Verify the CLI
+
+Run this from your actual project directory:
 
 ```bash
-which codies-memory
-codies-memory -h
+uv tool install "git+https://github.com/pyros-projects/limitless.git@main#subdirectory=plugins/codies-memory"
 ```
 
-If `which codies-memory` points at `~/.local/share/codies-memory/.venv/bin/codies-memory`, update that clone before continuing:
+For an existing installation that needs migration from a legacy clone, a pinned
+revision, or a local path, reinstall from the maintained source:
 
 ```bash
-cd ~/.local/share/codies-memory
-git pull
-uv sync
+uv tool install --reinstall "git+https://github.com/pyros-projects/limitless.git@main#subdirectory=plugins/codies-memory"
 ```
 
-Then continue with **Step 3**.
-
-**If `NOT_INSTALLED`**, continue with Step 1.
-
-## Step 1: Clone the Repository
+Check which executable the shell resolves. On Linux/macOS:
 
 ```bash
-if [ -d ~/.local/share/codies-memory ]; then
-  echo "ALREADY_CLONED"
-else
-  mkdir -p ~/.local/share
-  git clone https://github.com/pyros-projects/codies-memory.git ~/.local/share/codies-memory
-fi
+command -v codies-memory
+codies-memory --version
 ```
 
-**If `ALREADY_CLONED`**, update it before continuing:
+On native Windows PowerShell:
+
+```powershell
+Get-Command codies-memory -All
+codies-memory --version
+```
+
+If the command is missing, run `uv tool update-shell` and reopen the shell or
+agent terminal. `uv tool dir --bin` shows the directory that should be on `PATH`.
+
+If the command still resolves to an old `.venv` (for example
+`~/.local/share/codies-memory/.venv/bin/codies-memory`), deactivate that environment
+and remove its old codies-memory-specific `PATH` entry from the shell configuration.
+Keep the old clone and virtualenv intact. Reopen the shell and repeat the path and
+version checks; installing a new CLI alone does not fix an earlier `PATH` entry.
+
+These skills require CLI 1.2.4 or newer, including `promote --check`,
+`--session-count`, and `--references` (inspect `codies-memory promote --help`).
+Compare `--version` with `version` in the installed plugin's `pyproject.toml`,
+when available. Update an older backend; if the CLI is newer than the plugin,
+refresh the stale plugin instead of downgrading the CLI. A CLI without
+`--version` is outdated. For unpublished plugin changes, use the local-checkout
+installation below.
+
+## Step 3: Initialize Your Global Vault and Identity
+
+Use the agent name already established in the session, including its casing.
+Ask for a name only if none is known. Keep the current project directory.
 
 ```bash
-cd ~/.local/share/codies-memory
-git pull
-uv sync
+codies-memory init --type global --agent <name>
 ```
 
-## Step 2: Install Dependencies
+Run this even when the CLI was already installed. Initialization is idempotent:
+it creates missing directories and seed files in `~/.memory/<name>/` and preserves
+existing files. CLI availability does not prove this agent's vault exists.
+
+Read all three files in `~/.memory/<name>/identity/`. Preserve existing real
+content and the `---` frontmatter. Fill only empty or placeholder sections:
+
+1. **`self.md`** — Your name, model, capabilities, personality, and working style.
+2. **`rules.md`** — Your standing operational rules, drawing from the applicable
+   AGENTS.md, CLAUDE.md, or equivalent instructions.
+3. **`user.md`** — Facts already known from this conversation. Leave it empty if
+   none are known. Do not ask the user to describe themselves or explore the
+   filesystem for personal information. Later observations can be appended with
+   `codies-memory user "observation" --agent <name>`.
+
+**Setup is incomplete until `self.md` and `rules.md` contain real content.**
+Do not replace an established identity with fresh setup text.
+
+## Step 4: Verify With Boot
+
+From the original project directory:
 
 ```bash
-cd ~/.local/share/codies-memory
-uv sync
+codies-memory boot --agent <name> --budget 12000
 ```
 
-This installs the `codies-memory` CLI and Python library.
+Confirm that boot shows real identity content. Project context is resolved from
+the current working directory; use `--working-dir /path/to/project` to target a
+different directory. Do not change into the CLI's installation directory.
 
-## Step 3: Initialize Your Global Vault
-
-The user should have told you which agent name to use. If not, ask them.
+If no named project vault exists, global-only boot is expected. Initialize project
+memory when requested:
 
 ```bash
-cd ~/.local/share/codies-memory
-uv run codies-memory init --type global --agent <name>
+codies-memory init --type project --agent <name> --working-dir /path/to/project
 ```
 
-This creates `~/.memory/<name>/` with identity, procedural, reflections, dreams, registry, and boot directories.
-
-## Step 4: Write Your Identity (Required)
-
-The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content. **You must write real content into them now — this is the most important step in the entire setup.**
-
-Keep the existing `---` frontmatter block at the top. Write your content below it.
-
-1. **`self.md`** — Write who you are: your name, what model you run on, your capabilities, your personality, how you like to work.
-
-2. **`rules.md`** — Write your standing operational rules. If your platform has an AGENTS.md or similar, draw from that.
-
-3. **`user.md`** — If you already know things about the user from this conversation, write them. Otherwise leave it empty. User knowledge accumulates over time via `uv run codies-memory user "observation" --agent <name>`. **Do not ask the user to describe themselves and do not explore the filesystem.**
-
-Only proceed after `self.md` and `rules.md` have real content.
-
-## Step 5: Verify With Boot
-
-```bash
-cd ~/.local/share/codies-memory
-uv run codies-memory boot --agent <name> --budget 4000
-```
-
-You should see your identity content in the output — not just placeholder text. If boot shows real identity, setup is complete.
-
-## Step 6: Show the User What They Can Do
-
-If this was a new install, show the user this cheat sheet:
-
-```
-Here's what you can ask me to do with the memory system:
-
-**Set up project memory**
-→ "Start tracking memory for /path/to/my-project"
-
-**Add information about a project**
-→ "Remember that this project uses FastAPI and PostgreSQL"
-
-**Add global information (applies across all projects)**
-→ "Remember that I always want tests before implementation"
-
-**Ask about what I know**
-→ "What do you remember about this project?"
-
-**Session summaries**
-→ "Wrap up this session and save what we did"
-
-**Review and maintenance**
-→ "Check if there's anything in memory that needs attention"
-```
-
-## Initialize a Project Vault
-
-From anywhere, targeting any project:
-
-```bash
-cd ~/.local/share/codies-memory
-uv run codies-memory init --type project --agent <name> --working-dir /path/to/project
-```
+After a new setup, use the `memory-boot` skill's short introduction to show the
+user what they can ask you to remember.
 
 ## Day-to-Day Usage
 
-All commands require `--agent <name>`. Run from the codies-memory repo dir with `uv run`, or add the venv to PATH.
+Run the installed CLI from the project you are working on. Memory commands require
+`--agent <name>`; `--version` and `--help` do not.
 
 ```bash
-cd ~/.local/share/codies-memory
+# Boot and check the current project
+codies-memory boot --agent <name> --budget 12000
+codies-memory status --agent <name>
 
-# Boot (every session start)
-uv run codies-memory boot --agent <name> --budget 4000
-
-# Capture something
-uv run codies-memory capture "observation text" --source "session" --agent <name> --working-dir /path/to/project
-
-# List records
-uv run codies-memory list inbox --agent <name> --working-dir /path/to/project
-
-# Check status
-uv run codies-memory status --agent <name> --working-dir /path/to/project
+# Capture an observation and inspect the inbox
+codies-memory capture "observation text" --source "session" --agent <name>
+codies-memory list inbox --agent <name>
 
 # Rebuild warm summaries
-uv run codies-memory refresh --agent <name> --working-dir /path/to/project
+codies-memory refresh --agent <name>
 
-# Save something you learned about the user
-uv run codies-memory user "prefers short, high-signal answers" --agent <name>
+# Save a user preference or a session summary
+codies-memory user "prefers short, high-signal answers" --agent <name>
+codies-memory create session --title "Session Summary" --body-file /path/to/summary.md --agent <name>
 
-# Close session
-uv run codies-memory create session --title "Session Summary" --body "What happened..." --agent <name> --working-dir /path/to/project
-
-# Report feedback about the memory system itself
-uv run codies-memory feedback "describe what happened" --agent <name>
+# Report feedback about the memory system
+codies-memory feedback "describe what happened" --agent <name>
 ```
 
-For rich multiline record bodies, prefer `--body-file` over shell-quoted `--body`.
-Inline `--body` now normalizes literal `\n` sequences to real newlines, but
-`--body-file` remains the safer operator path for longer structured content.
+For multiline record bodies, prefer `--body-file`. Inline `--body` also normalizes
+literal `\n` sequences to real newlines.
 
-## How Recall Works
+When no project resolves, `create` and `capture` save project records in `_general`.
+Read commands do not silently use that catch-all: pass `--general` to `boot`,
+`status`, or `list` when you intend to read it.
 
-Use the system in this order:
+## Optional QMD Recall
 
-1. `codies-memory boot` for scoped startup context
-2. `qmd query` for broader recall across memory stores
-3. direct file reads when you need exact on-disk truth
+The canonical Markdown vault works on its own (**standalone mode**). Adding QMD
+provides keyword and semantic retrieval across memory stores (**full mode**).
+QMD is optional and installed separately; offer help with it if the user wants
+broader recall.
 
-Useful QMD commands when it is available:
+Use `codies-memory boot --agent <name>` for scoped startup context, `qmd query`
+for broader recall, and `qmd get` or direct file reads for exact source inspection.
+Before treating a QMD miss as absence, check `qmd status` and collection timestamps:
+the index can lag behind writes on disk.
 
-```bash
-qmd status
-qmd query
-qmd get
-```
-
-Do not treat a QMD miss as proof of absence until you check `qmd status`. The
-current index can lag behind on-disk writes, so collection timestamps or "last
-updated" values matter.
-
-One more practical gotcha: QMD structured searches are finicky about hyphenated
-names in `vec` / `hyde` queries. A term like `ACE-Step` or `codies-memory` can
-be interpreted like search syntax and trigger errors such as `Negation (-term)
-is not supported in vec/hyde queries`. When that happens, retry with a plain
-language variant like `ACE Step` or `codies memory`, and keep explicit `-term`
-negation only in `lex` queries.
-
-## Quick Sanity Check
-
-When something feels off, verify that you are using the expected copy of the CLI:
-
-```bash
-which codies-memory
-codies-memory -h
-```
-
-The help output should include newer commands like `user` and `feedback`. If it does not, you are probably running a stale install and should update the repo you are resolving from.
+In structured QMD searches, use plain-language names such as `codies memory` in
+`vec` / `hyde` queries. Keep explicit `-term` negation in `lex` queries only.
 
 ## Updating
 
+For the standard install tracking public `main`:
+
 ```bash
-cd ~/.local/share/codies-memory
-git pull
-uv sync
+uv tool upgrade codies-memory
+codies-memory --version
 ```
+
+Update the skills through your plugin manager and compare the versions again.
+You can replace `@main` with a tag or commit when installing for a fixed revision;
+`uv tool upgrade` keeps that pin. To move to another revision, reinstall with its
+URL using the command in Step 2.
+
+## Trying an Unpublished Checkout
+
+If you already have a local Limitless checkout, install its backend directly:
+
+```bash
+uv tool install --reinstall /absolute/path/to/limitless/plugins/codies-memory
+```
+
+Load the matching skills from that checkout through your agent's local skill or
+plugin support. Continue running the CLI from the user's project directory.
+After the changes reach public `main`, reinstall from the canonical Git URL in
+Step 2 so future updates do not depend on a local checkout or temporary plugin
+cache path.
 
 ## Uninstalling
 
 ```bash
-# Remove repo
-rm -rf ~/.local/share/codies-memory
-
-# Optionally remove memory (THIS DELETES YOUR MEMORIES)
-# rm -rf ~/.memory
+uv tool uninstall codies-memory
 ```
+
+Remove the skills through your plugin manager. Your memories remain in
+`~/.memory/<name>/`.
 
 ---
 

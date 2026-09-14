@@ -6,7 +6,7 @@ description: "This skill should be used when the agent needs to evaluate or prom
 # Memory Promote
 
 > **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
-> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+> `codies-memory feedback "describe what happened" --agent <name>` — your feedback is saved and reviewed.
 
 ## When To Use
 
@@ -34,30 +34,40 @@ project lesson -> global lesson (proven across 2+ projects)
 
 ## How To Run
 
+Run the installed CLI from the user's project directory. For setup or PATH issues,
+see [INSTALL.md](../../INSTALL.md).
+
 ```bash
-# List active inbox items for promotion review
-codies-memory list inbox --status active
+codies-memory status --agent <name>
+```
 
-# Evaluate all inbox items for promotion (no CLI equivalent yet)
-uv run python -c "
-from pathlib import Path
-from codies_memory.records import list_records
-from codies_memory.promotion import evaluate_for_promotion
+If no named project vault resolves, skip project lists and evaluation. To review
+the catch-all intentionally, use `--general` with `status` and `list`; do not
+silently switch scope.
 
-vault = Path('.memory')
-inbox_items = list_records(vault, 'inbox', scope='project')
-for item in inbox_items:
-    result = evaluate_for_promotion(item, context={'session_count': 3})
-    if result['eligible']:
-        print(f'  Promote: {item[\"frontmatter\"][\"title\"][:60]}')
-        print(f'  Suggested: {result[\"suggested_types\"]}')
-"
+```bash
+# List active records in the intended project
+codies-memory list inbox --status active --format paths --agent <name>
+codies-memory list threads --status active --format paths --agent <name>
 
+# Read a listed inbox/thread record and evaluate it without changing it
+codies-memory promote /absolute/path/to/record.md --check --agent <name>
+```
+
+For inbox and thread records, `--check` prints JSON with `eligible`,
+`suggested_types`, and `reason`. Other source types are not supported by this
+evaluator. Add `--session-count N` and/or `--references N` only for observed
+evidence supporting that individual record. Both default to `0`; the number of
+sessions in the vault is not evidence that every record recurred. Evaluate each
+candidate separately.
+`--check` cannot be combined with `--to` or `--to-global`.
+
+```bash
 # Promote an inbox item to a thread
-codies-memory promote /path/to/record.md --to thread
+codies-memory promote /absolute/path/to/record.md --to thread --agent <name>
 
 # Promote a project lesson to global
-codies-memory promote /path/to/lesson.md --to-global
+codies-memory promote /absolute/path/to/lesson.md --to-global --agent <name>
 ```
 
 ## Probation

@@ -6,104 +6,60 @@ description: "This skill should be used at session start, when entering a new pr
 # Memory Boot
 
 > **BETA** — This memory system is in active testing. If you encounter bugs, confusing behavior, or have suggestions, run:
-> `codies-memory feedback "describe what happened"` — your feedback is saved and reviewed.
+> `codies-memory feedback "describe what happened" --agent <name>` — your feedback is saved and reviewed.
 
-## Step 0: Check If Installed
+## Step 0: Verify CLI, Vault, and Identity
 
-Before anything else, check if the CLI exists:
+Keep the user's original project working directory throughout setup and boot.
+Check these three things independently, even when `codies-memory` already exists.
 
-```bash
-which codies-memory 2>/dev/null || echo "NOT_INSTALLED"
-```
+### A. Current CLI
 
-**If `NOT_INSTALLED`**, follow the setup below. Otherwise skip to **Step 1: Boot**.
-
-### First-Time Setup
-
-The user should have told you which agent name to use (e.g. `claude`, `codie`, `octocat`). If not, ask them.
-
-**A) If this is a Claude Code plugin** (you're reading this from a plugin directory):
+On Linux/macOS, run `command -v codies-memory`; on native Windows PowerShell, run
+`Get-Command codies-memory -All`. Then run:
 
 ```bash
-# Install the Python backend from the plugin root
-cd "${CLAUDE_PLUGIN_ROOT}" && uv sync
-
-# Initialize your global vault
-uv run codies-memory init --type global --agent <name>
+codies-memory --version
 ```
 
-**B) If this is a standalone installation** (not a Claude Code plugin):
+Require CLI 1.2.4 or newer and verify that `codies-memory promote --help` includes
+`--check`, `--session-count`, and `--references`. Compare the version with the
+plugin's `pyproject.toml` (two directories above this skill), when available:
+update an older backend, or refresh a stale plugin if the CLI is newer.
 
-Read `INSTALL.md` in this project for full instructions. Short version:
-- Clone repo to `~/.local/share/codies-memory`
-- `cd ~/.local/share/codies-memory && uv sync`
-- `uv run codies-memory init --type global --agent <name>`
+If the CLI is absent, outdated, or resolves to a legacy/plugin-cache `.venv`,
+follow [INSTALL.md](../../INSTALL.md) to install or migrate to `uv tool` from the
+public Limitless repository. Its PATH instructions cover `uv tool update-shell`,
+reopening the shell, and removing an old codies-memory venv's PATH entry without
+deleting it. Repeat executable, version, and capability checks before continuing.
 
-After the base install is working, recommend QMD as the preferred retrieval companion.
-Be explicit:
-- `codies-memory` works without QMD
-- QMD is still recommended because recall is faster, more token-efficient, and semantic
-- if the user wants the better recall path, offer to help install QMD
+### B. This Agent's Global Vault
 
-### After Setup: Write Your Identity (Required)
-
-The init command created seed identity files at `~/.memory/<name>/identity/`. They have placeholder content. **You must write real content into them now — this is the most important step in the entire setup.**
-
-Use your file editing tools (Write/Edit). Keep the existing `---` frontmatter block at the top. Write your content below it.
-
-1. **`self.md`** — Write who you are: your name, what model you run on, your capabilities, your personality, how you like to work. This is what future sessions read first to know who they are.
-
-2. **`rules.md`** — Write your standing operational rules: how you handle code, how you communicate, what you always/never do. If your platform has an AGENTS.md, CLAUDE.md, or similar, draw from that.
-
-3. **`user.md`** — If you already know things about the user from this conversation, write them. Otherwise leave it empty. **Do not ask the user to describe themselves and do not explore the filesystem.** User knowledge accumulates naturally over time via `codies-memory user "observation" --agent <name>`.
-
-Only proceed to the next step after `self.md` and `rules.md` have real content.
-
-### After Setup: Verify With Boot
-
-Run boot to confirm everything loads:
+Use the agent name already established in the session, including casing. Ask only
+if none is known. Always run the idempotent initialization:
 
 ```bash
-codies-memory boot --agent <name> --budget 12000
+codies-memory init --type global --agent <name>
 ```
 
-You should see your identity content in the output — not just placeholder text. If boot shows real identity, setup is complete.
+This creates missing files and preserves existing ones. An installed CLI does not
+mean this agent's vault is initialized.
 
-### After Setup: Show the User What They Can Do
+### C. Real Identity
 
-If this was a new install, show the user what they can ask you to do. Use this format — categories with example prompts. No internal jargon (no "threads", "lessons", "inbox", "promote"). Just plain language.
+Read `self.md`, `rules.md`, and `user.md` in `~/.memory/<name>/identity/`.
+Preserve existing real content and frontmatter; fill only empty or placeholder
+sections using file editing tools:
 
-```
-Here's what you can ask me to do with the memory system:
+- `self.md`: your name, model, capabilities, personality, and working style.
+- `rules.md`: standing operational rules from the applicable AGENTS.md,
+  CLAUDE.md, or equivalent instructions.
+- `user.md`: only facts already known from the conversation. Leave it empty if
+  none are known. Do not ask the user to describe themselves or explore the
+  filesystem for personal information.
 
-**Set up project memory**
-→ "Start tracking memory for /path/to/my-project"
-→ "Initialize memory for this project"
-
-**Add information about a project**
-→ "Remember that this project uses FastAPI and PostgreSQL"
-→ "Note that the deploy target is AWS ECS"
-
-**Add global information (applies across all projects)**
-→ "Remember that I always want tests before implementation"
-→ "Add a global rule: never commit to main directly"
-
-**Ask about what I know**
-→ "What do you remember about this project?"
-→ "What have you learned across all my projects?"
-
-**Session summaries**
-→ "Wrap up this session and save what we did"
-→ "Write a summary before we stop"
-
-**Review and maintenance**
-→ "Check if there's anything in memory that needs attention"
-→ "What's been sitting in memory unreviewed?"
-```
-
-Keep it exactly in this format — brief, scannable, no extra explanation.
-
----
+**Continue only when `self.md` and `rules.md` contain real content.** Never replace
+an established identity with fresh setup text.
 
 ## Step 1: Boot (Every Session)
 
@@ -119,6 +75,20 @@ This assembles your boot packet from:
 5. Branch overlay, last session summary, and the latest global daily-log tail
 
 Read the output — it contains your identity, project context, and recent state.
+Verify that it shows your real identity, not seed placeholders. Run from the
+original project directory or pass `--working-dir /path/to/project` explicitly.
+
+After a new setup, give the user a short introduction with example prompts:
+
+- "Start tracking memory for this project"
+- "Remember that this project uses FastAPI and PostgreSQL"
+- "Remember that I always want tests before implementation"
+- "What do you remember about this project?"
+- "Wrap up this session and save what we did"
+- "Check if there's anything in memory that needs attention"
+
+Codies-memory works without QMD. Offer to help install QMD if the user wants
+keyword and semantic recall across memory stores.
 
 Boot does not implicitly fall back to `_general`. If no project vault resolves,
 normal boot reports a global-only boot and still includes the latest
@@ -170,7 +140,8 @@ when you intentionally want the catch-all project.
 
 ## Available Commands
 
-All commands require `--agent <name>`. Use `--working-dir` to target a project without being in its directory.
+Memory commands require `--agent <name>`; `--version` and `--help` do not. Run from
+the user's project directory or use `--working-dir` to target another project.
 
 ```bash
 # Initialize a project vault (from anywhere)

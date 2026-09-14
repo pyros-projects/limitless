@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from codies_memory import __version__
 from codies_memory.vault import (
     ensure_general_project_vault,
     init_global_vault,
@@ -25,7 +26,7 @@ from codies_memory.records import (
     sanitize_short_text,
     update_record,
 )
-from codies_memory.promotion import promote_within_project, promote_to_global
+from codies_memory.promotion import evaluate_for_promotion, promote_within_project, promote_to_global
 from codies_memory.profile import load_profile, get_write_gate_bias
 from codies_memory.warm import write_warm_artifacts
 
@@ -43,6 +44,25 @@ def _resolve_agent(args: argparse.Namespace) -> str:
     return agent
 
 
+def _require_global_vault(args: argparse.Namespace) -> Path:
+    agent = _resolve_agent(args)
+    vault = resolve_global_vault(agent)
+    if not (vault / "registry" / "projects.yaml").is_file():
+        print(
+            f"Error: global vault is not initialized. Run 'codies-memory init --type global --agent {agent}' first.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return vault
+
+
+def _nonnegative_int(value: str) -> int:
+    count = int(value)
+    if count < 0:
+        raise argparse.ArgumentTypeError("must be a non-negative integer")
+    return count
+
+
 def _resolve_project_vault(
     args: argparse.Namespace,
     *,
@@ -55,8 +75,7 @@ def _resolve_project_vault(
     is true, in which case the reserved ``_general`` project vault is created
     if needed and returned.
     """
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
     working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
     project_vault = resolve_project_vault(global_vault, working_dir)
     if project_vault is None:
@@ -119,7 +138,7 @@ def cmd_init(args: argparse.Namespace) -> None:
         init_global_vault(global_vault)
         print(f"Initialized global vault at {global_vault}")
     else:
-        global_vault = resolve_global_vault(agent)
+        global_vault = _require_global_vault(args)
         working_dir = Path(args.working_dir).resolve() if args.working_dir else Path.cwd()
         slug = getattr(args, "slug", None)
         vault = init_project_vault(
@@ -137,6 +156,7 @@ def cmd_validate(args: argparse.Namespace) -> None:
     if args.type == "global":
         path = global_vault
     else:
+        global_vault = _require_global_vault(args)
         working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
         project_vault = resolve_project_vault(global_vault, working_dir)
         if project_vault is None:
@@ -165,8 +185,7 @@ def cmd_validate(args: argparse.Namespace) -> None:
 
 
 def cmd_boot(args: argparse.Namespace) -> None:
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
 
     project_vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
 
@@ -222,8 +241,7 @@ def cmd_capture(args: argparse.Namespace) -> None:
 
 
 def cmd_create(args: argparse.Namespace) -> None:
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
 
     # Global-only types: auto-route to global scope
     GLOBAL_ONLY_TYPES = {"reflection", "dream", "skill", "playbook", "identity"}
@@ -282,13 +300,24 @@ def cmd_create(args: argparse.Namespace) -> None:
 
 
 def cmd_promote(args: argparse.Namespace) -> None:
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
 
     source_path = Path(args.source).resolve()
-    if not source_path.exists():
+    if not source_path.is_file():
         print(f"Error: source file not found: {source_path}", file=sys.stderr)
         sys.exit(1)
+
+    if getattr(args, "check", False):
+        source = read_record(source_path)
+        if source["frontmatter"].get("type") not in {"inbox", "thread"}:
+            print("Error: --check supports inbox and thread records only.", file=sys.stderr)
+            sys.exit(1)
+        result = evaluate_for_promotion(source, context={
+            "session_count": args.session_count,
+            "references": args.references,
+        })
+        print(json.dumps(result, indent=2))
+        return
 
     to_type = getattr(args, "to", None)
     to_global = getattr(args, "to_global", False)
@@ -315,8 +344,7 @@ def cmd_promote(args: argparse.Namespace) -> None:
 
 
 def cmd_list(args: argparse.Namespace) -> None:
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
     scope = args.scope
 
     if scope == "global":
@@ -389,8 +417,7 @@ def cmd_list(args: argparse.Namespace) -> None:
 
 
 def cmd_status(args: argparse.Namespace) -> None:
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
 
     project_vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
 
@@ -483,8 +510,7 @@ def cmd_feedback(args: argparse.Namespace) -> None:
 
 def cmd_refresh(args: argparse.Namespace) -> None:
     """Rebuild derived warm-memory artifacts."""
-    agent = _resolve_agent(args)
-    global_vault = resolve_global_vault(agent)
+    global_vault = _require_global_vault(args)
 
     scope = getattr(args, "scope", "both")
     project_vault = None
@@ -517,6 +543,7 @@ def main() -> None:
         prog="codies-memory",
         description="File-based two-tier memory system for AI agents.",
     )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # --- init ---
@@ -794,6 +821,23 @@ def main() -> None:
         action="store_true",
         default=False,
         help="Promote to global vault.",
+    )
+    promote_group.add_argument(
+        "--check",
+        action="store_true",
+        help="Evaluate inbox/thread promotion heuristics as JSON without changing the record.",
+    )
+    promote_parser.add_argument(
+        "--session-count",
+        type=_nonnegative_int,
+        default=0,
+        help="Observed sessions for this record, used with --check (default: 0).",
+    )
+    promote_parser.add_argument(
+        "--references",
+        type=_nonnegative_int,
+        default=0,
+        help="Observed references to this record, used with --check (default: 0).",
     )
     promote_parser.add_argument(
         "--agent",

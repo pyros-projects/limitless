@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import sys
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
@@ -12,9 +14,41 @@ import json
 
 from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
-    cmd_promote, cmd_refresh, cmd_validate, _resolve_agent,
+    cmd_promote, cmd_refresh, cmd_validate, main, _resolve_agent,
 )
 from codies_memory.vault import GLOBAL_DIRS, LAZY_GLOBAL_DIRS, PROJECT_DIRS, resolve_global_vault
+
+
+def test_cli_version_without_a_vault(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    monkeypatch.setattr(sys, "argv", ["codies-memory", "--version"])
+
+    with pytest.raises(SystemExit) as result:
+        main()
+
+    assert result.value.code == 0
+    assert capsys.readouterr().out.strip() == f"codies-memory {version('codies-memory')}"
+    assert not (tmp_path / ".memory").exists()
+
+
+@pytest.mark.parametrize("arguments", [
+    ["boot"],
+    ["boot", "--general"],
+    ["status"],
+    ["refresh"],
+    ["capture", "A note", "--source", "test"],
+])
+def test_uninitialized_cli_explains_setup_without_writing(arguments, tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(sys, "argv", ["codies-memory", *arguments, "--agent", "NewAgent"])
+
+    with pytest.raises(SystemExit) as result:
+        main()
+
+    assert result.value.code == 1
+    assert "codies-memory init --type global --agent NewAgent" in capsys.readouterr().err
+    assert not (tmp_path / ".memory").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -1104,6 +1138,69 @@ class TestCmdList:
 # ---------------------------------------------------------------------------
 
 class TestCmdPromote:
+
+    @pytest.mark.parametrize("record_type,gate,counts,eligible,targets", [
+        ("inbox", "allow", [], False, []),
+        ("inbox", "allow", ["--session-count", "1"], True, ["thread", "lesson"]),
+        ("inbox", "hold", ["--session-count", "3"], False, []),
+        ("thread", "allow", ["--session-count", "1"], False, []),
+        ("thread", "allow", ["--session-count", "2"], True, ["decision", "lesson"]),
+        ("thread", "allow", ["--references", "2"], True, ["decision", "lesson"]),
+    ])
+    def test_check_from_another_directory_is_read_only(
+        self, record_type, gate, counts, eligible, targets, tmp_path, monkeypatch, capsys
+    ):
+        from codies_memory.records import create_record
+
+        vault = _setup_project(tmp_path, monkeypatch)
+        source = create_record(
+            vault, record_type, "project", "Check this record", "Evidence to review.", gate=gate
+        )
+        global_vault = resolve_global_vault("claude")
+        before = {p: p.read_bytes() for p in global_vault.rglob("*") if p.is_file()}
+        foreign = tmp_path / "other project"
+        foreign.mkdir()
+        monkeypatch.chdir(foreign)
+        capsys.readouterr()
+        monkeypatch.setattr(sys, "argv", [
+            "codies-memory", "promote", str(source), "--check", "--agent", "claude", *counts
+        ])
+
+        main()
+
+        result = json.loads(capsys.readouterr().out)
+        assert result["eligible"] is eligible
+        assert result["suggested_types"] == targets
+        assert result["reason"]
+        assert {p: p.read_bytes() for p in global_vault.rglob("*") if p.is_file()} == before
+
+    @pytest.mark.parametrize("flag", ["--session-count", "--references"])
+    def test_check_rejects_negative_evidence_counts(self, flag, monkeypatch, capsys):
+        monkeypatch.setattr(sys, "argv", [
+            "codies-memory", "promote", "record.md", "--check", "--agent", "claude", flag, "-1"
+        ])
+
+        with pytest.raises(SystemExit) as result:
+            main()
+
+        assert result.value.code == 2
+        assert "non-negative" in capsys.readouterr().err
+
+    @pytest.mark.parametrize("record_type", ["decision", "lesson"])
+    def test_check_explains_unsupported_record_types(self, record_type, tmp_path, monkeypatch, capsys):
+        from codies_memory.records import create_record
+
+        vault = _setup_project(tmp_path, monkeypatch)
+        source = create_record(vault, record_type, "project", "Existing record", "Evidence.")
+        monkeypatch.setattr(sys, "argv", [
+            "codies-memory", "promote", str(source), "--check", "--agent", "claude"
+        ])
+
+        with pytest.raises(SystemExit) as result:
+            main()
+
+        assert result.value.code == 1
+        assert "inbox and thread" in capsys.readouterr().err
 
     def test_cmd_promote_to_thread(self, tmp_path, monkeypatch, capsys):
         project_vault = _setup_project(tmp_path, monkeypatch)

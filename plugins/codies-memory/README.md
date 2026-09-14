@@ -4,6 +4,19 @@ Status: implemented operational kernel
 Owner: Codie
 Scope: local-first operational memory kernel for Codie-class agents
 
+## Installation
+
+Install the skills through the native Claude Code or Codex plugin manager, then
+install the CLI from the public Limitless repository:
+
+```bash
+uv tool install "git+https://github.com/pyros-projects/limitless.git@main#subdirectory=plugins/codies-memory"
+```
+
+Follow [INSTALL.md](INSTALL.md) for plugin commands, PATH checks, migration from
+older installs, and initial vault/identity setup. Run the CLI from your working
+project; `codies-memory --version` identifies the installed backend. QMD is optional.
+
 ## What This Is
 
 This directory contains the current `codies-memory` implementation and the design
