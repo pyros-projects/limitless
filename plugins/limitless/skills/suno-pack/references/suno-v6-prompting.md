@@ -166,7 +166,7 @@ lyrics"). Vocals still leak on some genres (EDM, D&B reported). Layer:
    - Web UI, arrangement control: Lyrics Mode **Write** with the
      structure-tags-only Lyrics block (each gap with a job). Higher leak risk;
      re-roll on leaks.
-   - CLI (when the execution layer supports v6): the instrumental flag plus
+   - CLI (`suno generate --instrumental`): the instrumental flag plus
      the structure-tags Lyrics block.
    - A song with a **Voice cannot be instrumental** — remove the Voice.
 2. Lyrics block: structure tags only, starting with `[Instrumental]`, every

@@ -27,8 +27,9 @@ Before authoring vocal lyrics, rewriting lyrics, or diagnosing lyric
 density/flow problems, read `references/lyrics-rhythm-craft.md` — the lyric
 beat-map and performance notation contract. Before ANY execution work
 (rendering, covers, library, experiments, saga sync), read
-`references/pp-cli.md` — it states the current execution status; for
-experiment mode additionally `references/experiment-lanes.md`. Do not prompt
+`references/suno-cli.md` — the verified v6 command truth; for the browser
+route additionally `references/browser-ui.md`, for experiment mode
+`references/experiment-lanes.md`. Do not prompt
 from memory of older Suno versions and do not improvise CLI flags.
 
 ## When to Use
@@ -193,15 +194,17 @@ user explicitly chooses a path. Default file set:
 
 `experiments.md` payloads are DERIVED from the concept (read the
 derivation rules in `references/experiment-lanes.md` before emitting) —
-pre-rolled picks with re-roll menus, never generic madlib fills. Do not emit
-`generate_*.sh` scripts while the execution layer has no v6 path (see Make
-It Real). Executed packs accumulate `audio/` and `runs/`.
+pre-rolled picks with re-roll menus, never generic madlib fills. Packs no
+longer ship `generate_*.sh` scripts; the skill renders them (see Make It
+Real). Executed packs accumulate `audio/` and `runs/`.
 
 Then present a compact summary: track name, premise line, file list, and the
 output path, recommended order (draft with Max Mode off, final take with Max
 Mode on), credit estimate (10 per generation, 20 with Max Mode), ending with
-the handoff line: paste `lyrics_v6.md` into Suno's Advanced mode top to
-bottom — or pick a lane from experiments.md / 'give me experiment N'. Offer
+the handoff line: the pack is paper until the user says so — "say 'make it
+real' to render it (credits, I'll confirm cost first), paste it into Suno's
+Advanced mode yourself, or pick a lane from experiments.md / 'give me
+experiment N'". Offer
 variations (different genre lens, language, vocal swap, the `--wild` route)
 as a follow-up, don't generate them unasked.
 
@@ -228,43 +231,76 @@ ready":
 ## Make It Real — Executing a Pack
 
 Triggers: "render <prompt file>", "generate the pack", "make it real",
-"run the cover pipeline", "how are my Suno tracks doing". **Read
-`references/pp-cli.md` first.**
+"run the cover pipeline", "remaster/cover/extend <take>", "how are my Suno
+tracks doing". **Read `references/suno-cli.md` first — the only source of
+command truth; never improvise flags.**
 
-**Status 2026-10-03: no v6 execution path yet.** `suno-pp-cli` cannot send
-v6 — its model list ends at v5.5, which Suno retired — so its generate,
-cover, extend, and remaster commands must not be run. The replacement
-(paperfoot's `suno` CLI or browser automation on the user's own session) is
-pending a live comparison with the user. Until it lands:
+**Pick the route per request:**
 
-1. Say so plainly in one line. Never fabricate a render, never run a
-   pp-cli generation command, never improvise another CLI's flags.
-2. Hand the paste route: the prompt file in Suno's Advanced-mode order
-   (Settings → Lyrics → Style → Exclude → Title) with the exact settings and
-   the credit cost per generation.
-3. Library reads (saga sync, "how are my tracks doing") may still work
-   through pp-cli's read-only commands — unverified for v6 clips; try them
-   as `references/pp-cli.md` describes and report honestly if they fail.
+| Situation | Claude with Claude in Chrome tools | Any other agent |
+|---|---|---|
+| Default render, cover, remaster, extend | **CLI route** (`suno`, always `--no-captcha`) | CLI route |
+| `suno doctor` says captcha `required: true`, or a call returned `captcha_required` | **browser route** (`references/browser-ui.md`) on the user's real Chrome; the user solves any captcha | **paste route** |
+| A setting the CLI cannot set is only part of the pack's defaults (Variety Off, fixed Duration in a faithful pack) | CLI route with server defaults; name what was not applied in the report and check stored tags after the roll | same |
+| The request is ABOUT a control the CLI cannot set (Variety/My Taste experiment, Mumble, a Duration the user asked for, Remaster strength, image/video/MIDI/playlist input) | **browser route** | **paste route** |
 
-The execution rules that carry over to any future v6 path stay binding:
-explicit user yes before EVERY credit-spending or account-mutating command
-with the cost stated first; already-ran check; per-clip downloads with
-take-aware names; immutable run logs; the human listens and judges, the
-skill never claims to have heard anything.
+Never run the CLI's built-in captcha solver, never a CDP automation browser
+or stealth flags for generation, never `suno-pp-cli` generation commands
+(it cannot send v6), never click a captcha yourself.
+
+The execution loop (CLI route):
+
+1. **Gates:** `suno` present → `suno doctor` healthy (refresh auth on
+   `auth_expired`) → `suno credits`. A failing gate → the playbooks in the
+   reference (offer install, user logs in in their own browser; never paste
+   secrets; fall back to authoring work — never fabricate execution).
+2. **Parse the prompt file:** Settings table → flags; `## Lyrics` block;
+   `## Style of Music`; `## Exclude Styles`; `## Title`. Note every setting
+   the CLI cannot apply.
+3. **Already-ran check:** pack `runs/` hashes + library search — surface
+   prior takes (and their verdicts) before spending. A request that
+   explicitly asks for this re-render and approves the spend ("render it
+   again, go") is the reason: say what exists and proceed.
+4. **Preflight:** the exact command with `--dry-run` (free; generate and
+   describe only).
+5. **Confirm:** one line — estimated cost, credit balance, running pack
+   total, prior-takes finding, settings the route cannot apply. Explicit
+   user yes required for EVERY spending or mutating command; a yes already
+   given in the request for this action counts — then state the line and
+   fire, without asking again.
+6. **Fire and land:** live command with a fresh `--request-id` and
+   `--wait`; parse clip ids; download per clip into staging and move to
+   take-aware names (`<slug>-<model>-take<N>-<clipid8>.mp3`); verify stored
+   tags with `suno info`; write the immutable run log to `runs/`.
+7. **Report:** files, clip ids, credits before/after, captcha state,
+   stored-tags result, settings not applied. The human listens and judges;
+   the skill never claims to have heard anything.
+
+Browser route: the same loop with the UI as the generation step
+(`references/browser-ui.md`); ids, downloads, and the run log still go
+through `suno`. Paste route: hand the prompt file in Advanced-mode order
+(Settings → Lyrics → Style → Exclude → Title) with the exact settings and
+cost; after the user renders, saga sync records the takes.
+
+Covers and remasters: the human picks the seed; the skill proposes from
+observables (journal verdicts, likes, plays, lineage); `parent_clip` goes
+into the run log.
 
 ## Experiment Mode
 
 `--mode experimental` — **read `references/experiment-lanes.md` plus
-`references/pp-cli.md` first.** One invocation = one lane = ONE roll;
+`references/suno-cli.md` first.** One invocation = one lane = ONE roll;
 cost stated before firing; unmet requirements (e.g. missing seed) are
 resolved in conversation, never refused or silently re-rolled. The
 pack's `experiments.md` is the menu source and journal ledger (emit it
-first if the pack predates it). While no v6 execution path exists, the
-roll is a web-UI recipe the user fires by hand: give the exact paste
-payload and settings for the lane, append the journal row unverdicted, stop
-— depth (re-rolls, taming, sweeps) is always human-triggered, one
-invocation each. Variety above Off is a legitimate experiment axis here
-(never in faithful packs).
+first if the pack predates it). The roll follows the route table above: a
+lane whose settings the CLI can send fires through `suno` after the yes;
+a lane that needs Variety, My Taste, or another UI-only control goes
+through the browser route (Claude) or becomes a paste recipe (other
+agents). After the roll: run log with lane metadata, journal row appended
+unverdicted, stop — depth (re-rolls, taming, sweeps) is always
+human-triggered, one invocation each. Variety above Off is a legitimate
+experiment axis here (never in faithful packs).
 
 Verdicts are the field journal scale — love/like/nope/hate, keep = like
 or better; no numeric scores on art, ever. ♥ in the Suno UI syncs as
@@ -274,17 +310,18 @@ or better; no numeric scores on art, ever. ♥ in the Suno UI syncs as
 
 Triggers: "sync the journal", "sync the pack", "rebuild the saga",
 "update the journal from my library". Read-only, free, no confirmation
-needed — recipes in `references/pp-cli.md` (Saga sync section; library
-reads unverified for v6 clips). The loop: clips by pack title(s) → lineage
-closure via `metadata.cover_clip_id` (rebuilds the full tree offline,
-including rolls made by hand in the web UI) → strays by style/time-window
-surfaced as QUESTIONS, never silently included or dropped → journal
-merge under the sacred rules: one row per generation, `is_liked` → at
-least "like" (mark which clip carries the ♥), never downgrade, never
-overwrite a human verdict or note, absence of a like is never "nope" →
-render the lineage tree, update the running credit total. Record each
-clip's `model_name` as returned (`chirp-hawk` = v6, `chirp-goose` =
-v6-mini).
+needed — recipes in `references/suno-cli.md` (Library & saga sync:
+`suno-pp-cli` read-only commands, which still read v6 clips). The loop:
+clips by pack title(s) → lineage closure via `metadata.cover_clip_id`
+(rebuilds the full tree offline, including rolls made by hand in the web
+UI) → strays by style/time-window surfaced as QUESTIONS, never silently
+included or dropped → journal merge under the sacred rules: one row per
+generation, `is_liked` → at least "like" (mark which clip carries the ♥),
+never downgrade, never overwrite a human verdict or note, absence of a
+like is never "nope" → render the lineage tree, update the running credit
+total. Record each clip's model from its UI label
+(`metadata.model_badges.songrow.display_name`, e.g. `V6-WILD`) —
+`model_name` reports `chirp-hawk` for v6-wild too.
 
 ## Artifact Specs
 
@@ -439,8 +476,9 @@ Change nothing else while calibrating. Expect 2–3 rolls.
 | Instrumental = Lyrics Mode Instrumental (or Write + tags-only block) + clean style + Exclude vocals | the toggle is gone and vocals still leak |
 | Canonical metatags only; `( )` only for sung backing | invented tags and bare text get dropped or sung |
 | Cover style prompt minimal, Variety Off on covers | the audio carries the song; Variety makes cover melodies drift |
-| No pp-cli generation commands; never fabricate a render | pp-cli cannot send v6; the v6 execution path is pending |
-| Explicit user yes before EVERY spend, cost stated first | carries over to any execution path |
+| Execute through `suno` with `--no-captcha`; captcha → the user solves it (browser route on Claude, paste route otherwise) | the CLI's solver evades bot detection; pp-cli cannot send v6 |
+| Name every setting the route cannot apply; verify stored tags after the roll | the CLI cannot set Variety, Personalize, Duration |
+| Explicit user yes before EVERY spend, cost stated first | `--yes`-style shortcuts never replace the user's yes |
 
 ## Common Mistakes
 
@@ -462,5 +500,8 @@ Change nothing else while calibrating. Expect 2–3 rolls.
   use `[Bridge: whispered, stripped down]`.
 - **Restating lyrics or structure in a cover prompt** — the source audio
   carries both; a long cover prompt only adds drift.
-- **Running pp-cli generate "to see if v6 works"** — it can't send v6; say
-  the execution path is pending and hand the paste route.
+- **Ghost flags** (`--variety`, `--duration`, `--personalize`) or letting
+  `suno` start its captcha solver — the flags don't exist and the solver is
+  evasion; name what the CLI cannot set and pick a route.
+- **Running pp-cli generate** — it cannot send v6; pp-cli stays read-only
+  for saga sync.

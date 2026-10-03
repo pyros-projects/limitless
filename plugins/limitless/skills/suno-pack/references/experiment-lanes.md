@@ -2,11 +2,12 @@
 
 Experimental mode turns a pack into a small, trackable music experiment.
 Five default lanes (chosen 2026-06-11 from a 27-lane community-evidence
-pool). **v6 status:** no execution path can send v6 yet (see `pp-cli.md`), so
-every roll below is a web-UI recipe the user fires by hand; the skill states
-the payload, settings, and cost, and journals the roll. Once a v6 path
-exists, all execution mechanics from `pp-cli.md` apply — gates,
-confirmation rule, run logs, take-aware downloads.
+pool). All execution mechanics from `suno-cli.md` apply — gates,
+confirmation rule, `--no-captcha`, run logs, take-aware downloads — and the
+route table in SKILL.md decides how a roll fires: through `suno` when the
+lane's settings are CLI-settable, through the browser route (Claude with
+Claude in Chrome) or as a paste recipe (other agents) when it needs
+Variety, My Taste, a fixed Duration, or another UI-only control.
 
 ## Invocation API — one lane at a time
 
@@ -33,14 +34,16 @@ experiment proceeds.
    chosen → ask, offering ALL of: (a) generate the faithful pack now
    (state cost, ~10 credits / 2 takes), (b) pick an existing track —
    propose candidates from observables per the seed-selection rules in
-   `pp-cli.md` (journal verdicts outrank play counts; never claim to
+   `suno-cli.md` (journal verdicts outrank play counts; never claim to
    have listened), (c) the user provides a clip id directly, (d) swap to
    another lane. Same resolve-never-refuse pattern for any future
    requirement.
-2. **Confirm, then roll ONCE.** One generate/cover call. Where the lane
-   specifies slider values the CLI cannot set (covers have no slider
-   flags), say so in the confirmation line, roll on server defaults,
-   record the target values in the run log for web-UI re-rolls.
+2. **Confirm, then roll ONCE.** One generate/cover call. `suno cover`
+   sends only tags, model, and audio influence; where the lane specifies
+   values the CLI cannot set (weirdness or style influence on a cover,
+   Variety, My Taste), say so in the confirmation line and offer the
+   browser route (Claude) or the paste recipe — or, if the user prefers,
+   roll on server defaults and record the target values in the run log.
 3. **Run log** with `lane` metadata (name, invariant, mutation_axis,
    expected_failure). Take-aware downloads to `audio/`.
 4. **Report**: takes + an unverdicted journal row (verdicts are
@@ -184,7 +187,7 @@ roll.
   two loves). No dedicated lane needed: chains are repeat invocations,
   one rung each — "cover the last keeper with <new style>". The
   one-roll rule holds; depth stays human-triggered.
-- **Seed audio abuse** — pp-cli upload support unverified; verify first.
+- **Seed audio abuse** — v6 takes voice memos and audio uploads in the web UI (browser or paste route); the CLI has no upload command.
 - **Section-tag mutation** — low surprise; partially covered by Lane 2.
 - **Haunted tails** — speculative keeper rate; someday-lane.
 
