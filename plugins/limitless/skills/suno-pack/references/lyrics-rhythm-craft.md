@@ -43,7 +43,7 @@ command parser. Know which layer each thing belongs to:
 |---|---|---|
 | **Style prompt box** | top field | The song's DNA: primary/secondary genre, mood, key instruments, **BPM, key/scale, time-feel, texture**. Front-load it — the first 20–30 words carry the most weight. Max 2 genres, 3–4 instruments, 2 moods. Up to ~1000 chars (v4.5+). |
 | **Lyrics field** | body | Structure tags `[ ]`, **performance notation**, the words, vocal/emotion/instrument cues, background layers. **This is where you do the work in this doc.** |
-| **Sliders** | settings | Weirdness + Style Influence = how closely Suno follows you. **Probability weights, not guarantees** — always generate 3–4 versions. Tweak one slider at a time. |
+| **Sliders** | settings | Variety Off first (above Off it rewrites the style prompt); then Weirdness + Style Influence = how closely Suno follows you. **Probability weights, not guarantees** — always generate 3–4 versions. Tweak one slider at a time. |
 
 **Hard rule:** BPM, key, and time-feel live in the STYLE PROMPT, never in the
 lyrics field. Tags, section labels, and notation live in the LYRICS FIELD,
@@ -146,7 +146,13 @@ section tags — Suno uses them as structural anchors to prevent drift.
 `[Outro]` `[Hook]` · `[Build]` `[Drop]` `[Breakdown]` `[Break]`
 `[Instrumental]` `[Solo]` `[Interlude]` `[Fade Out]`
 
-### Advanced (v4.5+/v5)
+### Advanced
+On v6 (the only model family since 2026-09-09), direction inside section
+tags is followed more reliably than on any older model — this is the
+strongest arrangement lever. Tags that ask for timing ("half-time", "at
+0:45") are still ignored; express timing through section order and gaps
+with a length (`[Instrumental Interlude: 8 bars, …]`).
+
 `[Final Chorus]` `[Chorus x2]` `[Callback: Chorus melody]` (v5)
 `[Hook first]` `[Hook delay]` `[Beat switch]` `[Crowd-call section]`
 `[Band drop-out before final chorus]` `[Emotional release]`
@@ -374,8 +380,8 @@ chant chorus (4–6) · one image per slot · verify with a syllable count.
 
 - The "first 20–30 words of the style prompt carry the most weight" claim is
   `[claimed]`, not `[verified]` — worth a controlled test.
-- v5.5-only features (MILO-1080 sequencer, `[no vocals]`, Voices, My Taste)
-  may add control beyond this v4.5-era tag bible — pull from the V5.5
-  reference before final promotion.
+- v6 controls that interact with lyrics (Variety rewriting the style
+  prompt, Lyrics Mode Instrumental/Mumble, Voices) live in
+  `suno-v6-prompting.md`; this file stays the lyric-craft contract.
 - The 200-emotion-word list (47 winners) should be extracted and appended as
   a vocabulary table.

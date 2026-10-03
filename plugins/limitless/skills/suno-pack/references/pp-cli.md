@@ -1,5 +1,33 @@
 # pp-cli Execution Reference — Making Packs Real
 
+## STATUS 2026-10-03 — read first
+
+Suno retired every model before v6 on 2026-09-09. **`suno-pp-cli` cannot
+send v6:** its `--model` list is a fixed table ending at v5.5 (no raw-key
+passthrough), its captcha helper is hCaptcha-only while Suno now challenges
+with Turnstile, and the installed 2026.6.1 still drops `--exclude`. So:
+
+- **Do not run** `generate create/describe/cover/extend/remaster` — every
+  model it can name is retired. Never improvise a v6 value for `--model`.
+- **Read-only library commands** (`doctor`, `credits`, `sync --latest-only`,
+  `sql`, `grep`, `search`, `clips list/get`, `lineage`, `tree`) are not
+  model-bound and may still work for saga sync — unverified on v6 clips.
+  Try them, and report honestly if they fail.
+- **The v6 execution path is pending** a live comparison the user runs:
+  paperfoot's `suno` CLI (0.10.1: v6 default `chirp-hawk`, Turnstile,
+  Weirdness/Style/Audio Influence, Exclude as `negative_tags`, Max Mode,
+  offline `--dry-run` that prints the full request; no Variety, Personalize,
+  or Duration flags) versus browser automation on the user's own logged-in
+  session (every UI control). Until it lands, rendering is the web-UI paste
+  route from SKILL.md.
+- **Still binding** for whichever path wins, and documented below: the
+  confirmation rule, the already-ran check, take-aware downloads into a
+  staging dir, immutable run logs, verdict scale, cover seed selection,
+  captcha posture (never bypass silently).
+
+The command tables below describe pp-cli as verified in June 2026 — history
+for the read-only commands and the rules, not a recipe for v6 generation.
+
 `suno-pp-cli` is the unofficial, agent-friendly Suno CLI (local control
 plane + synced SQLite library). This reference carries the verified
 command truth for executing suno-packs. **Do not improvise flags — the
@@ -282,8 +310,10 @@ anything.
 
 | Action | Cost | Status |
 |---|---|---|
-| `generate create`, v4.5, 2 takes | 10 credits | observed 2026-06-11 |
-| `generate cover`, v5.5, 2 takes | 10 credits | observed 2026-06-12 (9,755 → 9,745) |
+| v6 / v6-wild / v6-mini generation, 2 songs | 10 credits | Suno v6 FAQ (2026-09-09) |
+| same with Max Mode | 20 credits | Suno app tooltip "Costs 2x credits per song" |
+| `generate create`, v4.5, 2 takes (retired model) | 10 credits | observed 2026-06-11 |
+| `generate cover`, v5.5, 2 takes (retired model) | 10 credits | observed 2026-06-12 (9,755 → 9,745) |
 | downloads, sync, library reads | 0 | observed |
 | pack authoring | 0 | by construction |
 
@@ -296,6 +326,7 @@ confirmation line.
 |---|---|---|
 | v4.5 | `chirp-auk` | observed 2026-06-11 |
 | v5.5 | `chirp-fenix` (response also carries `major_model_version: "v5.5"`) | observed 2026-06-12 |
+| — (v6, not sendable by pp-cli) | `chirp-hawk`; v6-mini `chirp-goose`; v6-wild reportedly `chirp-hawk-wild` (wild clips may return `chirp-hawk`) | from v6-capable CLIs' source, 2026-10 |
 | others | `chirp-crow`, `chirp-bluejay`, … | present in libraries; mapping unverified — record what returns, don't guess |
 
 ## Per-pack runnable scripts

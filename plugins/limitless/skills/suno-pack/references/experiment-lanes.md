@@ -2,7 +2,10 @@
 
 Experimental mode turns a pack into a small, trackable music experiment.
 Five default lanes (chosen 2026-06-11 from a 27-lane community-evidence
-pool). All execution mechanics from `pp-cli.md` apply — gates,
+pool). **v6 status:** no execution path can send v6 yet (see `pp-cli.md`), so
+every roll below is a web-UI recipe the user fires by hand; the skill states
+the payload, settings, and cost, and journals the roll. Once a v6 path
+exists, all execution mechanics from `pp-cli.md` apply — gates,
 confirmation rule, run logs, take-aware downloads.
 
 ## Invocation API — one lane at a time
@@ -69,9 +72,9 @@ roll.
   soul lament, baroque boom bap, shoegaze drill, ambient drone hymn,
   chamber trip-hop…) plus 2–3 concrete instruments to anchor it. One
   genre per roll; the next genre is a new invocation.
-- **Settings:** `--model v5.5`. Target sliders (web-UI only): audio
-  influence 50 first roll, weirdness 30. The 30/50/70/85 audio-influence
-  sweep is the opt-in exception.
+- **Settings:** model v6, Variety Off (it makes cover melodies drift).
+  Target sliders: audio influence 50 first roll, weirdness 30. The
+  30/50/70/85 audio-influence sweep is the opt-in exception.
 - **Expected failure:** genre gravity drags the cover back toward the
   seed, or melody drift destroys the hook.
 - **Keeper signal:** the concept is audible in an alien body — you can
@@ -244,7 +247,7 @@ the bookkeeping.**
 - Seed: <runs/ keeper, or "generate the faithful pack first">
 - Pre-rolled: **<genre>** anchored by <2–3 instruments>
 - Re-roll menu: <3–4 alternative incompatible genres>
-- Web UI: open seed → Cover → v5.5 · style: `<genre + anchors>` ·
+- Web UI: open seed → Cover → v6 · Variety Off · style: `<genre + anchors>` ·
   weirdness 30 · style influence 50 · audio influence 50
   (sweep 30/50/70/85 if the first roll hugs or drifts)
 - Expected failure: genre gravity pulls back to the seed. Keeper: you
