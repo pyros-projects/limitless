@@ -730,6 +730,26 @@ class TestResolveProjectVault:
         (nested / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")
         assert resolve_project_vault(global_vault, nested) is None
 
+    def test_marker_in_home_does_not_capture_non_git_dirs(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        home = tmp_path / "home"
+        monkeypatch.setenv("HOME", str(home))
+        global_vault = init_global_vault(home / ".memory" / "agent")
+        stray = init_project_vault(global_vault, "stray", home)
+        loose = home / "scratch" / "notes"
+        loose.mkdir(parents=True)
+        assert resolve_project_vault(global_vault, loose) is None
+        assert resolve_project_vault(global_vault, home) == stray
+
+    def test_empty_marker_falls_through_to_registry(self, tmp_path: Path) -> None:
+        global_vault = init_global_vault(tmp_path / "global")
+        working_dir = tmp_path / "proj"
+        working_dir.mkdir()
+        vault = init_project_vault(global_vault, "proj", working_dir)
+        (working_dir / ".codies-memory").write_text("\n", encoding="utf-8")
+        assert resolve_project_vault(global_vault, working_dir) == vault
+
     def test_missing_marked_vault_does_not_select_parent(self, tmp_path: Path) -> None:
         global_vault = init_global_vault(tmp_path / "global")
         repo = tmp_path / "repo"

@@ -142,7 +142,9 @@ def resolve_project_vault(global_vault: Path, working_dir: Path) -> Path | None:
 
     Uses a three-tier lookup:
 
-    1. **Nearest marker** — search parents up to and including the Git root.
+    1. **Nearest marker** — search parents up to and including the Git root;
+       outside a Git repository, stop below the home directory so a stray
+       marker in ``$HOME`` cannot claim every loose folder.
     2. **Registry working_dir** — match *working_dir* against registry entries.
     3. **Git remote URL** — match git remote against registry entries.
 
@@ -151,13 +153,17 @@ def resolve_project_vault(global_vault: Path, working_dir: Path) -> Path | None:
     """
     # --- Tier 1: marker file ---
     working_dir = working_dir.resolve()
+    home = Path.home().resolve()
     for directory in (working_dir, *working_dir.parents):
+        if directory == home and directory != working_dir:
+            break
         marker = directory / ".codies-memory"
         if marker.is_file():
             slug = marker.read_text(encoding="utf-8").strip()
-            vault_path = global_vault / "projects" / slug
-            # An explicit marker must not fall back to another project's vault.
-            return vault_path if slug and vault_path.is_dir() else None
+            if slug:
+                vault_path = global_vault / "projects" / slug
+                # An explicit marker must not fall back to another project's vault.
+                return vault_path if vault_path.is_dir() else None
         if (directory / ".git").exists():
             break
 

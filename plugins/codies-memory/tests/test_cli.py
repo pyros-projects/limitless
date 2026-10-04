@@ -1278,3 +1278,20 @@ class TestCmdPromote:
         )
         with pytest.raises(SystemExit):
             cmd_promote(ns)
+
+
+def test_version_falls_back_without_installed_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
+    import importlib
+    import importlib.metadata
+
+    import codies_memory
+
+    def missing(name: str) -> str:
+        raise importlib.metadata.PackageNotFoundError(name)
+
+    monkeypatch.setattr(importlib.metadata, "version", missing)
+    try:
+        assert importlib.reload(codies_memory).__version__ == "0+unknown"
+    finally:
+        monkeypatch.undo()
+        importlib.reload(codies_memory)
