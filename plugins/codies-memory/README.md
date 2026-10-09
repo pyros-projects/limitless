@@ -120,7 +120,7 @@ collection timestamps or last updated times lag behind recent writes.
 - [2026-03-30-codies-memory-lite-v2.md](docs/specs/2026-03-30-codies-memory-lite-v2.md) (v2, superseded by current code)
 - [2026-04-21-codies-memory-vnext-marketplace-design.md](docs/specs/2026-04-21-codies-memory-vnext-marketplace-design.md)
 - [2026-04-21-vnext-implementation-plan.md](docs/plans/2026-04-21-vnext-implementation-plan.md)
-- [2026-04-22-codies-memory-to-mneme-transformation.md](../../docs/brainstorm/mneme/2026-04-22-codies-memory-to-mneme-transformation.md)
+- 2026-04-22-codies-memory-to-mneme-transformation.md (moved to `specs/mneme/` in pyros-projects/claude-knowledge, 2026-10-09)
 
 ## Executive Summary
 
