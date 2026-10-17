@@ -72,8 +72,9 @@ and remove its old codies-memory-specific `PATH` entry from the shell configurat
 Keep the old clone and virtualenv intact. Reopen the shell and repeat the path and
 version checks; installing a new CLI alone does not fix an earlier `PATH` entry.
 
-These skills require CLI 1.2.4 or newer, including `promote --check`,
-`--session-count`, and `--references` (inspect `codies-memory promote --help`).
+These skills require CLI 1.3.0 or newer, including `promote --check`,
+`--session-count`, and `--references` (inspect `codies-memory promote --help`)
+and the `transcripts` command.
 Compare `--version` with `version` in the installed plugin's `pyproject.toml`,
 when available. Update an older backend; if the CLI is newer than the plugin,
 refresh the stale plugin instead of downgrading the CLI. A CLI without
@@ -160,6 +161,35 @@ literal `\n` sequences to real newlines.
 When no project resolves, `create` and `capture` save project records in `_general`.
 Read commands do not silently use that catch-all: pass `--general` to `boot`,
 `status`, or `list` when you intend to read it.
+
+## Optional Boot Hook
+
+Without a hook, the agent boots when the `memory-boot` skill runs. A
+SessionStart hook boots it on every start and after every compaction, and passes
+the hook payload so boot knows the current session and can ask for a checkpoint
+after a compaction. Save a script like this one and register it as a
+SessionStart command hook in your agent's hook settings:
+
+```bash
+#!/usr/bin/env bash
+# SessionStart hook: boot codies-memory. Uses jq for JSON escaping.
+BOOT=$(codies-memory boot --agent <name> --budget 12000 --hook-input - 2>/dev/null \
+  || echo "Memory boot failed: codies-memory not available")
+jq -n --arg ctx "$BOOT" \
+  '{hookSpecificOutput: {hookEventName: "SessionStart", additionalContext: $ctx}}'
+```
+
+`--hook-input -` reads the payload from stdin. In Claude Code, a SessionStart
+hook without a matcher also fires after compaction; in Codex, include `compact`
+in the matcher (`startup|resume|compact`).
+
+Claude Code deletes transcripts after 30 days by default. To catch up older
+sessions, keep them longer in `~/.claude/settings.json`. Transcripts can take
+several gigabytes a month, so pick a period the disk can hold:
+
+```json
+{ "cleanupPeriodDays": 90 }
+```
 
 ## Optional QMD Recall
 

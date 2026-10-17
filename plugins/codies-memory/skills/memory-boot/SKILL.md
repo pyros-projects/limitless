@@ -22,8 +22,8 @@ On Linux/macOS, run `command -v codies-memory`; on native Windows PowerShell, ru
 codies-memory --version
 ```
 
-Require CLI 1.2.4 or newer and verify that `codies-memory promote --help` includes
-`--check`, `--session-count`, and `--references`. Compare the version with the
+Require CLI 1.3.0 or newer and verify that `codies-memory promote --help` includes
+`--check`, `--session-count`, and `--references`, and that `codies-memory transcripts --help` works. Compare the version with the
 plugin's `pyproject.toml` (two directories above this skill), when available:
 update an older backend, or refresh a stale plugin if the CLI is newer.
 
@@ -101,6 +101,27 @@ codies-memory boot --agent <name> --general
 
 If the resolved project vault is `_general`, tell the user records are landing
 in the default catch-all project, not a named project.
+
+### Open Sessions and Checkpoint
+
+Inside Claude Code or Codex, boot also checks the transcripts of earlier sessions
+in this directory.
+
+- `=== Open Sessions ===` lists sessions that ended without a session summary, or
+  where the user wrote more after the last one. Catch them up before new work:
+  run `codies-memory transcripts digest <id> --agent <name>`, then write the
+  summary with the `create session --transcript <id> --covered-until <time>`
+  command the digest prints, moments included (see `memory-close-session`). Skip a session that needs no summary,
+  such as a one-line question, with
+  `codies-memory transcripts skip <id> --reason "..." --agent <name>`. Tell the
+  user what you caught up.
+- `=== Checkpoint ===` appears when a hook boots you right after a compaction.
+  Write an interim summary from the compaction summary with the
+  `create session --checkpoint` command it prints (it names the session, so it
+  works without the harness's session variables) before you go on. A checkpoint is not a close:
+  the session counts as open again once work goes on, until a final summary.
+- A `Note:` that Claude Code deletes transcripts after 30 days means
+  `cleanupPeriodDays` is not set; tell the user once (see INSTALL.md).
 
 The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
 

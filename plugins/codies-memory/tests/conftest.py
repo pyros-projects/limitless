@@ -8,6 +8,17 @@ from pathlib import Path
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def _outside_agent_session(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run tests as if no agent harness started them.
+
+    Inside Claude Code or Codex the session variables would link test records
+    to the real session and point boot at real transcripts.
+    """
+    for name in ("CLAUDE_CODE_SESSION_ID", "CLAUDE_SESSION_ID", "CODEX_THREAD_ID", "CODEX_SESSION_ID"):
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture
 def tmp_global_vault(tmp_path: Path) -> Path:
     """Create a minimal global vault directory structure."""

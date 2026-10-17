@@ -14,7 +14,7 @@ At the end of every work session.
 
 ## What It Does
 
-1. Write session summary with `next_step`
+1. Write session summary with `next_step` and the session's moments
 2. Optionally write a dream (see "Dream at Sign-Off" below)
 3. Review inbox items older than 7 days
 4. Enforce 14-day inbox aging rule (promote, compact, or discard stale items)
@@ -36,12 +36,14 @@ codies-memory create session \
   --agent "$AGENT" \
   --title "Session Summary - $TODAY" \
   --short "one-line summary of the session" \
-  --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Next Step\n- [what the next session should pick up]" \
+  --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Moments\n- [see Moments below, or none]\n\n## Next Step\n- [what the next session should pick up]" \
   --field mode=implement \
   --field next_step="[what to do next]"
 
 # This automatically appends to the global daily log. If no named project vault
 # resolves, the session lands in the reserved _general project vault.
+# Inside Claude Code or Codex the record links itself to this session's
+# transcript, so the next boot knows the session is covered.
 
 # 2. Check inbox aging and status
 codies-memory status --agent "$AGENT"
@@ -68,6 +70,38 @@ for promotion commands; `--check` is exclusive with `--to` and `--to-global`.
 # 4. Refresh warm summaries
 codies-memory refresh --agent "$AGENT"
 ```
+
+## Moments
+
+Session summaries lean toward what is useful: lessons, decisions, failures.
+That filter drops what a working relationship is made of. A joke, praise,
+something personal the user shared, the moment they saw what you missed.
+None of it teaches anything, so it never gets written. Write it anyway.
+
+Before writing the summary, ask what from this session you would want to
+remember even though it changes no workflow. Signals:
+
+- **Feeling**: the user laughed, was moved, grieved, or was fed up
+- **Surprise**: you were wrong, or the user saw what you missed
+- **Relationship**: praise, a shared joke, something personal, an old memory
+  that came back
+- **Recurrence**: something that keeps coming up across sessions
+
+Give each moment one to three lines under `## Moments`, in the user's own
+words where they carry it. It needs no justification, because its worth
+cannot be argued at the time. If nothing qualifies, write `none`, so an empty
+section is a decision and not an oversight.
+
+Moments stay in the vault. Do not quote them in public text, commits or PRs.
+
+## When a Session Never Closed
+
+Sessions often end without this skill: the user closes the window or forgets.
+The next boot lists them under `=== Open Sessions ===`. For each one, run
+`codies-memory transcripts digest <id> --agent "$AGENT"`, write the summary as
+above with the `--transcript <id> --covered-until <time>` the digest prints
+(moments included), and run the rest of this checklist once at the end. The
+cutoff keeps the record from claiming messages the digest did not show.
 
 ## Dream at Sign-Off (Optional)
 

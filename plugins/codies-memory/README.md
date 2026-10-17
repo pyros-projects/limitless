@@ -74,6 +74,7 @@ The shipped CLI currently provides:
 - `codies-memory user`
 - `codies-memory feedback`
 - `codies-memory validate`
+- `codies-memory transcripts`
 
 The shipped skills currently provide:
 

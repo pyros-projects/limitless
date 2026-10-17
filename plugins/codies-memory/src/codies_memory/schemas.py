@@ -31,7 +31,10 @@ TYPE_EXTRA_FIELDS: dict[str, set[str]] = {
     "thread": {"review_after", "related", "tags", "gate"},
     "decision": {"review_after", "related", "tags", "gate", "rationale", "alternatives"},
     "lesson": {"review_after", "related", "tags", "gate", "trigger", "why", "applies_to"},
-    "session": {"review_after", "related", "tags", "gate", "mode", "next_step", "artifacts", "write_gate_summary"},
+    "session": {
+        "review_after", "related", "tags", "gate", "mode", "next_step", "artifacts", "write_gate_summary",
+        "transcript", "transcript_covered_at", "transcript_checkpoint",
+    },
     "inbox": {"review_after", "related", "tags", "gate", "source", "compacted_into"},
     "daily-log": set(),
     "reflection": {"review_after", "related", "tags", "gate", "mood", "horizon"},

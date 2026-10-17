@@ -271,6 +271,27 @@ and cannot be combined with `--to` or `--to-global`. Optional
 `--session-count N` and `--references N` default to `0`; supply only observed
 evidence for the individual record. Use `memory-promote` for the review workflow.
 
+### Transcripts (catch up sessions that never closed)
+
+```bash
+codies-memory transcripts open --agent <name>
+codies-memory transcripts digest <session-id> --agent <name>
+codies-memory create session --transcript <session-id> --covered-until <time> --title "..." --body-file /path/to/summary.md --agent <name>
+codies-memory create session --checkpoint --title "..." --body-file /path/to/summary.md --agent <name>
+codies-memory transcripts skip <session-id> --reason "quick question" --agent <name>
+```
+
+Claude Code and Codex keep every session as a transcript. A session record
+written inside a session links to it by itself (`transcript`,
+`transcript_covered_at`). `open` lists earlier sessions in this directory that no
+record covers, where the user wrote more after the last summary, or where work
+went on after a `--checkpoint` record (an interim record written after a
+compaction). `digest` prints one of them compactly: user and agent messages plus
+compaction summaries, only the uncovered part unless `--all`, and the
+`--covered-until` time a summary written from it may claim. `skip` reaches as
+far as the session went; later user messages open it again. The harness is detected from the
+environment; pass `--harness claude-code` or `--harness codex` where it is not.
+
 ### Init project
 
 ```bash

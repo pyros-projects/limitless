@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from codies_memory import __version__
@@ -29,6 +30,7 @@ from codies_memory.records import (
 from codies_memory.promotion import evaluate_for_promotion, promote_within_project, promote_to_global
 from codies_memory.profile import load_profile, get_write_gate_bias
 from codies_memory.warm import write_warm_artifacts
+from codies_memory import transcripts
 
 
 # ---------------------------------------------------------------------------
@@ -184,10 +186,44 @@ def cmd_validate(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def _transcript_context(args: argparse.Namespace, hook: dict, working_dir: Path) -> dict | None:
+    """Collect harness, current session and directory for transcript checks.
+
+    Hook input wins over the environment, the environment over nothing. Returns
+    ``None`` when the harness cannot be told. The hook's transcript folder is
+    used only while the hook's directory is the one boot works in.
+    """
+    transcript_path = hook.get("transcript_path")
+    harness = (
+        getattr(args, "harness", None)
+        or transcripts.harness_from_path(transcript_path)
+        or transcripts.detect_harness()
+    )
+    if harness is None:
+        return None
+    transcript_dir = None
+    hook_cwd = Path(hook["cwd"]).resolve() if hook.get("cwd") else None
+    if harness == "claude-code" and transcript_path and hook_cwd == working_dir:
+        transcript_dir = Path(transcript_path).parent
+    return {
+        "harness": harness,
+        "current_id": hook.get("session_id") or transcripts.current_session_id(harness),
+        "source": hook.get("source"),
+        "working_dir": working_dir,
+        "transcript_dir": transcript_dir,
+    }
+
+
 def cmd_boot(args: argparse.Namespace) -> None:
     global_vault = _require_global_vault(args)
 
+    # One directory for everything boot does: --working-dir, else the hook's
+    # cwd, else the process's.
+    hook = transcripts.read_hook_input(args.hook_input) if getattr(args, "hook_input", None) else {}
+    if hook.get("cwd") and not getattr(args, "working_dir", None):
+        args.working_dir = str(hook["cwd"])  # --general picks the vault, not the directory
     project_vault, working_dir = _resolve_project_vault_for_read(args, global_vault)
+    context = _transcript_context(args, hook, working_dir)
 
     if project_vault is None:
         print("Warning: no project vault found; global-only boot.", file=sys.stderr)
@@ -208,6 +244,30 @@ def cmd_boot(args: argparse.Namespace) -> None:
     print()
     print("=== Project Packet ===")
     print(packet["project_packet"])
+
+    if context is not None:
+        agent = _resolve_agent(args)
+        if context["source"] == "compact":
+            print()
+            print("=== Checkpoint ===")
+            print(transcripts.render_checkpoint(agent, context["current_id"]))
+        try:
+            items = transcripts.open_transcripts(
+                global_vault,
+                context["harness"],
+                context["working_dir"],
+                current_id=context["current_id"],
+                transcript_dir=context["transcript_dir"],
+            )
+        except OSError as exc:
+            items = []
+            print(f"Warning: could not read transcripts: {exc}", file=sys.stderr)
+        warning = transcripts.transcript_retention_warning() if context["harness"] == "claude-code" else None
+        section = transcripts.render_open_section(items, agent, context["harness"], warning=warning)
+        if section:
+            print()
+            print("=== Open Sessions ===")
+            print(section)
 
     usage = packet["usage"]
     print()
@@ -272,6 +332,36 @@ def cmd_create(args: argparse.Namespace) -> None:
         extra[key] = value
     short = sanitize_short_text(getattr(args, "short", None) or args.title)
     extra["short"] = short
+
+    # A session summary links to the transcript it covers: the one named with
+    # --transcript, else the session this command runs in. It covers the
+    # transcript up to --covered-until (what a digest showed), else up to now.
+    link_flags = [
+        flag for flag, value in (
+            ("--transcript", getattr(args, "transcript", None)),
+            ("--covered-until", getattr(args, "covered_until", None) is not None),
+            ("--checkpoint", getattr(args, "checkpoint", False)),
+        ) if value
+    ]
+    if args.type == "session":
+        transcript_id = getattr(args, "transcript", None) or transcripts.current_session_id()
+        covered_until = datetime.now(timezone.utc)
+        if getattr(args, "covered_until", None) is not None:
+            covered_until = transcripts.parse_time(args.covered_until)
+            if covered_until is None:
+                print(f"Error: --covered-until is not an ISO time: {args.covered_until!r}", file=sys.stderr)
+                sys.exit(1)
+        if transcript_id:
+            extra["transcript"] = transcript_id
+            extra["transcript_covered_at"] = transcripts.isoformat(covered_until)
+            if getattr(args, "checkpoint", False):
+                extra["transcript_checkpoint"] = True
+        elif link_flags:
+            print(f"Error: {', '.join(link_flags)} needs --transcript outside an agent session.", file=sys.stderr)
+            sys.exit(1)
+    elif link_flags:
+        print(f"Error: {', '.join(link_flags)} only applies to session records.", file=sys.stderr)
+        sys.exit(1)
 
     # Resolve vault
     if scope == "global":
@@ -534,6 +624,85 @@ def cmd_refresh(args: argparse.Namespace) -> None:
         print(f"{key}: {path}")
 
 
+def _transcript_harness(args: argparse.Namespace) -> str:
+    harness = getattr(args, "harness", None) or transcripts.detect_harness()
+    if harness is None:
+        print("Error: cannot tell the harness; pass --harness claude-code or --harness codex.", file=sys.stderr)
+        sys.exit(1)
+    return harness
+
+
+def cmd_transcripts(args: argparse.Namespace) -> None:
+    """List, digest or skip session transcripts that lack a session summary."""
+    global_vault = _require_global_vault(args)
+    agent = _resolve_agent(args)
+    working_dir = Path(args.working_dir).resolve() if getattr(args, "working_dir", None) else Path.cwd()
+
+    if args.action == "open":
+        harness = _transcript_harness(args)
+        items = transcripts.open_transcripts(
+            global_vault,
+            harness,
+            working_dir,
+            current_id=transcripts.current_session_id(harness),
+            days=args.days,
+        )
+        if args.format == "json":
+            print(json.dumps([
+                {
+                    "session_id": o.transcript.session_id,
+                    "harness": o.transcript.harness,
+                    "path": str(o.transcript.path),
+                    "label": o.transcript.label,
+                    "started": o.transcript.started.isoformat() if o.transcript.started else None,
+                    "last_activity": o.transcript.last_activity.isoformat() if o.transcript.last_activity else None,
+                    "user_messages": o.transcript.user_messages,
+                    "covered_at": o.covered_at.isoformat() if o.covered_at else None,
+                    "covered_by_checkpoint": bool(o.covered and o.covered.checkpoint),
+                }
+                for o in items
+            ], indent=2))
+            return
+        if not items:
+            print("No open sessions.")
+            return
+        print(transcripts.render_open_section(items, agent, harness, limit=len(items)))
+        return
+
+    if not args.session_id:
+        print(f"Error: transcripts {args.action} needs a session id.", file=sys.stderr)
+        sys.exit(1)
+
+    path = transcripts.locate_transcript(args.session_id, getattr(args, "harness", None), working_dir)
+
+    if args.action == "skip":
+        if not args.reason:
+            print("Error: transcripts skip needs --reason.", file=sys.stderr)
+            sys.exit(1)
+        # The skip reaches as far as the transcript goes now; later user
+        # messages open the session again.
+        through = transcripts.read_transcript(path).last_activity if path else None
+        if through is None:
+            print(f"Error: cannot read how far {args.session_id} went (transcript not found or without times); "
+                  "check --harness.", file=sys.stderr)
+            sys.exit(1)
+        transcripts.skip_transcript(global_vault, args.session_id, args.reason, through)
+        print(f"Skipped {args.session_id}")
+        return
+
+    if path is None:
+        print(f"Error: no transcript found for {args.session_id}", file=sys.stderr)
+        sys.exit(1)
+    transcript = transcripts.read_transcript(path)
+    covered_at = None
+    if not args.all:
+        covered, legacy = transcripts.scan_records(global_vault)
+        best = transcripts.best_coverage(transcript, covered, legacy)
+        if best and best.at.year < 9999:
+            covered_at = best.at
+    print(transcripts.render_digest(transcript, covered_at=covered_at, max_chars=args.max_chars), end="")
+
+
 # ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
@@ -622,6 +791,20 @@ def main() -> None:
         action="store_true",
         default=False,
         help="Load the reserved _general project vault instead of resolving from the working directory.",
+    )
+    boot_parser.add_argument(
+        "--harness",
+        choices=list(transcripts.HARNESSES),
+        default=None,
+        help="Agent harness whose transcripts to check for sessions without a summary "
+             "(default: detected from the hook input or the environment).",
+    )
+    boot_parser.add_argument(
+        "--hook-input",
+        dest="hook_input",
+        default=None,
+        help="SessionStart hook payload as a file, or - for stdin. Supplies the session id, "
+             "the transcript folder, and whether the session was just compacted.",
     )
     boot_parser.set_defaults(func=cmd_boot)
 
@@ -742,6 +925,25 @@ def main() -> None:
         "--short",
         default=None,
         help="One-line summary for the global daily log.",
+    )
+    create_parser.add_argument(
+        "--transcript",
+        default=None,
+        help="Session id of the transcript a session record covers "
+             "(default: the session this command runs in).",
+    )
+    create_parser.add_argument(
+        "--covered-until",
+        dest="covered_until",
+        default=None,
+        help="ISO time up to which the record covers the transcript; transcripts digest prints it "
+             "(default: now).",
+    )
+    create_parser.add_argument(
+        "--checkpoint",
+        action="store_true",
+        default=False,
+        help="Mark a session record as an interim checkpoint (after a compaction), not a close.",
     )
     create_parser.add_argument(
         "--agent",
@@ -898,6 +1100,72 @@ def main() -> None:
         help="Project working directory (defaults to cwd).",
     )
     refresh_parser.set_defaults(func=cmd_refresh)
+
+    # --- transcripts ---
+    transcripts_parser = subparsers.add_parser(
+        "transcripts",
+        help="Find sessions that ended without a session summary and catch them up.",
+    )
+    transcripts_parser.add_argument(
+        "action",
+        choices=["open", "digest", "skip"],
+        help="open: list sessions without a summary; digest: print one transcript compactly; "
+             "skip: mark one as not needing a summary.",
+    )
+    transcripts_parser.add_argument(
+        "session_id",
+        nargs="?",
+        default=None,
+        help="Session id (for digest and skip).",
+    )
+    transcripts_parser.add_argument(
+        "--harness",
+        choices=list(transcripts.HARNESSES),
+        default=None,
+        help="Agent harness (default: detected from the environment).",
+    )
+    transcripts_parser.add_argument(
+        "--days",
+        type=_nonnegative_int,
+        default=transcripts.DEFAULT_DAYS,
+        help=f"How far back open looks (default: {transcripts.DEFAULT_DAYS}).",
+    )
+    transcripts_parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help="Output format for open (default: text).",
+    )
+    transcripts_parser.add_argument(
+        "--max-chars",
+        dest="max_chars",
+        type=_nonnegative_int,
+        default=24000,
+        help="Size limit for digest (default: 24000).",
+    )
+    transcripts_parser.add_argument(
+        "--all",
+        action="store_true",
+        default=False,
+        help="Digest the whole transcript, including parts a summary already covers.",
+    )
+    transcripts_parser.add_argument(
+        "--reason",
+        default=None,
+        help="Why the session needs no summary (for skip).",
+    )
+    transcripts_parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent name (required).",
+    )
+    transcripts_parser.add_argument(
+        "--working-dir",
+        dest="working_dir",
+        default=None,
+        help="Directory the sessions ran in (defaults to cwd).",
+    )
+    transcripts_parser.set_defaults(func=cmd_transcripts)
 
     args = parser.parse_args()
     args.func(args)
