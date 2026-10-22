@@ -16,6 +16,7 @@ from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
     cmd_promote, cmd_refresh, cmd_validate, main, _resolve_agent,
 )
+from codies_memory.records import read_record
 from codies_memory.vault import GLOBAL_DIRS, LAZY_GLOBAL_DIRS, PROJECT_DIRS, resolve_global_vault
 
 
@@ -794,7 +795,7 @@ class TestCmdCreate:
         project_vault = _setup_project(tmp_path, monkeypatch)
         capsys.readouterr()
         raw_short = "  " + ("x" * 60) + "\n" + ("y" * 80) + "  "
-        expected_short = (("x" * 60) + " " + ("y" * 80))[:120]
+        expected_short = ("x" * 60) + "..."  # cut at the word boundary, never mid-word
 
         cmd_create(argparse.Namespace(
             agent="claude",
@@ -817,6 +818,47 @@ class TestCmdCreate:
         global_vault = tmp_path / "home" / ".memory" / "claude"
         log = next((global_vault / "sessions").glob("*.md")).read_text()
         assert f"- [[{out}]] {expected_short} (myapp)" in log
+
+    def test_long_short_is_announced_on_stderr(self, tmp_path, monkeypatch, capsys):
+        _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+        long_short = "word " * 40
+
+        cmd_create(argparse.Namespace(
+            agent="claude", type="lesson", title="Long short", body="Body.", body_file=None,
+            scope="project", trust="working", field=None, short=long_short, working_dir=None,
+        ))
+
+        err = capsys.readouterr().err
+        assert "--short is longer than 120 characters; shortened to: word word" in err
+        assert err.rstrip().endswith("word...")
+
+    def test_fitting_short_stays_quiet(self, tmp_path, monkeypatch, capsys):
+        _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude", type="lesson", title="Quiet", body="Body.", body_file=None,
+            scope="project", trust="working", field=None, short="  fits \n fine ", working_dir=None,
+        ))
+
+        assert "--short" not in capsys.readouterr().err
+
+    def test_field_flow_list_becomes_a_yaml_list(self, tmp_path, monkeypatch, capsys):
+        project_vault = _setup_project(tmp_path, monkeypatch)
+        capsys.readouterr()
+
+        cmd_create(argparse.Namespace(
+            agent="claude", type="lesson", title="Tagged", body="Body.", body_file=None,
+            scope="project", trust="working", short=None, working_dir=None,
+            field=["tags=[reflection, on, 001, 'a b', \"one, two\", don't]", "applies_to=plain [text] stays",
+                   "related=[[TH-0001]]"],
+        ))
+
+        record = read_record(next((project_vault / "lessons").glob("*.md")))
+        assert record["frontmatter"]["tags"] == ["reflection", "on", "001", "a b", "one, two", "don't"]
+        assert record["frontmatter"]["applies_to"] == "plain [text] stays"
+        assert record["frontmatter"]["related"] == "[[TH-0001]]"
 
 
 # ---------------------------------------------------------------------------

@@ -8,6 +8,7 @@ import pytest
 
 from codies_memory.boot import (
     DAILY_LOG_TAIL_LINES,
+    LATEST_REFLECTION_MAX_TOKENS,
     assemble_boot,
     build_cache_key,
     cache_boot_packet,
@@ -16,6 +17,7 @@ from codies_memory.boot import (
     is_cache_valid,
     truncate_to_budget,
 )
+from codies_memory.records import create_record, update_record
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +277,64 @@ class TestBootCache:
         boot_dir = tmp_path / "boot"
         boot_dir.mkdir()
         assert is_cache_valid(boot_dir, "nonexistent", {}) is False
+
+
+class TestLatestReflection:
+    def _reflection(self, vault: Path, title: str, body: str, created: str = "2026-10-22") -> Path:
+        path = create_record(vault, "reflection", "global", title=title, body=body)
+        update_record(path, created=created)
+        return path
+
+    def test_newest_reflection_is_in_the_global_packet_whole(self, tmp_global_vault: Path) -> None:
+        self._reflection(tmp_global_vault, "On Older Things", "older body text", created="2026-10-14")
+        self._reflection(tmp_global_vault, "On Newer Things", "newer body text\n\nsecond paragraph")
+
+        result = assemble_boot(tmp_global_vault, project_vault=None)
+
+        packet = result["global_packet"]
+        assert "## Latest Reflection: RF-0002 On Newer Things" in packet
+        assert "newer body text\n\nsecond paragraph" in packet
+        assert "older body text" not in packet
+        assert result["usage"]["latest_reflection"]["used"] > 0
+
+    def test_same_day_reflections_pick_the_higher_id(self, tmp_global_vault: Path) -> None:
+        self._reflection(tmp_global_vault, "First Today", "first body")
+        self._reflection(tmp_global_vault, "Second Today", "second body")
+
+        packet = assemble_boot(tmp_global_vault, project_vault=None)["global_packet"]
+
+        assert "second body" in packet
+        assert "first body" not in packet
+
+    def test_reflection_is_outside_the_budget_but_capped(self, tmp_global_vault: Path) -> None:
+        self._reflection(tmp_global_vault, "On Length", "word " * 5000)
+
+        result = assemble_boot(tmp_global_vault, project_vault=None, budget=600)
+
+        packet = result["global_packet"]
+        assert "[truncated]" in packet
+        assert "Full text: " in packet and "RF-0001" in packet
+        reflection_part = "## Latest Reflection" + packet.split("## Latest Reflection")[1]
+        assert estimate_tokens(reflection_part) <= LATEST_REFLECTION_MAX_TOKENS
+        assert result["usage"]["latest_reflection"]["used"] <= LATEST_REFLECTION_MAX_TOKENS
+        assert "latest_reflection" not in result["usage"]["layers"]
+
+    def test_ids_compare_as_numbers(self, tmp_global_vault: Path) -> None:
+        older = create_record(tmp_global_vault, "reflection", "global", title="Nine", body="nine body")
+        newer = create_record(tmp_global_vault, "reflection", "global", title="Ten", body="ten body")
+        update_record(older, id="RF-9999", created="2026-10-22")
+        update_record(newer, id="RF-10000", created="2026-10-22")
+
+        packet = assemble_boot(tmp_global_vault, project_vault=None)["global_packet"]
+
+        assert "ten body" in packet
+        assert "nine body" not in packet
+
+    def test_no_reflection_means_no_section(self, tmp_global_vault: Path) -> None:
+        result = assemble_boot(tmp_global_vault, project_vault=None)
+
+        assert "Latest Reflection" not in result["global_packet"]
+        assert result["usage"]["latest_reflection"]["used"] == 0
 
 
 class TestGlobalOnlyBoot:

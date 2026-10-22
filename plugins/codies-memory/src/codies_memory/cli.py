@@ -24,6 +24,7 @@ from codies_memory.records import (
     create_record,
     list_records,
     read_record,
+    SHORT_TEXT_LIMIT,
     sanitize_short_text,
     update_record,
 )
@@ -118,6 +119,43 @@ def _format_usage_line(name: str, stats: dict) -> str:
     if pct >= 90:
         line += "  ⚠ over 90% full"
     return line
+
+
+def _short_from_args(given: str | None, fallback: str) -> str:
+    """Sanitize ``--short`` (or *fallback*) and say on stderr when it had to be cut."""
+    short = sanitize_short_text(given or fallback)
+    if given and given.strip() and short != " ".join(given.split()):
+        print(f"Note: --short is longer than {SHORT_TEXT_LIMIT} characters; shortened to: {short}",
+              file=sys.stderr)
+    return short
+
+
+def _parse_field_value(value: str) -> object:
+    """Return a ``--field`` value: "[a, b]" becomes the list ["a", "b"].
+
+    Items keep their text exactly (no YAML typing: "on" stays "on", "001"
+    stays "001"). A value starting with "[[" is a wikilink and stays a string.
+    """
+    stripped = value.strip()
+    if not (stripped.startswith("[") and stripped.endswith("]")) or stripped.startswith("[["):
+        return value
+    # split on commas outside quotes; a quote opens only at the start of an item
+    items, current, quote = [], "", None
+    for ch in stripped[1:-1]:
+        if quote:
+            if ch == quote:
+                quote = None
+            else:
+                current += ch
+        elif ch in "'\"" and not current.strip():
+            quote, current = ch, ""
+        elif ch == ",":
+            items.append(current.strip())
+            current = ""
+        else:
+            current += ch
+    items.append(current.strip())
+    return [item for item in items if item]
 
 
 def _normalize_inline_body(body: str) -> str:
@@ -273,6 +311,9 @@ def cmd_boot(args: argparse.Namespace) -> None:
     print()
     print("=== Boot Budget ===")
     print(f"identity: {usage['identity']['used']} tokens (exempt — no limit)")
+    reflection = usage["latest_reflection"]
+    if reflection["used"]:
+        print(f"latest_reflection: {reflection['used']} tokens (exempt — own cap {reflection['cap']})")
     for name, stats in usage["layers"].items():
         print(_format_usage_line(name, stats))
     print(_format_usage_line("total", usage["total"]))
@@ -286,7 +327,7 @@ def cmd_capture(args: argparse.Namespace) -> None:
         profile = load_profile(global_vault, project_vault)
         gate = get_write_gate_bias(profile)
 
-    short = sanitize_short_text(getattr(args, "short", None) or args.content[:80])
+    short = _short_from_args(getattr(args, "short", None), args.content[:80])
     record_path = capture(
         vault=project_vault,
         content=args.content,
@@ -329,8 +370,8 @@ def cmd_create(args: argparse.Namespace) -> None:
             print(f"Error: --field must be key=value, got: {field_str!r}", file=sys.stderr)
             sys.exit(1)
         key, value = field_str.split("=", 1)
-        extra[key] = value
-    short = sanitize_short_text(getattr(args, "short", None) or args.title)
+        extra[key] = _parse_field_value(value)
+    short = _short_from_args(getattr(args, "short", None), args.title)
     extra["short"] = short
 
     # A session summary links to the transcript it covers: the one named with

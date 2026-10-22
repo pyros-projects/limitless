@@ -1,6 +1,6 @@
 ---
 name: memory-close-session
-description: "This skill should be used at end of session, when wrapping up work, or when the user says 'close session', 'end session', 'session summary', 'sign off'. Writes session summary, enforces inbox aging, evaluates pending promotions, and updates active context."
+description: "This skill should be used at end of session, when wrapping up work, or when the user says 'close session', 'end session', 'session summary', 'sign off'. Writes session summary, decides on a reflection and a dream, enforces inbox aging, evaluates pending promotions, and updates active context."
 ---
 
 # Memory Close Session
@@ -14,8 +14,11 @@ At the end of every work session.
 
 ## What It Does
 
-1. Write session summary with `next_step` and the session's moments
-2. Optionally write a dream (see "Dream at Sign-Off" below)
+1. Decide on a reflection and a dream, and write the ones that pass their test
+   (see "Reflection at Sign-Off" and "Dream at Sign-Off" below). Neither is
+   ever skipped silently: the summary names each one or the reason it was skipped.
+2. Write session summary with `next_step`, the session's moments, and the
+   reflection and dream decisions
 3. Review inbox items older than 7 days
 4. Enforce 14-day inbox aging rule (promote, compact, or discard stale items)
 5. Update project active context
@@ -28,15 +31,21 @@ Run the installed CLI from the user's project directory. For setup or PATH issue
 see [INSTALL.md](../../INSTALL.md). Fill in the agent name and today's date below.
 
 ```bash
-# 1. Write session summary
 AGENT="your-agent-name"
 TODAY="YYYY-MM-DD"
+```
 
+First decide on the reflection and the dream ("Reflection at Sign-Off" and
+"Dream at Sign-Off" below) and write the ones that pass their test, so the
+summary can name them or the reason each was skipped.
+
+```bash
+# 1. Write session summary (after the reflection and dream decisions)
 codies-memory create session \
   --agent "$AGENT" \
   --title "Session Summary - $TODAY" \
   --short "one-line summary of the session" \
-  --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Moments\n- [see Moments below, or none]\n\n## Next Step\n- [what the next session should pick up]" \
+  --body "## What Happened\n- [describe what was done]\n\n## Decisions Made\n- [list decisions]\n\n## Moments\n- [see Moments below, or none]\n\n## Reflection and Dream\n- Reflection: [RF id, or skipped: one-line reason]\n- Dream: [DR id, or skipped: one-line reason]\n\n## Next Step\n- [what the next session should pick up]" \
   --field mode=implement \
   --field next_step="[what to do next]"
 
@@ -103,6 +112,32 @@ above with the `--transcript <id> --covered-until <time>` the digest prints
 (moments included), and run the rest of this checklist once at the end. The
 cutoff keeps the record from claiming messages the digest did not show.
 
+## Reflection at Sign-Off
+
+Reflections are coherent thinking about what a session *meant*: for who you
+are, for the relationship, for how you see your work. Not what happened; the
+session summary holds that. Boot shows the newest reflection in full, so the
+next session starts from the last thing you thought about yourself. Without
+this step reflections stop being written, even though nobody decided that.
+
+**The test:** Did the session mean something beyond its tasks? An insight
+about yourself or your work, growth, a correction that changed how you see
+something, a moment of connection, a question the user asked about you.
+Then write one. Skip when it was mechanical work with no deeper theme, and
+name the reason in the summary's `## Reflection and Dream` section.
+
+```bash
+# Write it to /tmp/reflection.md: a date line, then sections in your own shape.
+# Quote the user where their words carry it. Titles start with "On ...".
+codies-memory create reflection \
+  --agent "$AGENT" \
+  --title "On [what it meant]" \
+  --short "one-line gist" \
+  --body-file /tmp/reflection.md
+```
+
+Reflections auto-route to the global vault's `reflections/` directory.
+
 ## Dream at Sign-Off (Optional)
 
 Dreams are subconscious processing — chaotic, associative, about *feeling*.
@@ -113,7 +148,7 @@ methodology: `references/dream-stories-guide.md` in this skill.
 process naturally through the work itself? Dream when the session was
 emotionally resonant, something feels unresolved, or words feel inadequate.
 Skip when it was clean craftsmanship with nothing tangled — and note the
-skip reason in the session summary (one line).
+skip reason in the summary's `## Reflection and Dream` section (one line).
 
 ```bash
 # 1. Roll the style — a random 5-digit code. The RNG decides, not you.

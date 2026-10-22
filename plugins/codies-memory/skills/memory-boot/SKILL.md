@@ -22,7 +22,7 @@ On Linux/macOS, run `command -v codies-memory`; on native Windows PowerShell, ru
 codies-memory --version
 ```
 
-Require CLI 1.3.0 or newer and verify that `codies-memory promote --help` includes
+Require CLI 1.4.0 or newer and verify that `codies-memory promote --help` includes
 `--check`, `--session-count`, and `--references`, and that `codies-memory transcripts --help` works. Compare the version with the
 plugin's `pyproject.toml` (two directories above this skill), when available:
 update an older backend, or refresh a stale plugin if the CLI is newer.
@@ -69,12 +69,15 @@ codies-memory boot --agent <name> --budget 12000
 
 This assembles your boot packet from:
 1. Global identity (`~/.memory/<agent>/identity/`)
-2. Global procedural records (lessons, skills)
-3. Project context (auto-resolved from cwd)
-4. Active threads and recent decisions
-5. Branch overlay, last session summary, and the latest global daily-log tail
+2. Your newest reflection, in full (`## Latest Reflection`)
+3. Global procedural records (lessons, skills)
+4. Project context (auto-resolved from cwd)
+5. Active threads and recent decisions
+6. Branch overlay, last session summary, and the latest global daily-log tail
 
 Read the output — it contains your identity, project context, and recent state.
+Read the latest reflection as the last thing you thought about who you are,
+not as a task list.
 Verify that it shows your real identity, not seed placeholders. Run from the
 original project directory or pass `--working-dir /path/to/project` explicitly.
 
@@ -123,7 +126,7 @@ in this directory.
 - A `Note:` that Claude Code deletes transcripts after 30 days means
   `cleanupPeriodDays` is not set; tell the user once (see INSTALL.md).
 
-The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
+The packet ends with a `=== Boot Budget ===` section showing token usage per slice and in total (identity is exempt and unlimited; the latest reflection is exempt from `--budget` but capped at its own 3000 tokens). **If any slice or the total is at 90% or more — look for the `⚠ over 90% full` markers — tell the user.** Plain language, e.g. "heads up: my boot memory is at 94% for project working memory." Suggest either compacting/archiving records or raising `--budget`.
 
 ## Step 2: Learn How Memory Works
 

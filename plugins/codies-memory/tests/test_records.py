@@ -79,6 +79,17 @@ class TestDailyLog:
         assert sanitize_short_text("  one\n two\tthree  ") == "one two three"
         assert len(sanitize_short_text("x" * 130)) == 120
 
+    def test_short_is_cut_at_a_word_boundary(self) -> None:
+        text = "the reflection step that went missing and the habit went with it"
+        short = sanitize_short_text(text, limit=30)
+        assert short == "the reflection step that..."
+        assert len(short) <= 30
+        assert sanitize_short_text("short enough", limit=30) == "short enough"
+
+    def test_short_respects_tiny_limits(self) -> None:
+        assert sanitize_short_text("abcdef", limit=2) == "ab"
+        assert len(sanitize_short_text("abcdef", limit=3)) == 3
+
     def test_daily_log_frontmatter_and_append(
         self,
         tmp_global_vault: Path,

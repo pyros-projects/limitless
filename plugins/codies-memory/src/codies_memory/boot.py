@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 
+from codies_memory.records import list_records
+
 DAILY_LOG_TAIL_LINES = 25
+LATEST_REFLECTION_MAX_TOKENS = 3000
 
 
 # ---------------------------------------------------------------------------
@@ -120,6 +124,34 @@ def _read_latest_daily_log_tail_lines(
     return lines[-line_count:]
 
 
+def _latest_reflection(global_vault: Path) -> str:
+    """Return the newest active reflection in full, headed by its id and title.
+
+    Newest means latest ``created`` date, then highest id. Reflections are
+    what the agent thinks about who it is, so boot shows the latest one whole
+    instead of only its title; past ``LATEST_REFLECTION_MAX_TOKENS`` it is cut
+    and points to the file.
+    """
+    reflections = list_records(global_vault, "reflection", scope="global", status="active")
+    if not reflections:
+        return ""
+    def _newest_first(record: dict) -> tuple[str, int]:
+        fm = record["frontmatter"]
+        number = re.search(r"(\d+)$", str(fm.get("id") or ""))
+        return str(fm.get("created") or ""), int(number.group(1)) if number else -1
+
+    newest = max(reflections, key=_newest_first)
+    fm = newest["frontmatter"]
+    text = f"## Latest Reflection: {fm.get('id', '')} {fm.get('title', '')}".rstrip()
+    text += "\n\n" + newest["body"].strip()
+    if estimate_tokens(text) > LATEST_REFLECTION_MAX_TOKENS:
+        pointer = f"\nFull text: {newest['path']}"
+        # room for the pointer and the "[truncated]" marker, so the whole section fits the cap
+        room = LATEST_REFLECTION_MAX_TOKENS - estimate_tokens(pointer + " [truncated]") - 2
+        text = truncate_to_budget(text, room) + pointer
+    return text
+
+
 def _format_daily_log(lines: list[str]) -> str:
     """Format daily-log body lines for the recent activity layer."""
     if not lines:
@@ -171,19 +203,23 @@ def assemble_boot(
 
     Returns a dict with three keys:
 
-    - ``"global_packet"`` — layers 1 + 2 joined with ``"\\n\\n---\\n\\n"``
+    - ``"global_packet"`` — layer 1, the latest reflection and layer 2 joined with ``"\\n\\n---\\n\\n"``
     - ``"project_packet"`` — layers 3 + 4 + 5 joined (empty string if no project vault)
-    - ``"usage"`` — token demand vs budget: ``{"identity": {...}, "layers": {...}, "total": {...}}``
-      where ``used`` is the raw (pre-truncation) token estimate per layer
+    - ``"usage"`` — token demand vs budget: ``{"identity": {...}, "latest_reflection": {...},
+      "layers": {...}, "total": {...}}`` where ``used`` is the token estimate per layer
+      (raw, pre-truncation, for the budgeted layers)
 
     Layers 2-5 are independently truncated to their budgets before joining.
     Layer 1 (identity) is exempt: identity files are never truncated or
     budgeted, so the agent's sense of self survives boot regardless of budget.
+    The newest reflection is shown whole beside it, outside the budget but
+    under its own cap (``LATEST_REFLECTION_MAX_TOKENS``).
     """
     budgets = compute_layer_budgets(budget)
 
     # Layer 1: global identity — never truncated
     layer1 = _read_layer_files(global_vault, ["identity"])
+    reflection = _latest_reflection(global_vault)
 
     # Layer 2: global warm summary when available, otherwise procedural raws
     layer2_raw = _read_if_exists(global_vault / "boot" / "global-summary.md")
@@ -201,6 +237,7 @@ def assemble_boot(
     def _usage(layers: dict) -> dict:
         return {
             "identity": {"used": estimate_tokens(layer1), "budget": None},
+            "latest_reflection": {"used": estimate_tokens(reflection), "cap": LATEST_REFLECTION_MAX_TOKENS},
             "layers": layers,
             "total": {
                 "used": sum(s["used"] for s in layers.values()),
@@ -209,7 +246,7 @@ def assemble_boot(
         }
 
     separator = "\n\n---\n\n"
-    global_layers = [l for l in [layer1, layer2] if l]
+    global_layers = [l for l in [layer1, reflection, layer2] if l]
 
     # Global-only boot: no project context, but keep cross-project awareness.
     if project_vault is None:

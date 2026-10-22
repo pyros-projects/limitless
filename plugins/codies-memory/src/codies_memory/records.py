@@ -36,12 +36,26 @@ def _write_record(path: Path, frontmatter: dict[str, Any], body: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def sanitize_short_text(text: str, limit: int = 120) -> str:
-    """Return a single-line short summary capped at *limit* characters."""
+SHORT_TEXT_LIMIT = 120
+
+
+def sanitize_short_text(text: str, limit: int = SHORT_TEXT_LIMIT) -> str:
+    """Return a single-line short summary of at most *limit* characters.
+
+    Longer text is cut at the last word boundary that fits and ends with "...".
+    Only a single word longer than the limit is cut inside the word.
+    """
     sanitized = re.sub(r"\s+", " ", text).strip()
     if not sanitized:
         sanitized = "untitled"
-    return sanitized[:limit]
+    if len(sanitized) <= limit:
+        return sanitized
+    if limit <= 3:
+        return sanitized[:limit]
+    cut = sanitized[: limit - 3]
+    if " " in cut:
+        cut = cut[: cut.rfind(" ")]
+    return cut.rstrip(" ,;:-") + "..."
 
 
 def _append_bytes_once(path: Path, payload: bytes) -> None:
