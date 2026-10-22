@@ -167,6 +167,13 @@ reflections="$(run_cm list reflections --scope global --agent "${agent}")"
 contains "${reflections}" "Smoke Reflection"
 ok "global lesson promotion and global reflection auto-routing"
 
+favorites_out="$(run_cm favorites reflections "${reflection_id}" --why "it proves continuity" --agent "${agent}")"
+contains "${favorites_out}" "Favorite reflections saved: ${reflection_id}"
+favorites_boot="$(run_cm boot --agent "${agent}" 2>/dev/null)"
+contains "${favorites_boot}" "## Favorite Reflection: ${reflection_id}"
+contains "${favorites_boot}" "Why I keep it: it proves continuity"
+ok "favorite reflections are chosen and shown in full at boot"
+
 refresh_out="$(run_cm refresh --agent "${agent}" --working-dir "${tmp_project}")"
 contains "${refresh_out}" "global_summary:"
 contains "${refresh_out}" "project_summary:"

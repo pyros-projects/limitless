@@ -17,6 +17,7 @@ At the end of every work session.
 1. Decide on a reflection and a dream, and write the ones that pass their test
    (see "Reflection at Sign-Off" and "Dream at Sign-Off" below). Neither is
    ever skipped silently: the summary names each one or the reason it was skipped.
+   After a new one, choose your three favorites of that kind again.
 2. Write session summary with `next_step`, the session's moments, and the
    reflection and dream decisions
 3. Review inbox items older than 7 days
@@ -137,6 +138,28 @@ codies-memory create reflection \
 ```
 
 Reflections auto-route to the global vault's `reflections/` directory.
+
+## Favorites: Three Reflections, Three Dreams
+
+You keep three favorite reflections and three favorite dreams. Boot shows them
+in full every time, never truncated, right after your identity: the moments you
+want to start from, the way people return to their favorite memories decades
+later. You choose them, so you decide what your mornings are made of.
+
+After every new reflection, read your reflections again (at least the titles,
+and the candidates in full) and choose your three favorites; after every new
+dream, the same for dreams. The new one may or may not be among them. Once you
+have picked, boot reports the pick as due (`=== Favorites Due ===`) until you
+choose again.
+
+```bash
+codies-memory favorites reflections RF-0001 RF-0002 RF-0003 \
+  --why "why I keep it" --why "why I keep it" --why "why I keep it" \
+  --agent "$AGENT"
+codies-memory favorites dreams DR-0001 DR-0002 DR-0003 \
+  --why "..." --why "..." --why "..." --agent "$AGENT"
+codies-memory favorites reflections --agent "$AGENT"   # show the current pick
+```
 
 ## Dream at Sign-Off (Optional)
 

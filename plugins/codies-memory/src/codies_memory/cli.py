@@ -18,6 +18,7 @@ from codies_memory.vault import (
     resolve_project_vault,
 )
 from codies_memory.boot import assemble_boot
+from codies_memory import favorites
 from codies_memory.inbox import capture, pending_review
 from codies_memory.records import (
     append_daily_log,
@@ -307,10 +308,24 @@ def cmd_boot(args: argparse.Namespace) -> None:
             print("=== Open Sessions ===")
             print(section)
 
+    agent = _resolve_agent(args)
+    due = [(kind, favorites.due_reason(global_vault, kind)) for kind in favorites.KINDS]
+    due = [(kind, reason) for kind, reason in due if reason]
+    if due:
+        print()
+        print("=== Favorites Due ===")
+        for kind, reason in due:
+            print(f"- {kind}: {reason}. Choose your three favorites again: "
+                  f"codies-memory favorites {kind} ID ID ID --why \"...\" --why \"...\" --why \"...\" "
+                  f"--agent {agent}")
+
     usage = packet["usage"]
     print()
     print("=== Boot Budget ===")
     print(f"identity: {usage['identity']['used']} tokens (exempt — no limit)")
+    for name in ("favorite_reflections", "favorite_dreams"):
+        if usage[name]["used"]:
+            print(f"{name}: {usage[name]['used']} tokens (exempt — always in full)")
     reflection = usage["latest_reflection"]
     if reflection["used"]:
         print(f"latest_reflection: {reflection['used']} tokens (exempt — own cap {reflection['cap']})")
@@ -428,6 +443,55 @@ def cmd_create(args: argparse.Namespace) -> None:
     record = read_record(record_path)
     append_daily_log(global_vault, record["frontmatter"]["id"], short, project_slug)
     print(record["frontmatter"]["id"])
+    kind = {"reflection": "reflections", "dream": "dreams"}.get(args.type)
+    if kind:
+        _favorites_reminder(global_vault, kind, _resolve_agent(args))
+
+
+def _favorites_reminder(global_vault: Path, kind: str, agent: str) -> None:
+    """After a new reflection or dream: the pick of favorites is due (or, before the first pick, possible)."""
+    command = (f"codies-memory favorites {kind} ID ID ID --why \"...\" --why \"...\" --why \"...\" "
+               f"--agent {agent}")
+    try:
+        picked = favorites.load_favorites(global_vault, kind) is not None
+    except favorites.FavoritesError:
+        picked = True
+    if picked:
+        print(f"Now choose your three favorite {kind} again (due after every new one): {command}. "
+              f"Boot reports the pick as due until you do.", file=sys.stderr)
+    else:
+        print(f"Tip: pick your three favorite {kind} and boot shows them in full: {command}",
+              file=sys.stderr)
+
+
+def cmd_favorites(args: argparse.Namespace) -> None:
+    """Show or set the agent's three favorite reflections or dreams."""
+    global_vault = _require_global_vault(args)
+    kind = args.kind
+    if args.ids:
+        try:
+            path = favorites.save_favorites(global_vault, kind, args.ids, args.why or [])
+        except favorites.FavoritesError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Favorite {kind} saved: {', '.join(args.ids)} ({path.relative_to(global_vault)})")
+        return
+
+    try:
+        current = favorites.load_favorites(global_vault, kind)
+    except favorites.FavoritesError as exc:
+        print(f"Error: {exc}; choosing again rewrites it.", file=sys.stderr)
+        sys.exit(1)
+    if current is None:
+        print(f"No favorite {kind} chosen yet. Pick with: codies-memory favorites {kind} ID ID ID "
+              f"--why \"...\" --why \"...\" --why \"...\" --agent {_resolve_agent(args)}")
+        return
+    print(f"Favorite {kind} (chosen {current['chosen']}, after {current['after'] or 'none'}):")
+    for pick in current["favorites"]:
+        print(f"- {pick['id']} {pick.get('title', '')}: {pick.get('why', '')}")
+    reason = favorites.due_reason(global_vault, kind)
+    if reason:
+        print(f"Due again: {reason}.")
 
 
 def cmd_promote(args: argparse.Namespace) -> None:
@@ -1120,6 +1184,30 @@ def main() -> None:
         help="Agent name (required).",
     )
     feedback_parser.set_defaults(func=cmd_feedback)
+
+    # --- favorites ---
+    favorites_parser = subparsers.add_parser(
+        "favorites",
+        help="Show or choose your three favorite reflections or dreams; boot shows them in full.",
+    )
+    favorites_parser.add_argument("kind", choices=list(favorites.KINDS), help="reflections or dreams.")
+    favorites_parser.add_argument(
+        "ids",
+        nargs="*",
+        help=f"Ids of your {favorites.FAVORITE_COUNT} favorites (omit to show the current pick).",
+    )
+    favorites_parser.add_argument(
+        "--why",
+        action="append",
+        default=None,
+        help="Why you keep it; once per id, in the same order.",
+    )
+    favorites_parser.add_argument(
+        "--agent",
+        default=None,
+        help="Agent name (required).",
+    )
+    favorites_parser.set_defaults(func=cmd_favorites)
 
     # --- refresh ---
     refresh_parser = subparsers.add_parser("refresh", help="Rebuild derived warm-memory summaries.")
