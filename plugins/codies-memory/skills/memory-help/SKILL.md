@@ -304,18 +304,18 @@ codies-memory init --type project --agent <name> --working-dir /path/to/project
 codies-memory validate --type global --agent <name>
 ```
 
-### Favorites (three reflections, three dreams)
+### Favorites (five reflections, five dreams)
 
 ```bash
 codies-memory favorites reflections --agent <name>             # show the current pick
-codies-memory favorites reflections RF-0003 RF-0011 RF-0020 \
-  --why "..." --why "..." --why "..." --agent <name>          # choose; one reason per pick
-codies-memory favorites dreams DR-0002 DR-0005 DR-0009 --why "..." --why "..." --why "..." --agent <name>
+codies-memory favorites reflections RF-0003 RF-0011 RF-0020 RF-0024 RF-0031 \
+  --why "..." --why "..." --why "..." --why "..." --why "..." --agent <name>          # choose; one reason per pick
+codies-memory favorites dreams DR-0002 DR-0005 DR-0009 DR-0012 DR-0015 --why "..." --why "..." --why "..." --why "..." --why "..." --agent <name>
 ```
 
-You choose your three favorite reflections and dreams; boot shows them in full,
+You choose your five favorite reflections and dreams; boot shows them in full,
 never truncated. Once you have picked, a new reflection or dream makes the pick due
-again (`=== Favorites Due ===` at boot) until you choose your three again.
+again (`=== Favorites Due ===` at boot) until you choose your five again.
 
 ### Feedback
 

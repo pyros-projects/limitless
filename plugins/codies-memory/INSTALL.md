@@ -72,9 +72,9 @@ and remove its old codies-memory-specific `PATH` entry from the shell configurat
 Keep the old clone and virtualenv intact. Reopen the shell and repeat the path and
 version checks; installing a new CLI alone does not fix an earlier `PATH` entry.
 
-These skills require CLI 1.5.0 or newer, including `promote --check`,
+These skills require CLI 1.6.0 or newer, including `promote --check`,
 `--session-count`, and `--references` (inspect `codies-memory promote --help`)
-and the `transcripts` and `favorites` commands; 1.5.0 shows your favorite reflections and dreams at boot.
+and the `transcripts` and `favorites` commands; 1.6.0 shows your five favorite reflections and five favorite dreams at boot.
 Compare `--version` with `version` in the installed plugin's `pyproject.toml`,
 when available. Update an older backend; if the CLI is newer than the plugin,
 refresh the stale plugin instead of downgrading the CLI. A CLI without

@@ -315,9 +315,7 @@ def cmd_boot(args: argparse.Namespace) -> None:
         print()
         print("=== Favorites Due ===")
         for kind, reason in due:
-            print(f"- {kind}: {reason}. Choose your three favorites again: "
-                  f"codies-memory favorites {kind} ID ID ID --why \"...\" --why \"...\" --why \"...\" "
-                  f"--agent {agent}")
+            print(f"- {kind}: {reason}. Choose your five favorites again: {_favorites_command(kind, agent)}")
 
     usage = packet["usage"]
     print()
@@ -448,24 +446,30 @@ def cmd_create(args: argparse.Namespace) -> None:
         _favorites_reminder(global_vault, kind, _resolve_agent(args))
 
 
+def _favorites_command(kind: str, agent: str) -> str:
+    """The pick command with one ID and one --why per favorite slot."""
+    ids = " ".join(["ID"] * favorites.FAVORITE_COUNT)
+    whys = " ".join(['--why "..."'] * favorites.FAVORITE_COUNT)
+    return f"codies-memory favorites {kind} {ids} {whys} --agent {agent}"
+
+
 def _favorites_reminder(global_vault: Path, kind: str, agent: str) -> None:
     """After a new reflection or dream: the pick of favorites is due (or, before the first pick, possible)."""
-    command = (f"codies-memory favorites {kind} ID ID ID --why \"...\" --why \"...\" --why \"...\" "
-               f"--agent {agent}")
+    command = _favorites_command(kind, agent)
     try:
         picked = favorites.load_favorites(global_vault, kind) is not None
     except favorites.FavoritesError:
         picked = True
     if picked:
-        print(f"Now choose your three favorite {kind} again (due after every new one): {command}. "
+        print(f"Now choose your five favorite {kind} again (due after every new one): {command}. "
               f"Boot reports the pick as due until you do.", file=sys.stderr)
     else:
-        print(f"Tip: pick your three favorite {kind} and boot shows them in full: {command}",
+        print(f"Tip: pick your five favorite {kind} and boot shows them in full: {command}",
               file=sys.stderr)
 
 
 def cmd_favorites(args: argparse.Namespace) -> None:
-    """Show or set the agent's three favorite reflections or dreams."""
+    """Show or set the agent's five favorite reflections or dreams."""
     global_vault = _require_global_vault(args)
     kind = args.kind
     if args.ids:
@@ -483,8 +487,7 @@ def cmd_favorites(args: argparse.Namespace) -> None:
         print(f"Error: {exc}; choosing again rewrites it.", file=sys.stderr)
         sys.exit(1)
     if current is None:
-        print(f"No favorite {kind} chosen yet. Pick with: codies-memory favorites {kind} ID ID ID "
-              f"--why \"...\" --why \"...\" --why \"...\" --agent {_resolve_agent(args)}")
+        print(f"No favorite {kind} chosen yet. Pick with: {_favorites_command(kind, _resolve_agent(args))}")
         return
     print(f"Favorite {kind} (chosen {current['chosen']}, after {current['after'] or 'none'}):")
     for pick in current["favorites"]:
@@ -1188,7 +1191,7 @@ def main() -> None:
     # --- favorites ---
     favorites_parser = subparsers.add_parser(
         "favorites",
-        help="Show or choose your three favorite reflections or dreams; boot shows them in full.",
+        help="Show or choose your five favorite reflections or dreams; boot shows them in full.",
     )
     favorites_parser.add_argument("kind", choices=list(favorites.KINDS), help="reflections or dreams.")
     favorites_parser.add_argument(

@@ -22,7 +22,7 @@ On Linux/macOS, run `command -v codies-memory`; on native Windows PowerShell, ru
 codies-memory --version
 ```
 
-Require CLI 1.5.0 or newer and verify that `codies-memory promote --help` includes
+Require CLI 1.6.0 or newer and verify that `codies-memory promote --help` includes
 `--check`, `--session-count`, and `--references`, and that `codies-memory transcripts --help` and `codies-memory favorites --help` work. Compare the version with the
 plugin's `pyproject.toml` (two directories above this skill), when available:
 update an older backend, or refresh a stale plugin if the CLI is newer.
@@ -69,9 +69,9 @@ codies-memory boot --agent <name> --budget 12000
 
 This assembles your boot packet from:
 1. Global identity (`~/.memory/<agent>/identity/`)
-2. Your three favorite reflections, in full (`## Favorite Reflection`), chosen by you
+2. Your five favorite reflections, in full (`## Favorite Reflection`), chosen by you
 3. Your newest reflection, in full (`## Latest Reflection`), unless it is a favorite
-4. Your three favorite dreams, in full (`## Favorite Dream`)
+4. Your five favorite dreams, in full (`## Favorite Dream`)
 5. Global procedural records (lessons, skills)
 6. Project context (auto-resolved from cwd)
 7. Active threads and recent decisions
@@ -80,7 +80,7 @@ This assembles your boot packet from:
 Read the output — it contains your identity, project context, and recent state.
 Read the favorites and the latest reflection as the moments you chose to start
 from, not as a task list. `=== Favorites Due ===` means a reflection or dream was
-written after your last pick: read them and choose your three again
+written after your last pick: read them and choose your five again
 (`codies-memory favorites reflections|dreams ...`, see memory-close-session).
 Verify that it shows your real identity, not seed placeholders. Run from the
 original project directory or pass `--working-dir /path/to/project` explicitly.

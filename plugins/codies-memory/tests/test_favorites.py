@@ -25,32 +25,32 @@ def _ids(vault: Path, kind: str, count: int) -> list[str]:
 
 
 class TestSaveFavorites:
-    def test_saves_three_picks_with_reasons(self, tmp_global_vault: Path) -> None:
-        ids = _ids(tmp_global_vault, "reflection", 4)
+    def test_saves_five_picks_with_reasons(self, tmp_global_vault: Path) -> None:
+        ids = _ids(tmp_global_vault, "reflection", 6)
 
-        path = favorites.save_favorites(tmp_global_vault, "reflections", ids[:3], ["a", "b", "c"])
+        path = favorites.save_favorites(tmp_global_vault, "reflections", ids[:5], ["a", "b", "c", "d", "e"])
 
         current = favorites.load_favorites(tmp_global_vault, "reflections")
         assert path == tmp_global_vault / "reflections" / "favorites.yaml"
-        assert [p["id"] for p in current["favorites"]] == ids[:3]
-        assert [p["why"] for p in current["favorites"]] == ["a", "b", "c"]
-        assert current["after"] == ids[3]
+        assert [p["id"] for p in current["favorites"]] == ids[:5]
+        assert [p["why"] for p in current["favorites"]] == ["a", "b", "c", "d", "e"]
+        assert current["after"] == ids[5]
 
     @pytest.mark.parametrize("picks, reasons, message", [
-        (["RF-0001", "RF-0002"], ["a", "b"], "exactly 3"),
-        (["RF-0001", "RF-0001", "RF-0002"], ["a", "b", "c"], "exactly 3"),
-        (["RF-0001", "RF-0002", "RF-0099"], ["a", "b", "c"], "RF-0099"),
-        (["RF-0001", "RF-0002", "RF-0003"], ["a", "b"], "one --why per pick"),
-        (["RF-0001", "RF-0002", "RF-0003"], ["a", " ", "c"], "one --why per pick"),
+        (["RF-0001", "RF-0002", "RF-0003", "RF-0004"], ["a", "b", "c", "d"], "exactly 5"),
+        (["RF-0001", "RF-0001", "RF-0002", "RF-0003", "RF-0004"], ["a", "b", "c", "d", "e"], "exactly 5"),
+        (["RF-0001", "RF-0002", "RF-0003", "RF-0004", "RF-0099"], ["a", "b", "c", "d", "e"], "RF-0099"),
+        (["RF-0001", "RF-0002", "RF-0003", "RF-0004", "RF-0005"], ["a", "b", "c", "d"], "one --why per pick"),
+        (["RF-0001", "RF-0002", "RF-0003", "RF-0004", "RF-0005"], ["a", " ", "c", "d", "e"], "one --why per pick"),
     ])
     def test_refuses_a_pick_that_does_not_hold(self, tmp_global_vault, picks, reasons, message) -> None:
-        _ids(tmp_global_vault, "reflection", 4)
+        _ids(tmp_global_vault, "reflection", 6)
 
         with pytest.raises(favorites.FavoritesError, match=message):
             favorites.save_favorites(tmp_global_vault, "reflections", picks, reasons)
         assert favorites.load_favorites(tmp_global_vault, "reflections") is None
 
-    def test_fewer_records_than_three_pick_all(self, tmp_global_vault: Path) -> None:
+    def test_fewer_records_than_five_pick_all(self, tmp_global_vault: Path) -> None:
         ids = _ids(tmp_global_vault, "dream", 2)
 
         favorites.save_favorites(tmp_global_vault, "dreams", ids, ["x", "y"])
@@ -114,14 +114,14 @@ class TestDue:
 class TestBootShowsFavorites:
     def test_favorites_are_in_full_and_never_truncated(self, tmp_global_vault: Path) -> None:
         ids = [_record(tmp_global_vault, "reflection", f"On Long {n}", f"start{n} " + "word " * 4000 + f"end{n}",
-                       created=f"2026-10-0{n + 1}") for n in range(3)]
+                       created=f"2026-10-0{n + 1}") for n in range(5)]
         _record(tmp_global_vault, "reflection", "On The Newest", "newest body", created="2026-10-20")
-        favorites.save_favorites(tmp_global_vault, "reflections", ids, ["one", "two", "three"])
+        favorites.save_favorites(tmp_global_vault, "reflections", ids, ["one", "two", "three", "four", "five"])
 
         result = assemble_boot(tmp_global_vault, project_vault=None, budget=600)
 
         packet = result["global_packet"]
-        for n in range(3):
+        for n in range(5):
             assert f"start{n}" in packet and f"end{n}" in packet
         assert "*Why I keep it: two*" in packet
         assert "## Latest Reflection" in packet and "newest body" in packet
@@ -137,8 +137,8 @@ class TestBootShowsFavorites:
         assert result["global_packet"].count("reflection body 2") == 1
 
     def test_favorite_dreams_are_shown(self, tmp_global_vault: Path) -> None:
-        ids = _ids(tmp_global_vault, "dream", 4)
-        favorites.save_favorites(tmp_global_vault, "dreams", ids[1:], ["a", "b", "c"])
+        ids = _ids(tmp_global_vault, "dream", 6)
+        favorites.save_favorites(tmp_global_vault, "dreams", ids[1:], ["a", "b", "c", "d", "e"])
 
         packet = assemble_boot(tmp_global_vault, project_vault=None)["global_packet"]
 
@@ -173,21 +173,22 @@ def _favorites(kind: str, ids: list[str], why: list[str] | None) -> None:
 class TestFavoritesCli:
     def test_set_show_and_the_reminder_after_a_new_reflection(self, tmp_path, monkeypatch, capsys) -> None:
         _cli_vault(tmp_path, monkeypatch)
-        for n in range(3):
+        for n in range(5):
             _create("reflection", f"On Thing {n}")
         err = capsys.readouterr().err
-        assert "Tip: pick your three favorite reflections" in err
+        assert "Tip: pick your five favorite reflections" in err
+        assert "ID ID ID ID ID" in err
 
-        _favorites("reflections", ["RF-0001", "RF-0002", "RF-0003"], ["a", "b", "c"])
-        assert "Favorite reflections saved: RF-0001, RF-0002, RF-0003" in capsys.readouterr().out
+        _favorites("reflections", ["RF-0001", "RF-0002", "RF-0003", "RF-0004", "RF-0005"], ["a", "b", "c", "d", "e"])
+        assert "Favorite reflections saved: RF-0001, RF-0002, RF-0003, RF-0004, RF-0005" in capsys.readouterr().out
 
-        _create("reflection", "On Thing 3")
-        assert "Now choose your three favorite reflections again" in capsys.readouterr().err
+        _create("reflection", "On Thing 5")
+        assert "Now choose your five favorite reflections again" in capsys.readouterr().err
 
         _favorites("reflections", [], None)
         shown = capsys.readouterr().out
         assert "- RF-0002 On Thing 1: b" in shown
-        assert "Due again: RF-0004 was written after you chose" in shown
+        assert "Due again: RF-0006 was written after you chose" in shown
 
     def test_create_still_succeeds_with_a_broken_file(self, tmp_path, monkeypatch, capsys) -> None:
         vault = _cli_vault(tmp_path, monkeypatch)
@@ -199,7 +200,7 @@ class TestFavoritesCli:
 
         captured = capsys.readouterr()
         assert captured.out.strip() == "RF-0002"
-        assert "Now choose your three favorite reflections again" in captured.err
+        assert "Now choose your five favorite reflections again" in captured.err
 
     def test_a_bad_pick_exits_with_the_reason(self, tmp_path, monkeypatch, capsys) -> None:
         _cli_vault(tmp_path, monkeypatch)

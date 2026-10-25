@@ -1,7 +1,7 @@
 """Favorite reflections and dreams: the agent's own picks, shown in full at every boot.
 
 Each kind keeps one file in the global vault (``reflections/favorites.yaml``,
-``dreams/favorites.yaml``) with up to three picks and why each was chosen.
+``dreams/favorites.yaml``) with up to five picks and why each was chosen.
 Boot shows the picked records in full, never truncated and outside
 ``--budget``. Once an agent has picked, every new record of that kind makes the
 pick due again: boot says so until the agent chooses again.
@@ -17,7 +17,7 @@ import yaml
 
 from codies_memory.records import list_records
 
-FAVORITE_COUNT = 3
+FAVORITE_COUNT = 5
 KINDS = {"reflections": "reflection", "dreams": "dream"}
 
 
@@ -97,7 +97,7 @@ def save_favorites(global_vault: Path, kind: str, ids: list[str], reasons: list[
         ],
     }
     path = favorites_path(global_vault, kind)
-    header = (f"# Three favorite {kind}, chosen by the agent. Boot shows them in full.\n"
+    header = (f"# Five favorite {kind}, chosen by the agent. Boot shows them in full.\n"
               f"# Change with: codies-memory favorites {kind} ID ID ID --why ... --why ... --why ...\n")
     path.write_text(header + yaml.dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
     return path
