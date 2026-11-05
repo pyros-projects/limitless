@@ -203,25 +203,32 @@ def build_recent_episodes(project_vault: Path) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def build_warm_texts(
+    global_vault: Path,
+    project_vault: Path | None = None,
+) -> dict[str, str]:
+    """Build the warm-memory summaries in memory, keyed like write_warm_artifacts."""
+    texts = {"global_summary": build_global_summary(global_vault)}
+    if project_vault is not None:
+        texts["project_summary"] = build_project_summary(project_vault)
+        texts["recent_episodes"] = build_recent_episodes(project_vault)
+    return texts
+
+
 def write_warm_artifacts(
     global_vault: Path,
     project_vault: Path | None = None,
 ) -> dict[str, Path]:
     """Write warm-memory artifacts and return their paths."""
-    written: dict[str, Path] = {}
-
-    global_summary = global_vault / "boot" / "global-summary.md"
-    global_summary.parent.mkdir(parents=True, exist_ok=True)
-    global_summary.write_text(build_global_summary(global_vault), encoding="utf-8")
-    written["global_summary"] = global_summary
-
+    texts = build_warm_texts(global_vault, project_vault=project_vault)
+    paths = {"global_summary": global_vault / "boot" / "global-summary.md"}
     if project_vault is not None:
-        project_summary = project_vault / "boot" / "project-summary.md"
-        recent_episodes = project_vault / "boot" / "recent-episodes.md"
-        project_summary.parent.mkdir(parents=True, exist_ok=True)
-        project_summary.write_text(build_project_summary(project_vault), encoding="utf-8")
-        recent_episodes.write_text(build_recent_episodes(project_vault), encoding="utf-8")
-        written["project_summary"] = project_summary
-        written["recent_episodes"] = recent_episodes
+        paths["project_summary"] = project_vault / "boot" / "project-summary.md"
+        paths["recent_episodes"] = project_vault / "boot" / "recent-episodes.md"
 
+    written: dict[str, Path] = {}
+    for key, path in paths.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(texts[key], encoding="utf-8")
+        written[key] = path
     return written

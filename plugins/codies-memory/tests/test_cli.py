@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 import json
+import os
 
 from codies_memory.cli import (
     cmd_init, cmd_boot, cmd_status, cmd_capture, cmd_create, cmd_list,
@@ -371,6 +372,79 @@ class TestCmdBootRefresh:
         assert "STALE SUMMARY CONTENT" not in captured.out
         assert "Fresh identity fact." in captured.out
         assert "STALE SUMMARY CONTENT" not in (gv / "boot" / "global-summary.md").read_text()
+
+    @pytest.mark.skipif(sys.platform == "win32" or getattr(os, "geteuid", lambda: 1)() == 0,
+                        reason="chmod does not block writes for root or on Windows")
+    def test_boot_on_read_only_vault_builds_fresh_summaries_in_memory(
+        self, tmp_path, monkeypatch, capsys
+    ):
+        """A sandboxed agent that cannot write still boots, fresh, and writes nothing."""
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+
+        gv = resolve_global_vault("claude")
+        (gv / "identity" / "self.md").write_text(
+            "---\ntitle: self\ntype: identity\n---\n\nFresh identity fact."
+        )
+        boot_dir = gv / "boot"
+        boot_dir.mkdir(exist_ok=True)
+        summary = boot_dir / "global-summary.md"
+        summary.write_text("# Global Summary\nSTALE SUMMARY CONTENT\n")
+        summary.chmod(0o444)
+        boot_dir.chmod(0o555)
+
+        working_dir = tmp_path / "unrelated"
+        working_dir.mkdir()
+        monkeypatch.chdir(working_dir)
+
+        try:
+            cmd_boot(argparse.Namespace(agent="claude", branch="main", budget=4000))
+        finally:
+            boot_dir.chmod(0o755)
+            summary.chmod(0o644)
+
+        captured = capsys.readouterr()
+        assert "Global Summary" in captured.out
+        assert "STALE SUMMARY CONTENT" not in captured.out
+        assert "Fresh identity fact." in captured.out
+        assert "could not save boot summaries" in captured.err
+        assert "STALE SUMMARY CONTENT" in summary.read_text()
+
+    @pytest.mark.skipif(sys.platform == "win32" or getattr(os, "geteuid", lambda: 1)() == 0,
+                        reason="chmod does not block writes for root or on Windows")
+    def test_general_boot_on_read_only_vault_reads_the_existing_general_vault(
+        self, tmp_path, monkeypatch, capsys
+    ):
+        """--general in a read-only sandbox reads the existing _general vault instead of crashing."""
+        fake_home = tmp_path / "home"
+        fake_home.mkdir()
+        monkeypatch.setattr(Path, "home", classmethod(lambda cls: fake_home))
+
+        cmd_init(argparse.Namespace(agent="claude", type="global"))
+        gv = resolve_global_vault("claude")
+        assert (gv / "projects" / "_general").is_dir()
+
+        working_dir = tmp_path / "unrelated"
+        working_dir.mkdir()
+        monkeypatch.chdir(working_dir)
+
+        locked = [p for p in gv.rglob("*")] + [gv]
+        modes = {p: p.stat().st_mode for p in locked}
+        for p in sorted(locked, key=lambda p: len(p.parts)):
+            p.chmod(0o555 if p.is_dir() else 0o444)
+        try:
+            cmd_boot(argparse.Namespace(agent="claude", branch="main", budget=4000, general=True))
+        finally:
+            for p in sorted(locked, key=lambda p: -len(p.parts)):
+                p.chmod(modes[p])
+
+        captured = capsys.readouterr()
+        assert "=== Boot Budget ===" in captured.out
+        assert "reading the existing _general vault" in captured.err
+        assert "could not save boot summaries" in captured.err
 
 
 # ---------------------------------------------------------------------------

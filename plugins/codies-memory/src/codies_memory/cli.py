@@ -10,6 +10,7 @@ from pathlib import Path
 
 from codies_memory import __version__
 from codies_memory.vault import (
+    GENERAL_PROJECT_SLUG,
     ensure_general_project_vault,
     init_global_vault,
     init_project_vault,
@@ -31,7 +32,7 @@ from codies_memory.records import (
 )
 from codies_memory.promotion import evaluate_for_promotion, promote_within_project, promote_to_global
 from codies_memory.profile import load_profile, get_write_gate_bias
-from codies_memory.warm import write_warm_artifacts
+from codies_memory.warm import build_warm_texts, write_warm_artifacts
 from codies_memory import transcripts
 
 
@@ -106,7 +107,14 @@ def _resolve_project_vault_for_read(
         else Path.cwd()
     )
     if getattr(args, "general", False):
-        return ensure_general_project_vault(global_vault), working_dir
+        try:
+            return ensure_general_project_vault(global_vault), working_dir
+        except OSError as exc:
+            existing = global_vault / "projects" / GENERAL_PROJECT_SLUG
+            if not existing.is_dir():
+                raise
+            print(f"Note: could not update the registry ({exc}); reading the existing _general vault.", file=sys.stderr)
+            return existing, working_dir
     return resolve_project_vault(global_vault, working_dir), working_dir
 
 
@@ -270,13 +278,20 @@ def cmd_boot(args: argparse.Namespace) -> None:
         print("Using reserved _general project vault.", file=sys.stderr)
 
     # Rebuild warm summaries so boot never serves stale derived artifacts.
-    write_warm_artifacts(global_vault, project_vault=project_vault)
+    # If they cannot be saved (a read-only sandbox, a full disk), boot uses them from memory.
+    warm = None
+    try:
+        write_warm_artifacts(global_vault, project_vault=project_vault)
+    except OSError as exc:
+        warm = build_warm_texts(global_vault, project_vault=project_vault)
+        print(f"Note: could not save boot summaries ({exc}); using summaries built in memory.", file=sys.stderr)
 
     packet = assemble_boot(
         global_vault=global_vault,
         project_vault=project_vault,
         branch=args.branch,
         budget=args.budget,
+        warm=warm,
     )
     print("=== Global Packet ===")
     print(packet["global_packet"])

@@ -99,6 +99,13 @@ def _read_if_exists(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
 
 
+def _warm_text(warm: dict[str, str] | None, key: str, path: Path) -> str:
+    """Return the in-memory summary for *key* if given, else the file at *path*."""
+    if warm is not None and key in warm:
+        return warm[key].strip()
+    return _read_if_exists(path)
+
+
 def _read_latest_daily_log_tail_lines(
     global_vault: Path,
     line_count: int = DAILY_LOG_TAIL_LINES,
@@ -191,6 +198,7 @@ def assemble_boot(
     project_vault: Path | None = None,
     branch: str = "main",
     budget: int = 12000,
+    warm: dict[str, str] | None = None,
 ) -> dict:
     """Assemble the five-layer boot packet from *global_vault* and *project_vault*.
 
@@ -201,6 +209,10 @@ def assemble_boot(
     - ``"usage"`` — token demand vs budget: ``{"identity": {...}, "latest_reflection": {...},
       "layers": {...}, "total": {...}}`` where ``used`` is the token estimate per layer
       (raw, pre-truncation, for the budgeted layers)
+
+    *warm* holds summaries built in memory (keys ``global_summary``,
+    ``project_summary``, ``recent_episodes``); when given, they replace the
+    files under ``boot/``, so a read-only vault still boots fresh.
 
     Layers 2-5 are independently truncated to their budgets before joining.
     Layer 1 (identity) is exempt: identity files are never truncated or
@@ -218,7 +230,7 @@ def assemble_boot(
     reflection = _latest_reflection(global_vault, skip_ids=favorite_ids)
 
     # Layer 2: global warm summary when available, otherwise procedural raws
-    layer2_raw = _read_if_exists(global_vault / "boot" / "global-summary.md")
+    layer2_raw = _warm_text(warm, "global_summary", global_vault / "boot" / "global-summary.md")
     if not layer2_raw:
         layer2_raw = _read_layer_files(global_vault, ["procedural/lessons", "procedural/skills"])
     layer2 = truncate_to_budget(layer2_raw, budgets["global_procedural"])
@@ -262,7 +274,7 @@ def assemble_boot(
         }
 
     # Layer 3: project summary when available, otherwise raw project files
-    layer3_raw = _read_if_exists(project_vault / "boot" / "project-summary.md")
+    layer3_raw = _warm_text(warm, "project_summary", project_vault / "boot" / "project-summary.md")
     if not layer3_raw:
         layer3_raw = _read_layer_files(project_vault, ["project"])
     layer3 = truncate_to_budget(layer3_raw, budgets["project_context"])
@@ -281,7 +293,7 @@ def assemble_boot(
 
     # Layer 5: recent episodes summary when available, otherwise branch overlay + latest session.
     # The global daily-log tail is then added as cross-project recent activity.
-    project_recent_raw = _read_if_exists(project_vault / "boot" / "recent-episodes.md")
+    project_recent_raw = _warm_text(warm, "recent_episodes", project_vault / "boot" / "recent-episodes.md")
     if not project_recent_raw:
         branch_overlay_dir = project_vault / "project" / "branch-overlays"
         overlay_parts: list[str] = []
