@@ -210,6 +210,8 @@ The user will critique the prototype. Your job:
 
    `C-NNN` ids are per-project monotonic and survive into the contract file unchanged. Rejected alternatives get logged too, phrased as MUST NOT (e.g. "the tool MUST NOT read stdin"), with `born:` pointing at the rejection. Retrospective derivation is the biggest quality loss in this pipeline — the clause log is how the variant avoids it.
 
+6. **Offer a rule view once clauses exist.** On a GUI surface, add a toggle, off by default, that tags every element with the ids of the clauses governing it and shows each clause's text on hover. Elements tied to an open question get a tag of their own colour. Reviewers can then check the rules where they apply, without reading a contract file, and an element without a tag shows a gap. Build it from one id-to-text table filled from `.sfd/clause-log.md`, and let elements carry only ids, so no second copy of the rules exists. Other surfaces get the same link in their own form: clause ids beside a terminal transcript's lines, or in the margin of a document.
+
 **Convergence check:** After each iteration round, ask:
 
 > "Walk through the [key flows]. Is there anything that still feels wrong or missing?"
